@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2017-05-14T11:59:08.557Z</updated>
+  <updated>2017-05-14T13:08:58.521Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -14,6 +14,41 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>混合慢启动算法:Hybrid</title>
+    <link href="http://yoursite.com/2017/05/14/%E6%B7%B7%E5%90%88%E6%85%A2%E5%90%AF%E5%8A%A8%E7%AE%97%E6%B3%95/"/>
+    <id>http://yoursite.com/2017/05/14/混合慢启动算法/</id>
+    <published>2017-05-14T13:03:43.000Z</published>
+    <updated>2017-05-14T13:08:58.521Z</updated>
+    
+    <content type="html"><![CDATA[<p>&emsp;&emsp;传统的单纯采用指数增长的慢启动算法有一个无法避免的问题，在临界进入拥塞避免阶段时，特别是在高带宽长距离网络中，容易出现大规模丢包，进而导致大量数据包重传，也有可能出现timeout，致使网络带宽利用率下降。<br>&emsp;&emsp;这里，本文将介绍一种新的慢启动方法——Hybrid Slow Start，它在传统的慢启动算法中加入了判断机制，强制从慢启动转入拥塞避免。这里主要说说其在CUBIC中是怎么实现的，Hybrid Slow Start算法原理本身就不做过多介绍了，有兴趣可以看看本文最后给出的参考文献。<br><a id="more"></a></p>
+<h3 id="变量介绍"><a href="#变量介绍" class="headerlink" title="变量介绍"></a>变量介绍</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">#define HYSTART_ACK_TRAIN      0x1 //进入拥塞避免的条件</div><div class="line">#define HYSTART_DELAY          0x2 //进入拥塞避免的条件</div><div class="line">#define HYSTART_MIN_SAMPLES    8   //表示至少取一个RTT的前8个ACK作为样本</div><div class="line">#define HYSTART_DELAY_MIN      (4u&lt;&lt;3) </div><div class="line">#define HYSTART_DELAY_MAX      (16u&lt;&lt;3)</div><div class="line">/* if x &gt; HYSTART_DELAY_MAX，return HYSTART_DELAY_MAX </div><div class="line"> * else if x &lt; HYSTART_DELAY_MIN，return HYATART_DELAY_MIN</div><div class="line"> * else return x</div><div class="line"> */</div><div class="line">#define HYSTART_DELAY_THRESH clamp(x, HYSTART_DELAY_MIN, HYSTART_DELAY_MAX)</div><div class="line">static int hystart __read_mostly = 1;</div><div class="line">static int hystart_detect __read_mostly = HYSTART_ACK_TRAIN | HYSART_DELAY;</div><div class="line">static int hystart_low_window __read_mostly = 16;</div><div class="line">static int hystart_ack_delta __read_mostly = 2;</div><div class="line"></div><div class="line">struct bictcp &#123;</div><div class="line">  ...</div><div class="line">  u32    delay_min;   //全局最小rtt</div><div class="line">  u32    round_start; //记录慢启动的起始时间</div><div class="line">  u32    curr_rtt;    //记录样本中的最小rtt</div><div class="line">  u8      found;</div><div class="line">  u8      sample_cnt; //样本计数变量</div><div class="line">  ...</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<h3 id="两类退出slow-start机制"><a href="#两类退出slow-start机制" class="headerlink" title="两类退出slow start机制"></a>两类退出slow start机制</h3><p>在Hybrid Slow Start算法中给出了种类判断机制用来退出慢启动进入拥塞避免，分别是ACKs train length和Increase in packet delays。</p>
+<h4 id="ACKS-train-length"><a href="#ACKS-train-length" class="headerlink" title="ACKS train length"></a>ACKS train length</h4><p>这里给出一段原文描述，在这段描述中说了怎么测ACKs train length以及为什么要用ACKs train length。</p>
+<blockquote>
+<p>The ACK train length is measured by calculating the sum of inter-arrival times of all the closely spaced ACKs within an RTT round. The train length is strongly affected by the bottleneck bandwidth, routing delays and buffer sizes along the path, and is easily stretched out by congestion caused by cross traffic in the path, so by estimating the train length we can reliably find a safe exit point of Slow Start. </p>
+</blockquote>
+<h4 id="Increase-in-packet-delays"><a href="#Increase-in-packet-delays" class="headerlink" title="Increase in packet delays"></a>Increase in packet delays</h4><p>同样还是一段原文描述，如果你问我为什么不直接翻译成中文，我不会回答你这个问题的。</p>
+<blockquote>
+<p>Increase in packet delays during Slow Start may indicate the possibility of the bottleneck router being congested.</p>
+</blockquote>
+<p>但是Increase in packet delays的测量会受到bursty transmission的影响，所以只测一个RTT中刚开始的几个数据包的往返时间来避免bursty transission的影响，在后面给出的code中会看到。</p>
+<h3 id="函数实现"><a href="#函数实现" class="headerlink" title="函数实现"></a>函数实现</h3><p>hystart重置函数<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">static inline void bictcp_hystart_reset(struct sock *sk)</div><div class="line">&#123;</div><div class="line">    struct tcp_sock *tp = tcp_sk(sk);</div><div class="line">    struct bictcp *ca = inet_csk_ca(sk);</div><div class="line">    </div><div class="line">    ca-&gt;round_start = ca-&gt;last_ack = bictcp_clock(); //记录慢启动的开始时间</div><div class="line">    ca-&gt;end_seq = tp-&gt;snd_nxt;</div><div class="line">    ca-&gt;curr_rtt = 0;   //重置样本最小rtt为0</div><div class="line">    ca-&gt;sample_cnt = 0; //重置样本计数为0</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>Hybrid Slow Start实现的核心部分<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div></pre></td><td class="code"><pre><div class="line">static void hystart_update(struct sock *sk, u32 delay)</div><div class="line">&#123;</div><div class="line">    struct tcp_sock *tp = tcp_sk(sk);</div><div class="line">    struct bictcp *ca = inet_csk_ca(sk);</div><div class="line"></div><div class="line">    //如果ca-&gt;found &amp; hystart_detect为真，表示应该进入拥塞避免</div><div class="line">    if (!(ca-&gt;found &amp; hystart_detect)) &#123;</div><div class="line">        u32 now = bictcp_clock(); //获取当前时间</div><div class="line"></div><div class="line">        /* first detection parameter - ack-train detection */</div><div class="line">        /* 前后到来的两个ACK的间隔时间小于hystart_ack_delta才有效 */</div><div class="line">        if ((s32)(now - ca-&gt;last_ack) &lt;= hystart_ack_delta) &#123;</div><div class="line">            ca-&gt;last_ack = now;  //更新上一个ACK到来的时间</div><div class="line">            /* 每次慢启动时会重置round_start为0，结合前面的if条件，下面的</div><div class="line">             * if成立的条件是：从慢启动开始到现在经过的时间如果大于</div><div class="line">             * delay_min&gt;&gt;4，那么可以进入拥塞避免了。至于为什么选</div><div class="line">             * delay_min&gt;&gt;4这个值，鬼知道。</div><div class="line">             */</div><div class="line">            if ((s32)(now - ca-&gt;round_start) &gt; ca-&gt;delay_min &gt;&gt; 4)</div><div class="line">                ca-&gt;found |= HYSTART_ACK_TRAIN;</div><div class="line">        &#125;   </div><div class="line"></div><div class="line">        /* obtain the minimum delay of more than sampling packets */</div><div class="line">        /* 如果样本计数小于HYSTART_MIN_SAMPLES(默认为8) */</div><div class="line">        if (ca-&gt;sample_cnt &lt; HYSTART_MIN_SAMPLES) &#123;</div><div class="line">            if (ca-&gt;curr_rtt == 0 || ca-&gt;curr_rtt &gt; delay)</div><div class="line">                ca-&gt;curr_rtt = delay;/* 更新样本中的最小rtt */</div><div class="line"></div><div class="line">            ca-&gt;sample_cnt++;</div><div class="line">        &#125; else &#123;//如果样本大于8了，那么就可以判断是否要进入拥塞避免了</div><div class="line">            /* 如果前面8个样本中的最小rtt大于全局最小rtt与阈值的和，那么表示网络出</div><div class="line">             * 现了拥塞，应立马进入拥塞避免阶段，HYSTART_DELAY_THRESH()的返</div><div class="line">             * 回值在前面的变量介绍中有说明。</div><div class="line">            if (ca-&gt;curr_rtt &gt; ca-&gt;delay_min +</div><div class="line">                HYSTART_DELAY_THRESH(ca-&gt;delay_min&gt;&gt;4))</div><div class="line">                ca-&gt;found |= HYSTART_DELAY;</div><div class="line">        &#125;   </div><div class="line">        /*  </div><div class="line">         * Either one of two conditions are met,</div><div class="line">         * we exit from slow start immediately.</div><div class="line">         */</div><div class="line">        /* 如果为真就进入拥塞避免 */</div><div class="line">        if (ca-&gt;found &amp; hystart_detect)</div><div class="line">            tp-&gt;snd_ssthresh = tp-&gt;snd_cwnd;</div><div class="line">    &#125;   </div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>&emsp;&emsp;最近做实验需要探测网络带宽，需要用到Hybrid Slow Start，所以看了paper和其在Linux CUBIC算法中的实现，然后就写了这篇blog。<br>参考文献：<a href="https://pdfs.semanticscholar.org/25e9/ef3f03315782c7f1cbcd31b587857adae7d1.pdf" target="_blank" rel="external">Hybrid Slow Start for High-Bandwidth and Long-Distance Networks</a></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;&amp;emsp;&amp;emsp;传统的单纯采用指数增长的慢启动算法有一个无法避免的问题，在临界进入拥塞避免阶段时，特别是在高带宽长距离网络中，容易出现大规模丢包，进而导致大量数据包重传，也有可能出现timeout，致使网络带宽利用率下降。&lt;br&gt;&amp;emsp;&amp;emsp;这里，本文将介绍一种新的慢启动方法——Hybrid Slow Start，它在传统的慢启动算法中加入了判断机制，强制从慢启动转入拥塞避免。这里主要说说其在CUBIC中是怎么实现的，Hybrid Slow Start算法原理本身就不做过多介绍了，有兴趣可以看看本文最后给出的参考文献。&lt;br&gt;
+    
+    </summary>
+    
+      <category term="TCP/IP" scheme="http://yoursite.com/categories/TCP-IP/"/>
+    
+    
+  </entry>
   
   <entry>
     <title>Linux系统内核参数的添加方法</title>
@@ -39,6 +74,41 @@
     </summary>
     
       <category term="TCP/IP" scheme="http://yoursite.com/categories/TCP-IP/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>UNIX环境高级编程（第三版）头文件&quot;apue.h&quot;问题</title>
+    <link href="http://yoursite.com/2017/01/15/UNIX%E7%8E%AF%E5%A2%83%E9%AB%98%E7%BA%A7%E7%BC%96%E7%A8%8B%EF%BC%88%E7%AC%AC%E4%B8%89%E7%89%88%EF%BC%89%E5%A4%B4%E6%96%87%E4%BB%B6%E2%80%9Capue.h%E2%80%9D%E9%97%AE%E9%A2%98/"/>
+    <id>http://yoursite.com/2017/01/15/UNIX环境高级编程（第三版）头文件“apue.h”问题/</id>
+    <published>2017-01-15T01:39:01.000Z</published>
+    <updated>2017-05-14T13:17:50.277Z</updated>
+    
+    <content type="html"><![CDATA[<p>&emsp;&emsp;初次学UNIX环境高级编程（第三版）都会遇到头文件”apue.h”怎么添加的问题，这里说下从下载源码到编译通过的整个过程。当然在编译中会遇到各种error，本人也踩了好几个坑，好在都解决了。<br><a id="more"></a></p>
+<h4 id="下载源码及解压"><a href="#下载源码及解压" class="headerlink" title="下载源码及解压"></a>下载源码及解压</h4><p>先新建一个自己准备存放源码的目录，然后下载<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">cd /home/</div><div class="line">mkdir learnApue</div><div class="line">cd learnApue</div><div class="line">wget http://www.apuebook.com/src.tar.gz</div><div class="line">tar -zxvf src.tar.gz</div></pre></td></tr></table></figure></p>
+<p>解压后的文件在目录”aupe.3e”下。</p>
+<h4 id="头文件配置"><a href="#头文件配置" class="headerlink" title="头文件配置"></a>头文件配置</h4><p>经过上面的步骤，当前所在目录应该是”/home/learnApue/“<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">cd ./src.3e/apue.3e</div><div class="line">cp ./include/apue.h /usr/include/</div><div class="line">cp ./lib/error.c /usr/include/</div></pre></td></tr></table></figure></p>
+<h4 id="编辑”-usr-include-apue-h”"><a href="#编辑”-usr-include-apue-h”" class="headerlink" title="编辑”/usr/include/apue.h”"></a>编辑”/usr/include/apue.h”</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">vim /usr/include/apue.h</div></pre></td></tr></table></figure>
+<p>光标移动到文件最后一行”#endif”的前面，然后添加如下代码<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">#include &quot;error.c&quot;</div></pre></td></tr></table></figure></p>
+<p>保存退出</p>
+<h4 id="make报错及其解决方案"><a href="#make报错及其解决方案" class="headerlink" title="make报错及其解决方案"></a>make报错及其解决方案</h4><p>经过上面的操作，然后就可以编译了，这时你所在目录应该是”/home/learnApue/src.3e/apue.3e/“<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">make</div></pre></td></tr></table></figure></p>
+<p>正常情况下都会报error，下面是我遇到的error</p>
+<h5 id="error类型1"><a href="#error类型1" class="headerlink" title="error类型1"></a>error类型1</h5><p><img src="../../../../pictures/UNIX/20170514211405.png" alt=""><br>根据错误提示，systype.sh无法执行，我的方法是更改权限然后再编译<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">chmod 755 systype.sh</div><div class="line">make</div></pre></td></tr></table></figure></p>
+<h5 id="error类型2"><a href="#error类型2" class="headerlink" title="error类型2"></a>error类型2</h5><p><img src="../../../../pictures/UNIX/20170514211448.png" alt=""><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">chmod 755 ./advio/fixup.awk</div><div class="line">make</div></pre></td></tr></table></figure></p>
+<p>继续更改权限，只要是执行权限问题，都可以更改权限后再编译</p>
+<h5 id="error类型3"><a href="#error类型3" class="headerlink" title="error类型3"></a>error类型3</h5><p>下面的这个错误我没有碰到，来自于网友的报错，这里给出关键报错信息<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">/usr/bin/ld: cannot find -lbsd</div><div class="line">...</div><div class="line">make: ***[all] Error 1</div></pre></td></tr></table></figure></p>
+<p>根据这个error提示，应该是缺少一个库，解决方案如下。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">apt-get install libbsd-dev</div><div class="line">make</div></pre></td></tr></table></figure></p>
+<p>要说明的是我是roor权限，不是roor权限的在上一条命令前加sudo，再编译。<br>希望对各位正在使用UNIX环境高级编程一书的同行们有帮助，有错误还请指出。</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;&amp;emsp;&amp;emsp;初次学UNIX环境高级编程（第三版）都会遇到头文件”apue.h”怎么添加的问题，这里说下从下载源码到编译通过的整个过程。当然在编译中会遇到各种error，本人也踩了好几个坑，好在都解决了。&lt;br&gt;
+    
+    </summary>
+    
+      <category term="UNIX/LINUX" scheme="http://yoursite.com/categories/UNIX-LINUX/"/>
     
     
   </entry>

@@ -96,18 +96,19 @@
 
 
 
-<meta name="description" content="在Linux系统下，使用sysctl命令可以查看和修改系统参数，但是如果想要添加一个系统参数应该怎么办呢？这篇博客的目的就是要来说这个事的。添加一个系统参数是一件很麻烦的事，大多时候是用来做测试用。">
+<meta name="description" content="&amp;emsp;&amp;emsp;初次学UNIX环境高级编程（第三版）都会遇到头文件”apue.h”怎么添加的问题，这里说下从下载源码到编译通过的整个过程。当然在编译中会遇到各种error，本人也踩了好几个坑，好在都解决了。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Linux系统内核参数的添加方法">
-<meta property="og:url" content="http://yoursite.com/2017/01/15/Linux系统内核参数的添加方法/index.html">
+<meta property="og:title" content="UNIX环境高级编程（第三版）头文件&quot;apue.h&quot;问题">
+<meta property="og:url" content="http://yoursite.com/2017/01/15/UNIX环境高级编程（第三版）头文件“apue.h”问题/index.html">
 <meta property="og:site_name" content="凡是过去 皆为序曲">
-<meta property="og:description" content="在Linux系统下，使用sysctl命令可以查看和修改系统参数，但是如果想要添加一个系统参数应该怎么办呢？这篇博客的目的就是要来说这个事的。添加一个系统参数是一件很麻烦的事，大多时候是用来做测试用。">
-<meta property="og:image" content="http://yoursite.com/pictures/TCP/20170115100648.png">
-<meta property="og:updated_time" content="2017-05-14T11:59:08.557Z">
+<meta property="og:description" content="&amp;emsp;&amp;emsp;初次学UNIX环境高级编程（第三版）都会遇到头文件”apue.h”怎么添加的问题，这里说下从下载源码到编译通过的整个过程。当然在编译中会遇到各种error，本人也踩了好几个坑，好在都解决了。">
+<meta property="og:image" content="http://yoursite.com/pictures/UNIX/20170514211405.png">
+<meta property="og:image" content="http://yoursite.com/pictures/UNIX/20170514211448.png">
+<meta property="og:updated_time" content="2017-05-14T13:17:50.277Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Linux系统内核参数的添加方法">
-<meta name="twitter:description" content="在Linux系统下，使用sysctl命令可以查看和修改系统参数，但是如果想要添加一个系统参数应该怎么办呢？这篇博客的目的就是要来说这个事的。添加一个系统参数是一件很麻烦的事，大多时候是用来做测试用。">
-<meta name="twitter:image" content="http://yoursite.com/pictures/TCP/20170115100648.png">
+<meta name="twitter:title" content="UNIX环境高级编程（第三版）头文件&quot;apue.h&quot;问题">
+<meta name="twitter:description" content="&amp;emsp;&amp;emsp;初次学UNIX环境高级编程（第三版）都会遇到头文件”apue.h”怎么添加的问题，这里说下从下载源码到编译通过的整个过程。当然在编译中会遇到各种error，本人也踩了好几个坑，好在都解决了。">
+<meta name="twitter:image" content="http://yoursite.com/pictures/UNIX/20170514211405.png">
 
 
 
@@ -135,13 +136,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2017/01/15/Linux系统内核参数的添加方法/"/>
+  <link rel="canonical" href="http://yoursite.com/2017/01/15/UNIX环境高级编程（第三版）头文件“apue.h”问题/"/>
 
 
 
 
 
-  <title>Linux系统内核参数的添加方法 | 凡是过去 皆为序曲</title>
+  <title>UNIX环境高级编程（第三版）头文件"apue.h"问题 | 凡是过去 皆为序曲</title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -281,7 +282,7 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/01/15/Linux系统内核参数的添加方法/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/01/15/UNIX环境高级编程（第三版）头文件“apue.h”问题/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="kevin">
@@ -298,7 +299,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">Linux系统内核参数的添加方法</h1>
+          <h1 class="post-title" itemprop="name headline">UNIX环境高级编程（第三版）头文件"apue.h"问题</h1>
         
 
         <div class="post-meta">
@@ -333,8 +334,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/TCP-IP/" itemprop="url" rel="index">
-                    <span itemprop="name">TCP/IP</span>
+                  <a href="/categories/UNIX-LINUX/" itemprop="url" rel="index">
+                    <span itemprop="name">UNIX/LINUX</span>
                   </a>
                 </span>
 
@@ -352,8 +353,8 @@
                 <i class="fa fa-comment-o"></i>
               </span>
               
-                <a href="/2017/01/15/Linux系统内核参数的添加方法/#SOHUCS" itemprop="discussionUrl">
-                  <span id="changyan_count_unit" class="post-comments-count hc-comment-count" data-xid="2017/01/15/Linux系统内核参数的添加方法/" itemprop="commentsCount"></span>
+                <a href="/2017/01/15/UNIX环境高级编程（第三版）头文件“apue.h”问题/#SOHUCS" itemprop="discussionUrl">
+                  <span id="changyan_count_unit" class="post-comments-count hc-comment-count" data-xid="2017/01/15/UNIX环境高级编程（第三版）头文件“apue.h”问题/" itemprop="commentsCount"></span>
                 </a>
               
             
@@ -378,14 +379,21 @@
       
 
       
-        <p>在Linux系统下，使用sysctl命令可以查看和修改系统参数，但是如果想要添加一个系统参数应该怎么办呢？这篇博客的目的就是要来说这个事的。添加一个系统参数是一件很麻烦的事，大多时候是用来做测试用。<br><a id="more"></a></p>
-<h4 id="在ctl-table中注册内核参数"><a href="#在ctl-table中注册内核参数" class="headerlink" title="在ctl_table中注册内核参数"></a>在ctl_table中注册内核参数</h4><p>在source/net/ipv4/sysctl_net_ipv4.c文件中有这样一个结构体数组<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">static struct ctl_table ipv4-table[] = &#123;</div><div class="line">    ......</div><div class="line">&#125;,</div><div class="line">&#123;</div><div class="line">    ......</div><div class="line">&#125;</div><div class="line">......</div></pre></td></tr></table></figure></p>
-<p>在目录/proc/sys/net/ipv4/下面所有的系统参数都得先到这里注册，下面给出一个具体例子。<br><img src="../../../../pictures/TCP/20170115100648.png" alt=""><br>这两个参数是拥塞控制算法Vegas在拥塞控制阶段调节cwnd用的，相信很多人都不陌生。<br>这里是struct ctl_table的具体定义。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">/* 结构位置：include/linux/sysctl.h */</div><div class="line">struct ctl_table</div><div class="line">&#123;</div><div class="line">    const char    *procname;    /* Text ID for /proc/sys, or zero */</div><div class="line">    void          *data;</div><div class="line">    int           maxlen;</div><div class="line">    umode_t       mode;</div><div class="line">    struct        ctl_table *child;  /* Deprecated */</div><div class="line">    proc_handler  *proc_handler;     /* Callback for text formatting */</div><div class="line">    struct ctl_tabel_poll *poll;</div><div class="line">    void *extral;</div><div class="line">    void *extra2;</div><div class="line">&#125;;</div></pre></td></tr></table></figure></p>
-<p>现在简单介绍一下这些结构体成员变量。<br><em>procname 表示在/proc/sys/下显示的文件名称，
-</em>data 表示对应于内核中的变量名称，<br>maxlen 表示允许的最大长度，<br>mode   表示访问权限<br>proc_handler表示回调函数，有一些常用取值：<br>porc_dointvec 读写包含一个或多个整数的数组，<br>proc_dostring 读写一个字符串，<br>proc_dointvec_minmax 写的整数必须在min~max范围内。</p>
-<h4 id="声明内核参数"><a href="#声明内核参数" class="headerlink" title="声明内核参数"></a>声明内核参数</h4><p>用于TCP的内核参数在source/include/net/tcp.h声明。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">/* 进入tcp.h文件可以看到大量的变量声明，这里只列出上文提及到的两个变量 */</div><div class="line">...</div><div class="line">extern int sysctl_tcp_vegas_alpha;</div><div class="line">extern int sysctl_tcp_vegas_beta</div><div class="line">...</div></pre></td></tr></table></figure></p>
-<h4 id="定义内核参数"><a href="#定义内核参数" class="headerlink" title="定义内核参数"></a>定义内核参数</h4><p>内核参数的定义可能在不同的文件中，这个根据内核参数的用途而定。<br>systcl_tcp_vegas_alpha和sysctl_tcp_vegas_beta这两个变量的定义位置：<br>source/net/ipv4/tcp_retrans.c<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">int sysctl_tcp_vegas_alpha = 2;</div><div class="line">int sysctl_tcp_vegas_beta = 4;</div></pre></td></tr></table></figure></p>
-<p>经过上面这些步奏，内核参数就添加成功了，但我们编译重启系统后，就会发现在目录：<br>/proc/sys/net/ipv4/下有两个文件分别是tcp_vegas_alpha和tcp_vegas_beta，以后就可以通过echo命令动态修改这两个值了。</p>
+        <p>&emsp;&emsp;初次学UNIX环境高级编程（第三版）都会遇到头文件”apue.h”怎么添加的问题，这里说下从下载源码到编译通过的整个过程。当然在编译中会遇到各种error，本人也踩了好几个坑，好在都解决了。<br><a id="more"></a></p>
+<h4 id="下载源码及解压"><a href="#下载源码及解压" class="headerlink" title="下载源码及解压"></a>下载源码及解压</h4><p>先新建一个自己准备存放源码的目录，然后下载<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">cd /home/</div><div class="line">mkdir learnApue</div><div class="line">cd learnApue</div><div class="line">wget http://www.apuebook.com/src.tar.gz</div><div class="line">tar -zxvf src.tar.gz</div></pre></td></tr></table></figure></p>
+<p>解压后的文件在目录”aupe.3e”下。</p>
+<h4 id="头文件配置"><a href="#头文件配置" class="headerlink" title="头文件配置"></a>头文件配置</h4><p>经过上面的步骤，当前所在目录应该是”/home/learnApue/“<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">cd ./src.3e/apue.3e</div><div class="line">cp ./include/apue.h /usr/include/</div><div class="line">cp ./lib/error.c /usr/include/</div></pre></td></tr></table></figure></p>
+<h4 id="编辑”-usr-include-apue-h”"><a href="#编辑”-usr-include-apue-h”" class="headerlink" title="编辑”/usr/include/apue.h”"></a>编辑”/usr/include/apue.h”</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">vim /usr/include/apue.h</div></pre></td></tr></table></figure>
+<p>光标移动到文件最后一行”#endif”的前面，然后添加如下代码<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">#include &quot;error.c&quot;</div></pre></td></tr></table></figure></p>
+<p>保存退出</p>
+<h4 id="make报错及其解决方案"><a href="#make报错及其解决方案" class="headerlink" title="make报错及其解决方案"></a>make报错及其解决方案</h4><p>经过上面的操作，然后就可以编译了，这时你所在目录应该是”/home/learnApue/src.3e/apue.3e/“<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">make</div></pre></td></tr></table></figure></p>
+<p>正常情况下都会报error，下面是我遇到的error</p>
+<h5 id="error类型1"><a href="#error类型1" class="headerlink" title="error类型1"></a>error类型1</h5><p><img src="../../../../pictures/UNIX/20170514211405.png" alt=""><br>根据错误提示，systype.sh无法执行，我的方法是更改权限然后再编译<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">chmod 755 systype.sh</div><div class="line">make</div></pre></td></tr></table></figure></p>
+<h5 id="error类型2"><a href="#error类型2" class="headerlink" title="error类型2"></a>error类型2</h5><p><img src="../../../../pictures/UNIX/20170514211448.png" alt=""><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">chmod 755 ./advio/fixup.awk</div><div class="line">make</div></pre></td></tr></table></figure></p>
+<p>继续更改权限，只要是执行权限问题，都可以更改权限后再编译</p>
+<h5 id="error类型3"><a href="#error类型3" class="headerlink" title="error类型3"></a>error类型3</h5><p>下面的这个错误我没有碰到，来自于网友的报错，这里给出关键报错信息<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">/usr/bin/ld: cannot find -lbsd</div><div class="line">...</div><div class="line">make: ***[all] Error 1</div></pre></td></tr></table></figure></p>
+<p>根据这个error提示，应该是缺少一个库，解决方案如下。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">apt-get install libbsd-dev</div><div class="line">make</div></pre></td></tr></table></figure></p>
+<p>要说明的是我是roor权限，不是roor权限的在上一条命令前加sudo，再编译。<br>希望对各位正在使用UNIX环境高级编程一书的同行们有帮助，有错误还请指出。</p>
 
       
     </div>
@@ -422,18 +430,14 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2017/01/15/UNIX环境高级编程（第三版）头文件“apue.h”问题/" rel="next" title="UNIX环境高级编程（第三版）头文件"apue.h"问题">
-                <i class="fa fa-chevron-left"></i> UNIX环境高级编程（第三版）头文件"apue.h"问题
-              </a>
-            
           </div>
 
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2017/05/14/混合慢启动算法/" rel="prev" title="混合慢启动算法:Hybrid">
-                混合慢启动算法:Hybrid <i class="fa fa-chevron-right"></i>
+              <a href="/2017/01/15/Linux系统内核参数的添加方法/" rel="prev" title="Linux系统内核参数的添加方法">
+                Linux系统内核参数的添加方法 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -563,7 +567,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#在ctl-table中注册内核参数"><span class="nav-number">1.</span> <span class="nav-text">在ctl_table中注册内核参数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#声明内核参数"><span class="nav-number">2.</span> <span class="nav-text">声明内核参数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#定义内核参数"><span class="nav-number">3.</span> <span class="nav-text">定义内核参数</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#下载源码及解压"><span class="nav-number">1.</span> <span class="nav-text">下载源码及解压</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#头文件配置"><span class="nav-number">2.</span> <span class="nav-text">头文件配置</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#编辑”-usr-include-apue-h”"><span class="nav-number">3.</span> <span class="nav-text">编辑”/usr/include/apue.h”</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#make报错及其解决方案"><span class="nav-number">4.</span> <span class="nav-text">make报错及其解决方案</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#error类型1"><span class="nav-number">4.1.</span> <span class="nav-text">error类型1</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#error类型2"><span class="nav-number">4.2.</span> <span class="nav-text">error类型2</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#error类型3"><span class="nav-number">4.3.</span> <span class="nav-text">error类型3</span></a></li></ol></li></ol></div>
             
 
           </div>
