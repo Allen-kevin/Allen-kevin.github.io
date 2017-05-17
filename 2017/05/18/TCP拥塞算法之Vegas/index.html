@@ -104,7 +104,7 @@
 <meta property="og:url" content="http://yoursite.com/2017/05/18/TCP拥塞算法之Vegas/index.html">
 <meta property="og:site_name" content="凡是过去 皆为序曲">
 <meta property="og:description" content="&amp;emsp;&amp;emsp;vegas是一种主动调整cwnd的拥塞控制算法，主要思想是设置两个阈值,alpha和beta,然后通过计算目标速率(Expected)和实际速率(Actual)差(diff)，再比较diff与alpha和beta的关系，对cwnd进行调节。vegas这篇paper的主要贡献是提供了一种拥塞检测的方法。">
-<meta property="og:updated_time" content="2017-05-17T17:08:37.636Z">
+<meta property="og:updated_time" content="2017-05-17T17:11:57.847Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="TCP拥塞算法之：Vegas">
 <meta name="twitter:description" content="&amp;emsp;&amp;emsp;vegas是一种主动调整cwnd的拥塞控制算法，主要思想是设置两个阈值,alpha和beta,然后通过计算目标速率(Expected)和实际速率(Actual)差(diff)，再比较diff与alpha和beta的关系，对cwnd进行调节。vegas这篇paper的主要贡献是提供了一种拥塞检测的方法。">
@@ -379,14 +379,11 @@
 
       
         <p>&emsp;&emsp;vegas是一种主动调整cwnd的拥塞控制算法，主要思想是设置两个阈值,alpha和beta,然后通过计算目标速率(Expected)和实际速率(Actual)差(diff)，再比较diff与alpha和beta的关系，对cwnd进行调节。vegas这篇paper的主要贡献是提供了一种拥塞检测的方法。<br><a id="more"></a></p>
-<h3 id="区分拥塞还是非拥塞状态"><a href="#区分拥塞还是非拥塞状态" class="headerlink" title="区分拥塞还是非拥塞状态"></a>区分拥塞还是非拥塞状态</h3><h4 id="定义理论速率Expected和实际速率Actual："><a href="#定义理论速率Expected和实际速率Actual：" class="headerlink" title="定义理论速率Expected和实际速率Actual："></a>定义理论速率Expected和实际速率Actual：</h4><pre><code>$$Expected = cwnd/BaseRTT$$
-$$Actual = cwnd/RTT$$
-</code></pre><p>这里cwnd是当前的TCP窗口大小，BaseRTT是测量的最小往返时间，RTT是所测量的经平滑后的往返时间。</p>
-<h4 id="定义速率差Diff"><a href="#定义速率差Diff" class="headerlink" title="定义速率差Diff"></a>定义速率差Diff</h4><pre><code>$$Diff = Expected - Actual$$
-$$diff = Diff*baseRTT$$
-</code></pre><h4 id="设置alpha和beta的值："><a href="#设置alpha和beta的值：" class="headerlink" title="设置alpha和beta的值："></a>设置alpha和beta的值：</h4><pre><code>alpha = 2;
+<h3 id="区分拥塞还是非拥塞状态"><a href="#区分拥塞还是非拥塞状态" class="headerlink" title="区分拥塞还是非拥塞状态"></a>区分拥塞还是非拥塞状态</h3><h4 id="定义理论速率Expected和实际速率Actual："><a href="#定义理论速率Expected和实际速率Actual：" class="headerlink" title="定义理论速率Expected和实际速率Actual："></a>定义理论速率Expected和实际速率Actual：</h4><p>$$Expected = cwnd/BaseRTT$$<br>$$Actual = cwnd/RTT$$<br>这里cwnd是当前的TCP窗口大小，BaseRTT是测量的最小往返时间，RTT是所测量的经平滑后的往返时间。</p>
+<h4 id="定义速率差Diff"><a href="#定义速率差Diff" class="headerlink" title="定义速率差Diff"></a>定义速率差Diff</h4><p>$$Diff = Expected - Actual$$<br>$$diff = Diff*baseRTT$$</p>
+<h4 id="设置alpha和beta的值："><a href="#设置alpha和beta的值：" class="headerlink" title="设置alpha和beta的值："></a>设置alpha和beta的值：</h4><pre><code>alpha = 2;
 beta = 4;
-</code></pre><h3 id="基于链路状态的拥塞控制"><a href="#基于链路状态的拥塞控制" class="headerlink" title="基于链路状态的拥塞控制"></a>基于链路状态的拥塞控制</h3><h4 id="慢开始算法-cwnd-lt-ssthresh"><a href="#慢开始算法-cwnd-lt-ssthresh" class="headerlink" title="慢开始算法(cwnd &lt;= ssthresh)"></a>慢开始算法(cwnd &lt;= ssthresh)</h4><p>慢开始算法同Reno算法的慢开始的处理方法一样，每收到一个ACK，cwnd加1，这样cwnd会程指数增长，即每经过一个RTT，<br>    $$cwnd = cwnd*2$$</p>
+</code></pre><h3 id="基于链路状态的拥塞控制"><a href="#基于链路状态的拥塞控制" class="headerlink" title="基于链路状态的拥塞控制"></a>基于链路状态的拥塞控制</h3><h4 id="慢开始算法-cwnd-lt-ssthresh"><a href="#慢开始算法-cwnd-lt-ssthresh" class="headerlink" title="慢开始算法(cwnd &lt;= ssthresh)"></a>慢开始算法(cwnd &lt;= ssthresh)</h4><p>&emsp;&emsp;慢开始算法同Reno算法的慢开始的处理方法一样，每收到一个ACK，cwnd加1，这样cwnd会程指数增长，即每经过一个RTT，<br>    $$cwnd = cwnd*2$$</p>
 <h4 id="自适应增长算法-cwnd-gt-ssthresh"><a href="#自适应增长算法-cwnd-gt-ssthresh" class="headerlink" title="自适应增长算法(cwnd &gt; ssthresh)"></a>自适应增长算法(cwnd &gt; ssthresh)</h4><p>Reno的处理方法:<br>对于cwnd而言，会设置一个ssthresh(slow-start threshold)来控制cwnd的增长。<br>当cwnd &gt;ssthresh，会降低cwnd的增长速度，避免出现拥塞(congestion)具体的控制方法是，每经过一个RTT，<br>    $$cwnd = cwnd + 1$$<br>也可以这样理解，每收到一个ACK，<br>    $$cwnd = cwnd + 1/cwnd$$</p>
 <p>vegas的处理方法:<br>当cwnd &gt; ssthresh时<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">if (diff &lt; alpha)</div><div class="line">set: cwnd = cwnd + 1 //每收到一个ACK</div><div class="line">else if (diff &gt;= beta)</div><div class="line">set: cwnd = cwnd - 1 //每收到两个ACK</div><div class="line">else</div><div class="line">set: cwnd = cwnd</div></pre></td></tr></table></figure></p>
 <p>理论知识介绍到此，下面来看看在内核中的具体代码实现。</p>
