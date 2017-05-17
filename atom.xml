@@ -51,6 +51,41 @@
   </entry>
   
   <entry>
+    <title>移动端拥塞控制算法之：Verus</title>
+    <link href="http://yoursite.com/2017/04/24/%E7%A7%BB%E5%8A%A8%E7%BD%91%E7%BB%9C%E6%8B%A5%E5%A1%9E%E6%8E%A7%E5%88%B6%E7%AE%97%E6%B3%95%E4%B9%8B%EF%BC%9AVerus/"/>
+    <id>http://yoursite.com/2017/04/24/移动网络拥塞控制算法之：Verus/</id>
+    <published>2017-04-24T06:19:49.000Z</published>
+    <updated>2017-05-17T16:24:37.820Z</updated>
+    
+    <content type="html"><![CDATA[<p>&emsp;&emsp;Verus是一种端到端的拥塞控制协议，它根据测量delay来快速反应移动网络的容量变化，而不是去尝试预测移动网络的动态信道。<br><a id="more"></a></p>
+<h3 id="背景介绍"><a href="#背景介绍" class="headerlink" title="背景介绍"></a>背景介绍</h3><p>&emsp;&emsp;Verus是一种端到端的拥塞控制协议，它根据测量delay来快速反应移动网络的容量变化，而不是去尝试预测移动网络的动态信道。Verus的关键idea是学习历史数据（delay profile）来得到在一个short epochs内，端到端的packet dealy和outstanding window size之间的关系。然后运用这种关系，观察在short-term内数据报延迟的变化，对window size做出适当的调整。</p>
+<h4 id="移动网络信道的难以预测主要有三点："><a href="#移动网络信道的难以预测主要有三点：" class="headerlink" title="移动网络信道的难以预测主要有三点："></a>移动网络信道的难以预测主要有三点：</h4><blockquote>
+<p>First, the state of a cellular channel between a mobile device and a base station undergoes several complex state transitions that affect channel availability in short time scales.<br>Second, the frame scheduling algorithms used in cellular networks cause burstiness in the cellular channel.<br>Third, while prior work has considered only self-inflicted queuing delay as a cause for high delays, we find that competing traffic does affect end-to-end delay characteristics, especially under high contention or when the cellular channel is near saturation. </p>
+</blockquote>
+<h4 id="通过实验观察到的三点网络特性："><a href="#通过实验观察到的三点网络特性：" class="headerlink" title="通过实验观察到的三点网络特性："></a>通过实验观察到的三点网络特性：</h4><blockquote>
+<p><strong>Burst scheduling:</strong> Typical traffic characteristics observed at a receiver are highly bursty with variable burst sizes and burst inter-arrival periods. Mobility further amplifies these characteristics.<br><strong>Competing traffic:</strong> When two or more flows contend for radio resources and their sending rates approach network capacity, we observe cross-flow dependencies.<br><strong>Channel unpredictability:</strong> Standard prediction mechanisms even using the most recent samples are far from capturing the bursty behavior of the channel.</p>
+</blockquote>
+<h3 id="Verus协议"><a href="#Verus协议" class="headerlink" title="Verus协议"></a>Verus协议</h3><p>&emsp;&emsp;Verus从传统的TCP拥塞控制算法中借鉴了一些东西，比如慢开始和丢包后的多路降低（multiplicative decrease），但Verus在发送窗口的增长机制上做了改变。不同于传统的TCP算法在拥塞避免阶段每一个$RTT$，$CWnd$才增1，而Verus增加和降低发送窗口每$\xi$ms——记为epoch，当信道条件允许发送更多的数据包时，verus通过快速增加发送窗口来适应动态改变的无线信道。<br>在每一个epoch，Verus的发送窗口函数如下：<br>                  $$W(t+1) = f(d(t) + \delta(t))$$<br>这里，$W(t+1)$是下一时刻的发送窗口，$d(t)$是网络延迟，$\delta(t)$是延迟增量（可为负数），$f$是delay profile 函数。</p>
+<h4 id="delay-profile"><a href="#delay-profile" class="headerlink" title="delay profile"></a>delay profile</h4><p>&emsp;&emsp;Verus通过下面四个步骤来建立delay profile：</p>
+<blockquote>
+<p><strong>Delay Estimator</strong>: estimates the network RTT using delay measurements reported from the receiver’s acknowledgments<br><strong>Delay Profiler</strong>: tracks the relationship between delay and sending window that does not cause network congestion<br><strong>Window Estimator:</strong> estimates the sending window using the estimated delay and delay profile<br><strong>Loss Handler</strong>: handles losses and adjusts the sending window</p>
+</blockquote>
+<p>具体建立delay profile的计算过程和公式推导在这里就不详细介绍了，最后会得到下面给出的一张图，这张图反映的是delay estimate和sending window之间的关系。通过当前时刻测得的delay，估算下一时刻的delay，然后根据这张图找出下一时刻的sending window值。<br><img src="../../../../pictures/Cellular/20170424165913.png" alt=""><br>这里只是很简单的介绍了verus的思想， 想要深入了解verus算法的话还是看其paper更好一点，下面会给出这篇paper的地址。</p>
+<p><strong>参考文献：</strong><br><a href="https://cs.nyu.edu/~jchen/publications/sigcomm15-zaki.pdf" target="_blank" rel="external">Adaptive Congestion Control for Unpredictable Celler Networks</a></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;&amp;emsp;&amp;emsp;Verus是一种端到端的拥塞控制协议，它根据测量delay来快速反应移动网络的容量变化，而不是去尝试预测移动网络的动态信道。&lt;br&gt;
+    
+    </summary>
+    
+      <category term="私人文献阅读" scheme="http://yoursite.com/categories/%E7%A7%81%E4%BA%BA%E6%96%87%E7%8C%AE%E9%98%85%E8%AF%BB/"/>
+    
+    
+  </entry>
+  
+  <entry>
     <title>Linux系统内核参数的添加方法</title>
     <link href="http://yoursite.com/2017/01/15/Linux%E7%B3%BB%E7%BB%9F%E5%86%85%E6%A0%B8%E5%8F%82%E6%95%B0%E7%9A%84%E6%B7%BB%E5%8A%A0%E6%96%B9%E6%B3%95/"/>
     <id>http://yoursite.com/2017/01/15/Linux系统内核参数的添加方法/</id>
