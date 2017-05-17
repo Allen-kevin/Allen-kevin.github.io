@@ -1,28 +1,384 @@
-<?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom">
-  <title>凡是过去 皆为序曲</title>
+<!doctype html>
+
+
+
   
-  <link href="/atom.xml" rel="self"/>
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
   
-  <link href="http://yoursite.com/"/>
-  <updated>2017-05-17T17:08:37.636Z</updated>
-  <id>http://yoursite.com/</id>
   
-  <author>
-    <name>kevin</name>
+  <link rel="stylesheet" media="all" href="/lib/Han/dist/han.min.css?v=3.3">
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
     
-  </author>
-  
-  <generator uri="http://hexo.io/">Hexo</generator>
-  
-  <entry>
-    <title>TCP拥塞算法之：Vegas</title>
-    <link href="http://yoursite.com/2017/05/18/TCP%E6%8B%A5%E5%A1%9E%E7%AE%97%E6%B3%95%E4%B9%8BVegas/"/>
-    <id>http://yoursite.com/2017/05/18/TCP拥塞算法之Vegas/</id>
-    <published>2017-05-17T17:06:38.000Z</published>
-    <updated>2017-05-17T17:08:37.636Z</updated>
     
-    <content type="html"><![CDATA[<p>&emsp;&emsp;vegas是一种主动调整cwnd的拥塞控制算法，主要思想是设置两个阈值,alpha和beta,然后通过计算目标速率(Expected)和实际速率(Actual)差(diff)，再比较diff与alpha和beta的关系，对cwnd进行调节。vegas这篇paper的主要贡献是提供了一种拥塞检测的方法。<br><a id="more"></a></p>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+  
+
+
+  <link rel="alternate" href="/atom.xml" title="凡是过去 皆为序曲" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.1" />
+
+
+
+
+
+
+<meta name="description" content="&amp;emsp;&amp;emsp;vegas是一种主动调整cwnd的拥塞控制算法，主要思想是设置两个阈值,alpha和beta,然后通过计算目标速率(Expected)和实际速率(Actual)差(diff)，再比较diff与alpha和beta的关系，对cwnd进行调节。vegas这篇paper的主要贡献是提供了一种拥塞检测的方法。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="TCP拥塞算法之：Vegas">
+<meta property="og:url" content="http://yoursite.com/2017/05/18/TCP拥塞算法之Vegas/index.html">
+<meta property="og:site_name" content="凡是过去 皆为序曲">
+<meta property="og:description" content="&amp;emsp;&amp;emsp;vegas是一种主动调整cwnd的拥塞控制算法，主要思想是设置两个阈值,alpha和beta,然后通过计算目标速率(Expected)和实际速率(Actual)差(diff)，再比较diff与alpha和beta的关系，对cwnd进行调节。vegas这篇paper的主要贡献是提供了一种拥塞检测的方法。">
+<meta property="og:updated_time" content="2017-05-17T17:08:37.636Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="TCP拥塞算法之：Vegas">
+<meta name="twitter:description" content="&amp;emsp;&amp;emsp;vegas是一种主动调整cwnd的拥塞控制算法，主要思想是设置两个阈值,alpha和beta,然后通过计算目标速率(Expected)和实际速率(Actual)差(diff)，再比较diff与alpha和beta的关系，对cwnd进行调节。vegas这篇paper的主要贡献是提供了一种拥塞检测的方法。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2017/05/18/TCP拥塞算法之Vegas/"/>
+
+
+
+
+
+  <title>TCP拥塞算法之：Vegas | 凡是过去 皆为序曲</title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">凡是过去 皆为序曲</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archives"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-commonweal">
+          <a href="/404.html" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-heartbeat"></i> <br />
+            
+            公益404
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/05/18/TCP拥塞算法之Vegas/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="kevin">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="凡是过去 皆为序曲">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">TCP拥塞算法之：Vegas</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-18T01:06:38+08:00">
+                2017-05-18
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/TCP-IP/" itemprop="url" rel="index">
+                    <span itemprop="name">TCP/IP</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+              <span class="post-meta-divider">|</span>
+              <span class="post-meta-item-icon">
+                <i class="fa fa-comment-o"></i>
+              </span>
+              
+                <a href="/2017/05/18/TCP拥塞算法之Vegas/#SOHUCS" itemprop="discussionUrl">
+                  <span id="changyan_count_unit" class="post-comments-count hc-comment-count" data-xid="2017/05/18/TCP拥塞算法之Vegas/" itemprop="commentsCount"></span>
+                </a>
+              
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body han-init-context" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>&emsp;&emsp;vegas是一种主动调整cwnd的拥塞控制算法，主要思想是设置两个阈值,alpha和beta,然后通过计算目标速率(Expected)和实际速率(Actual)差(diff)，再比较diff与alpha和beta的关系，对cwnd进行调节。vegas这篇paper的主要贡献是提供了一种拥塞检测的方法。<br><a id="more"></a></p>
 <h3 id="区分拥塞还是非拥塞状态"><a href="#区分拥塞还是非拥塞状态" class="headerlink" title="区分拥塞还是非拥塞状态"></a>区分拥塞还是非拥塞状态</h3><h4 id="定义理论速率Expected和实际速率Actual："><a href="#定义理论速率Expected和实际速率Actual：" class="headerlink" title="定义理论速率Expected和实际速率Actual："></a>定义理论速率Expected和实际速率Actual：</h4><pre><code>$$Expected = cwnd/BaseRTT$$
 $$Actual = cwnd/RTT$$
 </code></pre><p>这里cwnd是当前的TCP窗口大小，BaseRTT是测量的最小往返时间，RTT是所测量的经平滑后的往返时间。</p>
@@ -38,150 +394,395 @@ beta = 4;
 <h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>vegas拥塞控制算法用于控制传输速率和delay会有很好的效果，但其缺点是在现在的高带宽网络环境下，其竞争带宽时不够激进，比不上其他拥塞控制算法，比如cubic, veno等。</p>
 <p><strong>参考文献</strong><br><a href="http://www.cs.toronto.edu/syslab/courses/csc2209/06au/papers/vegas.pdf" target="_blank" rel="external">TCP Vegas: End to End Congestion<br>Avoidance on a Global Internet
 </a></p>
-]]></content>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/05/14/混合慢启动算法/" rel="next" title="混合慢启动算法:Hybrid">
+                <i class="fa fa-chevron-left"></i> 混合慢启动算法:Hybrid
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
     
-    <summary type="html">
+      <div id="SOHUCS"></div>
     
-      &lt;p&gt;&amp;emsp;&amp;emsp;vegas是一种主动调整cwnd的拥塞控制算法，主要思想是设置两个阈值,alpha和beta,然后通过计算目标速率(Expected)和实际速率(Actual)差(diff)，再比较diff与alpha和beta的关系，对cwnd进行调节。vegas这篇paper的主要贡献是提供了一种拥塞检测的方法。&lt;br&gt;
-    
-    </summary>
-    
-      <category term="TCP/IP" scheme="http://yoursite.com/categories/TCP-IP/"/>
-    
-    
-  </entry>
+  </div>
+
+
+        </div>
+        
+          
   
-  <entry>
-    <title>混合慢启动算法:Hybrid</title>
-    <link href="http://yoursite.com/2017/05/14/%E6%B7%B7%E5%90%88%E6%85%A2%E5%90%AF%E5%8A%A8%E7%AE%97%E6%B3%95/"/>
-    <id>http://yoursite.com/2017/05/14/混合慢启动算法/</id>
-    <published>2017-05-14T13:03:43.000Z</published>
-    <updated>2017-05-14T13:08:58.521Z</updated>
-    
-    <content type="html"><![CDATA[<p>&emsp;&emsp;传统的单纯采用指数增长的慢启动算法有一个无法避免的问题，在临界进入拥塞避免阶段时，特别是在高带宽长距离网络中，容易出现大规模丢包，进而导致大量数据包重传，也有可能出现timeout，致使网络带宽利用率下降。<br>&emsp;&emsp;这里，本文将介绍一种新的慢启动方法——Hybrid Slow Start，它在传统的慢启动算法中加入了判断机制，强制从慢启动转入拥塞避免。这里主要说说其在CUBIC中是怎么实现的，Hybrid Slow Start算法原理本身就不做过多介绍了，有兴趣可以看看本文最后给出的参考文献。<br><a id="more"></a></p>
-<h3 id="变量介绍"><a href="#变量介绍" class="headerlink" title="变量介绍"></a>变量介绍</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">#define HYSTART_ACK_TRAIN      0x1 //进入拥塞避免的条件</div><div class="line">#define HYSTART_DELAY          0x2 //进入拥塞避免的条件</div><div class="line">#define HYSTART_MIN_SAMPLES    8   //表示至少取一个RTT的前8个ACK作为样本</div><div class="line">#define HYSTART_DELAY_MIN      (4u&lt;&lt;3) </div><div class="line">#define HYSTART_DELAY_MAX      (16u&lt;&lt;3)</div><div class="line">/* if x &gt; HYSTART_DELAY_MAX，return HYSTART_DELAY_MAX </div><div class="line"> * else if x &lt; HYSTART_DELAY_MIN，return HYATART_DELAY_MIN</div><div class="line"> * else return x</div><div class="line"> */</div><div class="line">#define HYSTART_DELAY_THRESH clamp(x, HYSTART_DELAY_MIN, HYSTART_DELAY_MAX)</div><div class="line">static int hystart __read_mostly = 1;</div><div class="line">static int hystart_detect __read_mostly = HYSTART_ACK_TRAIN | HYSART_DELAY;</div><div class="line">static int hystart_low_window __read_mostly = 16;</div><div class="line">static int hystart_ack_delta __read_mostly = 2;</div><div class="line"></div><div class="line">struct bictcp &#123;</div><div class="line">  ...</div><div class="line">  u32    delay_min;   //全局最小rtt</div><div class="line">  u32    round_start; //记录慢启动的起始时间</div><div class="line">  u32    curr_rtt;    //记录样本中的最小rtt</div><div class="line">  u8      found;</div><div class="line">  u8      sample_cnt; //样本计数变量</div><div class="line">  ...</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
-<h3 id="两类退出slow-start机制"><a href="#两类退出slow-start机制" class="headerlink" title="两类退出slow start机制"></a>两类退出slow start机制</h3><p>在Hybrid Slow Start算法中给出了种类判断机制用来退出慢启动进入拥塞避免，分别是ACKs train length和Increase in packet delays。</p>
-<h4 id="ACKS-train-length"><a href="#ACKS-train-length" class="headerlink" title="ACKS train length"></a>ACKS train length</h4><p>这里给出一段原文描述，在这段描述中说了怎么测ACKs train length以及为什么要用ACKs train length。</p>
-<blockquote>
-<p>The ACK train length is measured by calculating the sum of inter-arrival times of all the closely spaced ACKs within an RTT round. The train length is strongly affected by the bottleneck bandwidth, routing delays and buffer sizes along the path, and is easily stretched out by congestion caused by cross traffic in the path, so by estimating the train length we can reliably find a safe exit point of Slow Start. </p>
-</blockquote>
-<h4 id="Increase-in-packet-delays"><a href="#Increase-in-packet-delays" class="headerlink" title="Increase in packet delays"></a>Increase in packet delays</h4><p>同样还是一段原文描述，如果你问我为什么不直接翻译成中文，我不会回答你这个问题的。</p>
-<blockquote>
-<p>Increase in packet delays during Slow Start may indicate the possibility of the bottleneck router being congested.</p>
-</blockquote>
-<p>但是Increase in packet delays的测量会受到bursty transmission的影响，所以只测一个RTT中刚开始的几个数据包的往返时间来避免bursty transission的影响，在后面给出的code中会看到。</p>
-<h3 id="函数实现"><a href="#函数实现" class="headerlink" title="函数实现"></a>函数实现</h3><p>hystart重置函数<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">static inline void bictcp_hystart_reset(struct sock *sk)</div><div class="line">&#123;</div><div class="line">    struct tcp_sock *tp = tcp_sk(sk);</div><div class="line">    struct bictcp *ca = inet_csk_ca(sk);</div><div class="line">    </div><div class="line">    ca-&gt;round_start = ca-&gt;last_ack = bictcp_clock(); //记录慢启动的开始时间</div><div class="line">    ca-&gt;end_seq = tp-&gt;snd_nxt;</div><div class="line">    ca-&gt;curr_rtt = 0;   //重置样本最小rtt为0</div><div class="line">    ca-&gt;sample_cnt = 0; //重置样本计数为0</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>Hybrid Slow Start实现的核心部分<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div></pre></td><td class="code"><pre><div class="line">static void hystart_update(struct sock *sk, u32 delay)</div><div class="line">&#123;</div><div class="line">    struct tcp_sock *tp = tcp_sk(sk);</div><div class="line">    struct bictcp *ca = inet_csk_ca(sk);</div><div class="line"></div><div class="line">    //如果ca-&gt;found &amp; hystart_detect为真，表示应该进入拥塞避免</div><div class="line">    if (!(ca-&gt;found &amp; hystart_detect)) &#123;</div><div class="line">        u32 now = bictcp_clock(); //获取当前时间</div><div class="line"></div><div class="line">        /* first detection parameter - ack-train detection */</div><div class="line">        /* 前后到来的两个ACK的间隔时间小于hystart_ack_delta才有效 */</div><div class="line">        if ((s32)(now - ca-&gt;last_ack) &lt;= hystart_ack_delta) &#123;</div><div class="line">            ca-&gt;last_ack = now;  //更新上一个ACK到来的时间</div><div class="line">            /* 每次慢启动时会重置round_start为0，结合前面的if条件，下面的</div><div class="line">             * if成立的条件是：从慢启动开始到现在经过的时间如果大于</div><div class="line">             * delay_min&gt;&gt;4，那么可以进入拥塞避免了。至于为什么选</div><div class="line">             * delay_min&gt;&gt;4这个值，鬼知道。</div><div class="line">             */</div><div class="line">            if ((s32)(now - ca-&gt;round_start) &gt; ca-&gt;delay_min &gt;&gt; 4)</div><div class="line">                ca-&gt;found |= HYSTART_ACK_TRAIN;</div><div class="line">        &#125;   </div><div class="line"></div><div class="line">        /* obtain the minimum delay of more than sampling packets */</div><div class="line">        /* 如果样本计数小于HYSTART_MIN_SAMPLES(默认为8) */</div><div class="line">        if (ca-&gt;sample_cnt &lt; HYSTART_MIN_SAMPLES) &#123;</div><div class="line">            if (ca-&gt;curr_rtt == 0 || ca-&gt;curr_rtt &gt; delay)</div><div class="line">                ca-&gt;curr_rtt = delay;/* 更新样本中的最小rtt */</div><div class="line"></div><div class="line">            ca-&gt;sample_cnt++;</div><div class="line">        &#125; else &#123;//如果样本大于8了，那么就可以判断是否要进入拥塞避免了</div><div class="line">            /* 如果前面8个样本中的最小rtt大于全局最小rtt与阈值的和，那么表示网络出</div><div class="line">             * 现了拥塞，应立马进入拥塞避免阶段，HYSTART_DELAY_THRESH()的返</div><div class="line">             * 回值在前面的变量介绍中有说明。</div><div class="line">            if (ca-&gt;curr_rtt &gt; ca-&gt;delay_min +</div><div class="line">                HYSTART_DELAY_THRESH(ca-&gt;delay_min&gt;&gt;4))</div><div class="line">                ca-&gt;found |= HYSTART_DELAY;</div><div class="line">        &#125;   </div><div class="line">        /*  </div><div class="line">         * Either one of two conditions are met,</div><div class="line">         * we exit from slow start immediately.</div><div class="line">         */</div><div class="line">        /* 如果为真就进入拥塞避免 */</div><div class="line">        if (ca-&gt;found &amp; hystart_detect)</div><div class="line">            tp-&gt;snd_ssthresh = tp-&gt;snd_cwnd;</div><div class="line">    &#125;   </div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>&emsp;&emsp;最近做实验需要探测网络带宽，需要用到Hybrid Slow Start，所以看了paper和其在Linux CUBIC算法中的实现，然后就写了这篇blog。<br>参考文献：<a href="https://pdfs.semanticscholar.org/25e9/ef3f03315782c7f1cbcd31b587857adae7d1.pdf" target="_blank" rel="external">Hybrid Slow Start for High-Bandwidth and Long-Distance Networks</a></p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;&amp;emsp;&amp;emsp;传统的单纯采用指数增长的慢启动算法有一个无法避免的问题，在临界进入拥塞避免阶段时，特别是在高带宽长距离网络中，容易出现大规模丢包，进而导致大量数据包重传，也有可能出现timeout，致使网络带宽利用率下降。&lt;br&gt;&amp;emsp;&amp;emsp;这里，本文将介绍一种新的慢启动方法——Hybrid Slow Start，它在传统的慢启动算法中加入了判断机制，强制从慢启动转入拥塞避免。这里主要说说其在CUBIC中是怎么实现的，Hybrid Slow Start算法原理本身就不做过多介绍了，有兴趣可以看看本文最后给出的参考文献。&lt;br&gt;
-    
-    </summary>
-    
-      <category term="TCP/IP" scheme="http://yoursite.com/categories/TCP-IP/"/>
-    
-    
-  </entry>
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.gif"
+               alt="kevin" />
+          <p class="site-author-name" itemprop="name">kevin</p>
+           
+              <p class="site-description motion-element" itemprop="description"></p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">5</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">分类</span>
+              
+            </div>
+          
+
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#区分拥塞还是非拥塞状态"><span class="nav-number">1.</span> <span class="nav-text">区分拥塞还是非拥塞状态</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#定义理论速率Expected和实际速率Actual："><span class="nav-number">1.1.</span> <span class="nav-text">定义理论速率Expected和实际速率Actual：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#定义速率差Diff"><span class="nav-number">1.2.</span> <span class="nav-text">定义速率差Diff</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#设置alpha和beta的值："><span class="nav-number">1.3.</span> <span class="nav-text">设置alpha和beta的值：</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#基于链路状态的拥塞控制"><span class="nav-number">2.</span> <span class="nav-text">基于链路状态的拥塞控制</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#慢开始算法-cwnd-lt-ssthresh"><span class="nav-number">2.1.</span> <span class="nav-text">慢开始算法(cwnd <= ssthresh)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#自适应增长算法-cwnd-gt-ssthresh"><span class="nav-number">2.2.</span> <span class="nav-text">自适应增长算法(cwnd > ssthresh)</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#代码实现注解"><span class="nav-number">3.</span> <span class="nav-text">代码实现注解</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
   
-  <entry>
-    <title>移动端拥塞控制算法之：Verus</title>
-    <link href="http://yoursite.com/2017/04/24/%E7%A7%BB%E5%8A%A8%E7%BD%91%E7%BB%9C%E6%8B%A5%E5%A1%9E%E6%8E%A7%E5%88%B6%E7%AE%97%E6%B3%95%E4%B9%8B%EF%BC%9AVerus/"/>
-    <id>http://yoursite.com/2017/04/24/移动网络拥塞控制算法之：Verus/</id>
-    <published>2017-04-24T06:19:49.000Z</published>
-    <updated>2017-05-17T16:31:14.163Z</updated>
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">kevin</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
     
-    <content type="html"><![CDATA[<p>&emsp;&emsp;Verus是一种端到端的拥塞控制协议，它根据测量delay来快速反应移动网络的容量变化，而不是去尝试预测移动网络的动态信道。<br><a id="more"></a></p>
-<h3 id="背景介绍"><a href="#背景介绍" class="headerlink" title="背景介绍"></a>背景介绍</h3><p>&emsp;&emsp;Verus是一种端到端的拥塞控制协议，它根据测量delay来快速反应移动网络的容量变化，而不是去尝试预测移动网络的动态信道。Verus的关键idea是学习历史数据（delay profile）来得到在一个short epochs内，端到端的packet dealy和outstanding window size之间的关系。然后运用这种关系，观察在short-term内数据报延迟的变化，对window size做出适当的调整。</p>
-<h4 id="移动网络信道的难以预测主要有三点："><a href="#移动网络信道的难以预测主要有三点：" class="headerlink" title="移动网络信道的难以预测主要有三点："></a>移动网络信道的难以预测主要有三点：</h4><blockquote>
-<p>First, the state of a cellular channel between a mobile device and a base station undergoes several complex state transitions that affect channel availability in short time scales.<br>Second, the frame scheduling algorithms used in cellular networks cause burstiness in the cellular channel.<br>Third, while prior work has considered only self-inflicted queuing delay as a cause for high delays, we find that competing traffic does affect end-to-end delay characteristics, especially under high contention or when the cellular channel is near saturation. </p>
-</blockquote>
-<h4 id="通过实验观察到的三点网络特性："><a href="#通过实验观察到的三点网络特性：" class="headerlink" title="通过实验观察到的三点网络特性："></a>通过实验观察到的三点网络特性：</h4><blockquote>
-<p><strong>Burst scheduling:</strong> Typical traffic characteristics observed at a receiver are highly bursty with variable burst sizes and burst inter-arrival periods. Mobility further amplifies these characteristics.<br><strong>Competing traffic:</strong> When two or more flows contend for radio resources and their sending rates approach network capacity, we observe cross-flow dependencies.<br><strong>Channel unpredictability:</strong> Standard prediction mechanisms even using the most recent samples are far from capturing the bursty behavior of the channel.</p>
-</blockquote>
-<h3 id="Verus协议"><a href="#Verus协议" class="headerlink" title="Verus协议"></a>Verus协议</h3><p>&emsp;&emsp;Verus从传统的TCP拥塞控制算法中借鉴了一些东西，比如慢开始和丢包后的多路降低（multiplicative decrease），但Verus在发送窗口的增长机制上做了改变。不同于传统的TCP算法在拥塞避免阶段每一个$RTT$，$CWnd$才增1，而Verus增加和降低发送窗口每$\xi$ms——记为epoch，当信道条件允许发送更多的数据包时，verus通过快速增加发送窗口来适应动态改变的无线信道。<br>在每一个epoch，Verus的发送窗口函数如下：<br>                  $$W(t+1) = f(d(t) + \delta(t))$$<br>这里，$W(t+1)$是下一时刻的发送窗口，$d(t)$是网络延迟，$\delta(t)$是延迟增量（可为负数），$f$是delay profile 函数。</p>
-<h4 id="delay-profile"><a href="#delay-profile" class="headerlink" title="delay profile"></a>delay profile</h4><p>&emsp;&emsp;Verus通过下面四个步骤来建立delay profile：</p>
-<blockquote>
-<p><strong>Delay Estimator</strong>: estimates the network RTT using delay measurements reported from the receiver’s acknowledgments<br><strong>Delay Profiler</strong>: tracks the relationship between delay and sending window that does not cause network congestion<br><strong>Window Estimator:</strong> estimates the sending window using the estimated delay and delay profile<br><strong>Loss Handler</strong>: handles losses and adjusts the sending window</p>
-</blockquote>
-<p>具体建立delay profile的计算过程和公式推导在这里就不详细介绍了，最后会得到下面给出的一张图，这张图反映的是delay estimate和sending window之间的关系。通过当前时刻测得的delay，估算下一时刻的delay，然后根据这张图找出下一时刻的sending window值。<br><img src="../../../../pictures/Cellular/20170424165913.png" alt=""><br>这里只是很简单的介绍了verus的思想， 想要深入了解verus算法的话还是看其paper更好一点，下面会给出这篇paper的地址。</p>
-<p><strong>参考文献：</strong><br><a href="https://cs.nyu.edu/~jchen/publications/sigcomm15-zaki.pdf" target="_blank" rel="external">Adaptive Congestion Control for Unpredictable Celler Networks</a></p>
-]]></content>
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
     
-    <summary type="html">
-    
-      &lt;p&gt;&amp;emsp;&amp;emsp;Verus是一种端到端的拥塞控制协议，它根据测量delay来快速反应移动网络的容量变化，而不是去尝试预测移动网络的动态信道。&lt;br&gt;
-    
-    </summary>
-    
-      <category term="私人文献阅读" scheme="http://yoursite.com/categories/%E7%A7%81%E4%BA%BA%E6%96%87%E7%8C%AE%E9%98%85%E8%AF%BB/"/>
-    
-    
-  </entry>
+
+  </div>
+
   
-  <entry>
-    <title>UNIX环境高级编程（第三版）头文件&quot;apue.h&quot;问题</title>
-    <link href="http://yoursite.com/2017/01/15/UNIX%E7%8E%AF%E5%A2%83%E9%AB%98%E7%BA%A7%E7%BC%96%E7%A8%8B%EF%BC%88%E7%AC%AC%E4%B8%89%E7%89%88%EF%BC%89%E5%A4%B4%E6%96%87%E4%BB%B6%E2%80%9Capue.h%E2%80%9D%E9%97%AE%E9%A2%98/"/>
-    <id>http://yoursite.com/2017/01/15/UNIX环境高级编程（第三版）头文件“apue.h”问题/</id>
-    <published>2017-01-15T01:39:01.000Z</published>
-    <updated>2017-05-14T13:17:50.277Z</updated>
-    
-    <content type="html"><![CDATA[<p>&emsp;&emsp;初次学UNIX环境高级编程（第三版）都会遇到头文件”apue.h”怎么添加的问题，这里说下从下载源码到编译通过的整个过程。当然在编译中会遇到各种error，本人也踩了好几个坑，好在都解决了。<br><a id="more"></a></p>
-<h4 id="下载源码及解压"><a href="#下载源码及解压" class="headerlink" title="下载源码及解压"></a>下载源码及解压</h4><p>先新建一个自己准备存放源码的目录，然后下载<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">cd /home/</div><div class="line">mkdir learnApue</div><div class="line">cd learnApue</div><div class="line">wget http://www.apuebook.com/src.tar.gz</div><div class="line">tar -zxvf src.tar.gz</div></pre></td></tr></table></figure></p>
-<p>解压后的文件在目录”aupe.3e”下。</p>
-<h4 id="头文件配置"><a href="#头文件配置" class="headerlink" title="头文件配置"></a>头文件配置</h4><p>经过上面的步骤，当前所在目录应该是”/home/learnApue/“<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">cd ./src.3e/apue.3e</div><div class="line">cp ./include/apue.h /usr/include/</div><div class="line">cp ./lib/error.c /usr/include/</div></pre></td></tr></table></figure></p>
-<h4 id="编辑”-usr-include-apue-h”"><a href="#编辑”-usr-include-apue-h”" class="headerlink" title="编辑”/usr/include/apue.h”"></a>编辑”/usr/include/apue.h”</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">vim /usr/include/apue.h</div></pre></td></tr></table></figure>
-<p>光标移动到文件最后一行”#endif”的前面，然后添加如下代码<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">#include &quot;error.c&quot;</div></pre></td></tr></table></figure></p>
-<p>保存退出</p>
-<h4 id="make报错及其解决方案"><a href="#make报错及其解决方案" class="headerlink" title="make报错及其解决方案"></a>make报错及其解决方案</h4><p>经过上面的操作，然后就可以编译了，这时你所在目录应该是”/home/learnApue/src.3e/apue.3e/“<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">make</div></pre></td></tr></table></figure></p>
-<p>正常情况下都会报error，下面是我遇到的error</p>
-<h5 id="error类型1"><a href="#error类型1" class="headerlink" title="error类型1"></a>error类型1</h5><p><img src="../../../../pictures/UNIX/20170514211405.png" alt=""><br>根据错误提示，systype.sh无法执行，我的方法是更改权限然后再编译<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">chmod 755 systype.sh</div><div class="line">make</div></pre></td></tr></table></figure></p>
-<h5 id="error类型2"><a href="#error类型2" class="headerlink" title="error类型2"></a>error类型2</h5><p><img src="../../../../pictures/UNIX/20170514211448.png" alt=""><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">chmod 755 ./advio/fixup.awk</div><div class="line">make</div></pre></td></tr></table></figure></p>
-<p>继续更改权限，只要是执行权限问题，都可以更改权限后再编译</p>
-<h5 id="error类型3"><a href="#error类型3" class="headerlink" title="error类型3"></a>error类型3</h5><p>下面的这个错误我没有碰到，来自于网友的报错，这里给出关键报错信息<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">/usr/bin/ld: cannot find -lbsd</div><div class="line">...</div><div class="line">make: ***[all] Error 1</div></pre></td></tr></table></figure></p>
-<p>根据这个error提示，应该是缺少一个库，解决方案如下。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">apt-get install libbsd-dev</div><div class="line">make</div></pre></td></tr></table></figure></p>
-<p>要说明的是我是roor权限，不是roor权限的在上一条命令前加sudo，再编译。<br>希望对各位正在使用UNIX环境高级编程一书的同行们有帮助，有错误还请指出。</p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;&amp;emsp;&amp;emsp;初次学UNIX环境高级编程（第三版）都会遇到头文件”apue.h”怎么添加的问题，这里说下从下载源码到编译通过的整个过程。当然在编译中会遇到各种error，本人也踩了好几个坑，好在都解决了。&lt;br&gt;
-    
-    </summary>
-    
-      <category term="UNIX/LINUX" scheme="http://yoursite.com/categories/UNIX-LINUX/"/>
-    
-    
-  </entry>
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
   
-  <entry>
-    <title>Linux系统内核参数的添加方法</title>
-    <link href="http://yoursite.com/2017/01/15/Linux%E7%B3%BB%E7%BB%9F%E5%86%85%E6%A0%B8%E5%8F%82%E6%95%B0%E7%9A%84%E6%B7%BB%E5%8A%A0%E6%96%B9%E6%B3%95/"/>
-    <id>http://yoursite.com/2017/01/15/Linux系统内核参数的添加方法/</id>
-    <published>2017-01-15T01:39:01.000Z</published>
-    <updated>2017-05-17T16:41:16.440Z</updated>
-    
-    <content type="html"><![CDATA[<p>&emsp;&emsp;在Linux系统下，使用sysctl命令可以查看和修改系统参数，但是如果想要添加一个系统参数应该怎么办呢？这篇博客的目的就是要来说这个事的。添加一个系统参数是一件很麻烦的事，大多时候是用来做测试用。<br><a id="more"></a></p>
-<h4 id="在ctl-table中注册内核参数"><a href="#在ctl-table中注册内核参数" class="headerlink" title="在ctl_table中注册内核参数"></a>在ctl_table中注册内核参数</h4><p>在source/net/ipv4/sysctl_net_ipv4.c文件中有这样一个结构体数组<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">static struct ctl_table ipv4-table[] = &#123;</div><div class="line">    ......</div><div class="line">&#125;,</div><div class="line">&#123;</div><div class="line">    ......</div><div class="line">&#125;</div><div class="line">......</div></pre></td></tr></table></figure></p>
-<p>在目录/proc/sys/net/ipv4/下面所有的系统参数都得先到这里注册，下面给出一个具体例子。<br><img src="../../../../pictures/TCP/20170115100648.png" alt=""><br>这两个参数是拥塞控制算法Vegas在拥塞控制阶段调节cwnd用的，相信很多人都不陌生。<br>这里是struct ctl_table的具体定义。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">/* 结构位置：include/linux/sysctl.h */</div><div class="line">struct ctl_table</div><div class="line">&#123;</div><div class="line">    const char    *procname;    /* Text ID for /proc/sys, or zero */</div><div class="line">    void          *data;</div><div class="line">    int           maxlen;</div><div class="line">    umode_t       mode;</div><div class="line">    struct        ctl_table *child;  /* Deprecated */</div><div class="line">    proc_handler  *proc_handler;     /* Callback for text formatting */</div><div class="line">    struct ctl_tabel_poll *poll;</div><div class="line">    void *extral;</div><div class="line">    void *extra2;</div><div class="line">&#125;;</div></pre></td></tr></table></figure></p>
-<p>现在简单介绍一下这些结构体成员变量。<br><em>procname 表示在/proc/sys/下显示的文件名称，
-</em>data 表示对应于内核中的变量名称，<br>maxlen 表示允许的最大长度，<br>mode   表示访问权限<br>proc_handler表示回调函数，有一些常用取值：<br>porc_dointvec 读写包含一个或多个整数的数组，<br>proc_dostring 读写一个字符串，<br>proc_dointvec_minmax 写的整数必须在min~max范围内。</p>
-<h4 id="声明内核参数"><a href="#声明内核参数" class="headerlink" title="声明内核参数"></a>声明内核参数</h4><p>用于TCP的内核参数在source/include/net/tcp.h声明。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">/* 进入tcp.h文件可以看到大量的变量声明，这里只列出上文提及到的两个变量 */</div><div class="line">...</div><div class="line">extern int sysctl_tcp_vegas_alpha;</div><div class="line">extern int sysctl_tcp_vegas_beta</div><div class="line">...</div></pre></td></tr></table></figure></p>
-<h4 id="定义内核参数"><a href="#定义内核参数" class="headerlink" title="定义内核参数"></a>定义内核参数</h4><p>内核参数的定义可能在不同的文件中，这个根据内核参数的用途而定。<br>systcl_tcp_vegas_alpha和sysctl_tcp_vegas_beta这两个变量的定义位置：<br>source/net/ipv4/tcp_retrans.c<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">int sysctl_tcp_vegas_alpha = 2;</div><div class="line">int sysctl_tcp_vegas_beta = 4;</div></pre></td></tr></table></figure></p>
-<p>经过上面这些步奏，内核参数就添加成功了，但我们编译重启系统后，就会发现在目录：<br>/proc/sys/net/ipv4/下有两个文件分别是tcp_vegas_alpha和tcp_vegas_beta，以后就可以通过echo命令动态修改这两个值了。</p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;&amp;emsp;&amp;emsp;在Linux系统下，使用sysctl命令可以查看和修改系统参数，但是如果想要添加一个系统参数应该怎么办呢？这篇博客的目的就是要来说这个事的。添加一个系统参数是一件很麻烦的事，大多时候是用来做测试用。&lt;br&gt;
-    
-    </summary>
-    
-      <category term="TCP/IP" scheme="http://yoursite.com/categories/TCP-IP/"/>
-    
-    
-  </entry>
+
+
+
+
+
+
+
+
+
+
+
+
   
-</feed>
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+  
+    <script type="text/javascript">
+    (function(){
+      var appid = 'cyt0MsHAj';
+      var conf = '66bcfe1dd2d805358cdeacd4effb7088';
+      var width = window.innerWidth || document.documentElement.clientWidth;
+      if (width < 960) {
+      window.document.write('<script id="changyan_mobile_js" charset="utf-8" type="text/javascript" src="https://changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf + '"><\/script>'); } else { var loadJs=function(d,a){var c=document.getElementsByTagName("head")[0]||document.head||document.documentElement;var b=document.createElement("script");b.setAttribute("type","text/javascript");b.setAttribute("charset","UTF-8");b.setAttribute("src",d);if(typeof a==="function"){if(window.attachEvent){b.onreadystatechange=function(){var e=b.readyState;if(e==="loaded"||e==="complete"){b.onreadystatechange=null;a()}}}else{b.onload=a}}c.appendChild(b)};loadJs("https://changyan.sohu.com/upload/changyan.js",function(){
+        window.changyan.api.config({appid:appid,conf:conf})});
+      }
+    })();
+    </script>
+    <script type="text/javascript" src="https://assets.changyan.sohu.com/upload/plugins/plugins.count.js"></script>
+  
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>
