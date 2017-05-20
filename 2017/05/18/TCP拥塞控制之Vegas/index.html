@@ -83,8 +83,6 @@
 
 
 
-  
-
 
   <link rel="alternate" href="/atom.xml" title="凡是过去 皆为序曲" type="application/atom+xml" />
 
@@ -101,7 +99,7 @@
 <meta name="description" content="&amp;emsp;&amp;emsp;vegas是一种主动调整cwnd的拥塞控制算法，主要思想是设置两个阈值,alpha和beta,然后通过计算目标速率(Expected)和实际速率(Actual)差(diff)，再比较diff与alpha和beta的关系，对cwnd进行调节。vegas这篇paper的主要贡献是提供了一种拥塞检测的方法。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="TCP拥塞算法之：Vegas">
-<meta property="og:url" content="http://yoursite.com/2017/05/18/TCP拥塞算法之Vegas/index.html">
+<meta property="og:url" content="http://yoursite.com/2017/05/18/TCP拥塞控制之Vegas/index.html">
 <meta property="og:site_name" content="凡是过去 皆为序曲">
 <meta property="og:description" content="&amp;emsp;&amp;emsp;vegas是一种主动调整cwnd的拥塞控制算法，主要思想是设置两个阈值,alpha和beta,然后通过计算目标速率(Expected)和实际速率(Actual)差(diff)，再比较diff与alpha和beta的关系，对cwnd进行调节。vegas这篇paper的主要贡献是提供了一种拥塞检测的方法。">
 <meta property="og:updated_time" content="2017-05-17T17:13:55.975Z">
@@ -135,7 +133,7 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2017/05/18/TCP拥塞算法之Vegas/"/>
+  <link rel="canonical" href="http://yoursite.com/2017/05/18/TCP拥塞控制之Vegas/"/>
 
 
 
@@ -281,7 +279,7 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/05/18/TCP拥塞算法之Vegas/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/05/18/TCP拥塞控制之Vegas/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="kevin">
@@ -352,8 +350,8 @@
                 <i class="fa fa-comment-o"></i>
               </span>
               
-                <a href="/2017/05/18/TCP拥塞算法之Vegas/#SOHUCS" itemprop="discussionUrl">
-                  <span id="changyan_count_unit" class="post-comments-count hc-comment-count" data-xid="2017/05/18/TCP拥塞算法之Vegas/" itemprop="commentsCount"></span>
+                <a href="/2017/05/18/TCP拥塞控制之Vegas/#SOHUCS" itemprop="discussionUrl">
+                  <span id="changyan_count_unit" class="post-comments-count hc-comment-count" data-xid="2017/05/18/TCP拥塞控制之Vegas/" itemprop="commentsCount"></span>
                 </a>
               
             
@@ -436,6 +434,10 @@ beta = 4;
 
           <div class="post-nav-prev post-nav-item">
             
+              <a href="/2017/05/18/TCP拥塞控制之FASTTCP/" rel="prev" title="TCP拥塞控制之：FAST TCP">
+                TCP拥塞控制之：FAST TCP <i class="fa fa-chevron-right"></i>
+              </a>
+            
           </div>
         </div>
       
@@ -508,7 +510,7 @@ beta = 4;
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">5</span>
+                <span class="site-state-item-count">6</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
