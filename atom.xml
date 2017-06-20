@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2017-05-20T06:15:57.596Z</updated>
+  <updated>2017-06-20T12:50:18.346Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -16,11 +16,48 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>TCP拥塞控制之：BBR</title>
+    <link href="http://yoursite.com/2017/05/25/TCP%E6%8B%A5%E5%A1%9E%E6%8E%A7%E5%88%B6%E4%B9%8BBBR/"/>
+    <id>http://yoursite.com/2017/05/25/TCP拥塞控制之BBR/</id>
+    <published>2017-05-25T06:49:05.000Z</published>
+    <updated>2017-06-20T12:50:18.346Z</updated>
+    
+    <content type="html"><![CDATA[<p>&emsp;&emsp;BBR是Google在2016年提出的一种拥塞控制算法，在Linux kernel@4.9及以后的版本中已添加该算法。在Googele通过paper将BBR公布前，BBR算法应该在Google自家World Area Network中早已投入使用。Google后来提出基于SDN的B4网络（paper叫做B4，很有名的一篇paper），其拥塞控制算法也是使用的BBR。<br><a id="more"></a><br>&emsp;&emsp;丢包即拥塞的思想已经沿用了很多年，很多拥塞控制算法也是基于此的，比如当前Linux kernel的默认拥塞控制算法CUBIC，还有Reno和FAST TCP等，都是基于这一思想进行的拥塞控制。在技术受限的年代，这一思想（丢包即拥塞）没有错，但是，现在，当NIC（network interface controllers）的处理能力从Mbps升级到Gpbs，memory chips从KB升级到GB，拥塞和丢包的关系就没那么紧密了。<br>&emsp;&emsp;在现在high BDP网络环境下，丢包即拥塞思想带来的问题包括：当因为bottelneck buffers满而出现丢包时，会引起bufferbloat现象，网络延迟高；但是，当bottleneck buffers很小时，这时出现丢包，网络会误认为是发生了拥塞，从而降低发送窗口，这样就会造成low throughput。想要解决上面的问题，那么就需要抛弃基于丢包的拥塞控制思想，换个新的。</p>
+<p><img src="../../../../pictures/paper read/20170525154759.png" alt=""><br>&emsp;&emsp;上图其实是两个图，只不过有共同的横坐标，想当初弱智的我看了半天，才明白这是两个图。图中的一些符号解释如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">RTprop = round-trip propagation</div><div class="line">BtlBw = bottleneck bandwidth</div><div class="line">blue lines show the RTprop constraint;</div><div class="line">green lines show the BtlBw constraint;</div><div class="line">red lines show the bottleneck buffer;</div></pre></td></tr></table></figure></p>
+<p>基于丢包的拥塞控制如图中指出的那样，其作用域在bandwidth limited，这时bottleneck buffers慢慢被填满，最后导致buffer溢出，出现丢包。在早前，memory价格较贵时，buffer sizes约等于一个link BDP，现在由于技术的进步，memory价格一直下降，buffer sizes越来越大，都快高出link BDP一个数量级。这样，delay也由以前的milliseconds升到了seconds，自然也带来了bufferbloat（缓冲区爆满，排队延迟影响网络整体性能）。其实之前有paper专门针对bottelneck buffer设置为多大给出了其研究结果，等于一个link BDP是最好的。</p>
+<h3 id="Characterizing-the-bottleneck"><a href="#Characterizing-the-bottleneck" class="headerlink" title="Characterizing the bottleneck"></a>Characterizing the bottleneck</h3><p>&emsp;&emsp;要达到highest throughput和lowest delay，connection必须同时满足两个条件：</p>
+<blockquote>
+<ol>
+<li>the bottleneck packet arrival rate equals BtlBw;</li>
+<li>the total data in flight is equal to the BDP(BtlBw*Rtprop);</li>
+</ol>
+</blockquote>
+<p>第一个条件保证bottelneck被100%的利用，第二个条件防止bottleneck出现饥饿，但又不会溢出。<br>&emsp;&emsp;因为$BtlBw$和$PTprop$在整个过程中一直是变动的，所以需要一直不断的测量。在任何时刻$t$，<br>$$RTT_t = RTprop_t$ + \eta_t$<br>这里$\eta&gt;=0$表示‘noise’，比如接收端的延迟ack策略，ack aggregation策略等。因此$RTprop$是不可能准确测量的，只能估算，像大多数算法测量最小$RTT$做的那样：<br>$$\hat{RT}prop = RTprop + min(\eta_t) = min(RTT_t)$$<br>&emsp;&emsp;根据从receiver返回的ack，我们可以知道当前ack确认数据包的$RTT$和离开sender留存在网络中的确切数据包数。因为我们可以准确知道当前的发送序号snd_nxt，以及其确认序号snd_una，如果开启了SACK也可以准确知道，只不过需要walk一遍SACK段。这样我们便可以测量平均delivery rate:$deliveryRate = \deltadelivered/\deltat$。在这个过程中delivered是可以准确知道的，而\deltat则会大于真实interval，因为受网络噪声的影响，所以$delivery rate &lt;= bottleneck rate$，那么我们可以这样评估BtlBw:<br>$$\hat{BtlBw} = max(deliveryRate_t)$$</p>
+<h3 id="MATCHING-THE-PACKET-FLOW-TO-THE-DELIVERY-PATH"><a href="#MATCHING-THE-PACKET-FLOW-TO-THE-DELIVERY-PATH" class="headerlink" title="MATCHING THE PACKET FLOW TO THE DELIVERY PATH"></a>MATCHING THE PACKET FLOW TO THE DELIVERY PATH</h3><p>The core BBR algorithm has two parts:</p>
+<h4 id="When-an-ack-is-received"><a href="#When-an-ack-is-received" class="headerlink" title="When an ack is received"></a>When an ack is received</h4><p>&emsp;&emsp;每一个ack都会提供一个新的RTT和delivery rate值，用来更新$RTprop$和$BtlBw$，伪代码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">function onAck(packet)</div><div class="line">    rtt = now - packet.sendtime</div><div class="line">    update_min_filter(RTpropFilter, rtt)</div><div class="line">    delivery_time = now</div><div class="line">    deliveryRate = (delivered - packet.delivered)/(now - packet.delivered_time)</div><div class="line">    if (deliveryRate &gt; BtlBwFilter.curentMax || !packet.app_limited)</div><div class="line">        update_max_filter(BtlBwFilter, deliveryRate)</div><div class="line">    if (app_limited_until &gt; 0)</div><div class="line">        app_limited_until -= packet.size</div></pre></td></tr></table></figure></p>
+<p>&emsp;&emsp;在数据传输过程中，senders可能成为application limited，也就是application有机会发送更多的数据，但是没有数据可以发送，这是一个很普遍的现象。</p>
+<h4 id="When-data-is-sent"><a href="#When-data-is-sent" class="headerlink" title="When data is sent"></a>When data is sent</h4><p>&emsp;&emsp;为了使packet-arrival rate和bottleneck link’s departure rate相匹配，BBR必须paces每一个数据包。$pacing_rate$是BBR的主要控制参数，另外一个参数是$cwnd_gain$，用来限定inflight为小倍数的BDP，伪代码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">function send(packet)</div><div class="line">    bdp = BtlBwFilter.currentMax*RTpropFilter.currentMin</div><div class="line">    if (inflight &gt;= cwnd_gain*bdp)</div><div class="line">        //wait for ack or timeout</div><div class="line">        return</div><div class="line">    if (now &gt;= nextSendTime)</div><div class="line">        packet = nextPacketToSend()</div><div class="line">        if (!packet)</div><div class="line">            app_limited_until = inflight</div><div class="line">            return</div><div class="line">        packet.app_limited = (app_limited_until &gt; 0)</div><div class="line">        packet.sendtime = now</div><div class="line">        packet.delivered = delivered</div><div class="line">        packet.delivered_time = delivered_time</div><div class="line">        ship(packet)</div><div class="line">        nextSendTime = now + packet.size/(pacing_gain * BtlBwFilter.currentMax)</div><div class="line">    timerCallbackAt(send, nextSendTime)</div></pre></td></tr></table></figure></p>
+<h4 id="Steady-state-behavior"><a href="#Steady-state-behavior" class="headerlink" title="Steady-state behavior"></a>Steady-state behavior</h4><p>&emsp;&emsp;有上面可知，测量$BtlBw$和$RTprop$都有独立的函数去完成，在bottleneck的约束下会形成一个控制循环，那么带来的效果如下图所示：<br><img src="../../../../pictures/paper read/20170620164658.png" alt=""><br>图中蓝线是RTT， 绿线是inflight，红线代表delivery rate，delivery rate上方的粗灰线表示BtlBw max filter的状态。<br>&emsp;&emsp;BBR通过保证inflight大多数时候为一个BDP来最小化delay。这样bottleneck就被转移到了sender，因为sender看不到BtlBw的变化，因此BBR需要周期性的通过$pacing_gain &gt; 1$来测量BtlBw是否变化，当发现形成queueing delay时， 将pacing_gain设为小于1便可消除queueing delay。</p>
+<p><strong>总结</strong><br>&emsp;&emsp;其实BBR的思想和CUBIC相比很简单，其最终的效果据google自己说很好，本人没有实际跑过来和CUBIC、vegas、westwood等传统的拥塞控制算法做对比。不过各类拥塞控制算法都有其适用环境，具体看需求。</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;&amp;emsp;&amp;emsp;BBR是Google在2016年提出的一种拥塞控制算法，在Linux kernel@4.9及以后的版本中已添加该算法。在Googele通过paper将BBR公布前，BBR算法应该在Google自家World Area Network中早已投入使用。Google后来提出基于SDN的B4网络（paper叫做B4，很有名的一篇paper），其拥塞控制算法也是使用的BBR。&lt;br&gt;
+    
+    </summary>
+    
+      <category term="私人文献阅读" scheme="http://yoursite.com/categories/%E7%A7%81%E4%BA%BA%E6%96%87%E7%8C%AE%E9%98%85%E8%AF%BB/"/>
+    
+    
+  </entry>
+  
+  <entry>
     <title>TCP拥塞控制之：FAST TCP</title>
     <link href="http://yoursite.com/2017/05/18/TCP%E6%8B%A5%E5%A1%9E%E6%8E%A7%E5%88%B6%E4%B9%8BFASTTCP/"/>
     <id>http://yoursite.com/2017/05/18/TCP拥塞控制之FASTTCP/</id>
     <published>2017-05-18T11:11:52.000Z</published>
-    <updated>2017-05-20T06:15:57.596Z</updated>
+    <updated>2017-05-22T01:46:18.004Z</updated>
     
     <content type="html"><![CDATA[<p>&emsp;&emsp;经典的TCP拥塞控制算法TCP Reno从被提出后很长一段时间一直作为Linux kernel的默认算法，但随着Internet在规模、传输速度、负载、连接数上的增长，TCP Reno迟早会成为性能瓶颈。<br><a id="more"></a></p>
 <h3 id="问题与背景"><a href="#问题与背景" class="headerlink" title="问题与背景"></a>问题与背景</h3><p>&emsp;&emsp;当前的Linux kernel的默认拥塞控制算法是于2008年提出的CUBIC，本文介绍的FAST TCP算法于2004年被提出，主要针对高速和长延迟网络，虽然有点老，但还是可以了解了解的。原文主要是和TCP Reno作比较，所以提出的问题也是针对TCP Reno的（时代所限制，如果是现在提出的算法多半是要和CUBIC作比较的）。</p>
@@ -53,7 +90,7 @@
     
     </summary>
     
-      <category term="TCP/IP" scheme="http://yoursite.com/categories/TCP-IP/"/>
+      <category term="私人文献阅读" scheme="http://yoursite.com/categories/%E7%A7%81%E4%BA%BA%E6%96%87%E7%8C%AE%E9%98%85%E8%AF%BB/"/>
     
     
   </entry>
