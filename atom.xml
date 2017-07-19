@@ -226,10 +226,10 @@ beta = 4;
   
   <entry>
     <title>TCP重点系列之拥塞状态机</title>
-    <link href="http://yoursite.com/2017/03/19/TCP%E9%87%8D%E7%82%B9%E7%B3%BB%E5%88%97%E4%B9%8B%E7%8A%B6%E6%80%81%E4%BB%8B%E7%BB%8D/"/>
-    <id>http://yoursite.com/2017/03/19/TCP重点系列之状态介绍/</id>
-    <published>2017-03-19T14:47:30.000Z</published>
-    <updated>2017-07-19T12:35:58.877Z</updated>
+    <link href="http://yoursite.com/2017/04/19/TCP%E9%87%8D%E7%82%B9%E7%B3%BB%E5%88%97%E4%B9%8B%E6%8B%A5%E5%A1%9E%E7%8A%B6%E6%80%81%E6%9C%BA/"/>
+    <id>http://yoursite.com/2017/04/19/TCP重点系列之拥塞状态机/</id>
+    <published>2017-04-19T14:47:30.000Z</published>
+    <updated>2017-07-19T12:39:42.358Z</updated>
     
     <content type="html"><![CDATA[<p>这篇博客主要介绍TCP拥塞状态(state)在不同场景的转换及通过flag怎么识别是正常的ACK还是SACK，这一块知识比较杂乱，仔细看这部分内容，还是因为研究timeout问题需要。<br><a id="more"></a></p>
 <h4 id="state"><a href="#state" class="headerlink" title="state"></a>state</h4><p>当sender收到一个ack时，Linux TCP通过状态机(state)来决定发送行为，是应该降低cwnd呢，还是保持cwnd不变，还是继续增加cwnd，这很重要。如果处理不当，可能会导致丢包或者timeout。<br>主要有五种状态，分别是：Open，Disorder，CWR，Recovery和Loss，下面对这五种状态做一个简要介绍，英文部分摘自这篇文章<a href="https://pdfs.semanticscholar.org/0e9c/968d09ab2e53e24c4dca5b2d67c7f7140f8e.pdf" target="_blank" rel="external">Congestion Control in Linux TCP</a>，有兴趣的话可以下载下来读读。</p>

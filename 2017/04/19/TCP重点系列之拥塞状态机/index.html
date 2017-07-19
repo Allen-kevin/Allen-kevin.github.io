@@ -99,11 +99,11 @@
 <meta name="description" content="这篇博客主要介绍TCP拥塞状态(state)在不同场景的转换及通过flag怎么识别是正常的ACK还是SACK，这一块知识比较杂乱，仔细看这部分内容，还是因为研究timeout问题需要。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="TCP重点系列之拥塞状态机">
-<meta property="og:url" content="http://yoursite.com/2017/03/19/TCP重点系列之状态介绍/index.html">
+<meta property="og:url" content="http://yoursite.com/2017/04/19/TCP重点系列之拥塞状态机/index.html">
 <meta property="og:site_name" content="凡是过去 皆为序曲">
 <meta property="og:description" content="这篇博客主要介绍TCP拥塞状态(state)在不同场景的转换及通过flag怎么识别是正常的ACK还是SACK，这一块知识比较杂乱，仔细看这部分内容，还是因为研究timeout问题需要。">
 <meta property="og:image" content="http://yoursite.com/pictures/state/20170719170346.png">
-<meta property="og:updated_time" content="2017-07-19T12:35:58.877Z">
+<meta property="og:updated_time" content="2017-07-19T12:39:42.358Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="TCP重点系列之拥塞状态机">
 <meta name="twitter:description" content="这篇博客主要介绍TCP拥塞状态(state)在不同场景的转换及通过flag怎么识别是正常的ACK还是SACK，这一块知识比较杂乱，仔细看这部分内容，还是因为研究timeout问题需要。">
@@ -135,7 +135,7 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2017/03/19/TCP重点系列之状态介绍/"/>
+  <link rel="canonical" href="http://yoursite.com/2017/04/19/TCP重点系列之拥塞状态机/"/>
 
 
 
@@ -281,7 +281,7 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/03/19/TCP重点系列之状态介绍/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/04/19/TCP重点系列之拥塞状态机/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="kevin">
@@ -310,8 +310,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-03-19T22:47:30+08:00">
-                2017-03-19
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-04-19T22:47:30+08:00">
+                2017-04-19
               </time>
             
 
@@ -352,8 +352,8 @@
                 <i class="fa fa-comment-o"></i>
               </span>
               
-                <a href="/2017/03/19/TCP重点系列之状态介绍/#SOHUCS" itemprop="discussionUrl">
-                  <span id="changyan_count_unit" class="post-comments-count hc-comment-count" data-xid="2017/03/19/TCP重点系列之状态介绍/" itemprop="commentsCount"></span>
+                <a href="/2017/04/19/TCP重点系列之拥塞状态机/#SOHUCS" itemprop="discussionUrl">
+                  <span id="changyan_count_unit" class="post-comments-count hc-comment-count" data-xid="2017/04/19/TCP重点系列之拥塞状态机/" itemprop="commentsCount"></span>
                 </a>
               
             
