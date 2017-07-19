@@ -526,7 +526,7 @@
 
       
         
-          <p>&emsp;&emsp;BBR是Google在2016年提出的一种拥塞控制算法，在Linux kernel@4.9及以后的版本中已添加该算法。在Googele通过paper将BBR公布前，BBR算法应该在Google自家World Area Network中早已投入使用。Google后来提出基于SDN的B4网络（paper叫做B4，很有名的一篇paper），其拥塞控制算法也是使用的BBR。<br>
+          <p>&emsp;&emsp;BBR是Google在2016年提出的一种拥塞控制算法，在Linux kernel@4.9及以后的版本中已添加该算法。在Google通过paper将BBR公布前，BBR算法应该在Google自家World Area Network中早已投入使用。Google后来提出基于SDN的B4网络（paper叫做B4，很有名的一篇paper），其拥塞控制算法也是使用的BBR。<br>
           <!--noindex-->
           <div class="post-button text-center">
             <a class="btn" href="/2017/05/25/TCP拥塞控制之BBR/#more" rel="contents">
@@ -1469,6 +1469,155 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/02/19/TCP重点系列之状态介绍/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="kevin">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="凡是过去 皆为序曲">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/02/19/TCP重点系列之状态介绍/" itemprop="url">TCP重点系列之拥塞状态机状态介绍</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-02-19T22:47:30+08:00">
+                2017-02-19
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/TCP-IP/" itemprop="url" rel="index">
+                    <span itemprop="name">TCP/IP</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+              <span class="post-meta-divider">|</span>
+              <span class="post-meta-item-icon">
+                <i class="fa fa-comment-o"></i>
+              </span>
+              
+                <a href="/2017/02/19/TCP重点系列之状态介绍/#SOHUCS" itemprop="discussionUrl">
+                  <span id="url::http://yoursite.com/2017/02/19/TCP重点系列之状态介绍/" class="cy_cmt_count" data-xid="2017/02/19/TCP重点系列之状态介绍/" itemprop="commentsCount" ></span>
+                </a>
+              
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body han-init-context" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>这篇博客主要介绍TCP拥塞状态(state)在不同场景的转换及通过flag怎么识别是正常的ACK还是SACK，这一块知识比较杂乱，仔细看这部分内容，还是因为研究timeout问题需要。<br>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/02/19/TCP重点系列之状态介绍/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/02/14/TCP重点系列之快速重传/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1609,155 +1758,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/01/15/UNIX环境高级编程（第三版）头文件“apue.h”问题/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="kevin">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="凡是过去 皆为序曲">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/01/15/UNIX环境高级编程（第三版）头文件“apue.h”问题/" itemprop="url">UNIX环境高级编程（第三版）头文件"apue.h"问题</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-01-15T09:39:01+08:00">
-                2017-01-15
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/UNIX-LINUX/" itemprop="url" rel="index">
-                    <span itemprop="name">UNIX/LINUX</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-              <span class="post-meta-divider">|</span>
-              <span class="post-meta-item-icon">
-                <i class="fa fa-comment-o"></i>
-              </span>
-              
-                <a href="/2017/01/15/UNIX环境高级编程（第三版）头文件“apue.h”问题/#SOHUCS" itemprop="discussionUrl">
-                  <span id="url::http://yoursite.com/2017/01/15/UNIX环境高级编程（第三版）头文件“apue.h”问题/" class="cy_cmt_count" data-xid="2017/01/15/UNIX环境高级编程（第三版）头文件“apue.h”问题/" itemprop="commentsCount" ></span>
-                </a>
-              
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    <div class="post-body han-init-context" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>&emsp;&emsp;初次学UNIX环境高级编程（第三版）都会遇到头文件”apue.h”怎么添加的问题，这里说下从下载源码到编译通过的整个过程。当然在编译中会遇到各种error，本人也踩了好几个坑，好在都解决了。<br>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2017/01/15/UNIX环境高级编程（第三版）头文件“apue.h”问题/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -1807,7 +1807,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">11</span>
+                <span class="site-state-item-count">12</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
