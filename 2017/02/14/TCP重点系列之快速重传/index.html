@@ -1,0 +1,783 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+  
+  
+  <link rel="stylesheet" media="all" href="/lib/Han/dist/han.min.css?v=3.3">
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="凡是过去 皆为序曲" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.1" />
+
+
+
+
+
+
+<meta name="description" content="本文主要分析在TCP拥塞状态机的实现中，丢包后进入快速重传时，主要函数tcp_fastretrans_alert()的实现，及对一些相关函数也做了介绍。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="TCP重点系列之快速重传tcp_fastretrans_alert">
+<meta property="og:url" content="http://yoursite.com/2017/02/14/TCP重点系列之快速重传/index.html">
+<meta property="og:site_name" content="凡是过去 皆为序曲">
+<meta property="og:description" content="本文主要分析在TCP拥塞状态机的实现中，丢包后进入快速重传时，主要函数tcp_fastretrans_alert()的实现，及对一些相关函数也做了介绍。">
+<meta property="og:updated_time" content="2017-07-19T01:57:07.018Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="TCP重点系列之快速重传tcp_fastretrans_alert">
+<meta name="twitter:description" content="本文主要分析在TCP拥塞状态机的实现中，丢包后进入快速重传时，主要函数tcp_fastretrans_alert()的实现，及对一些相关函数也做了介绍。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2017/02/14/TCP重点系列之快速重传/"/>
+
+
+
+
+
+  <title>TCP重点系列之快速重传tcp_fastretrans_alert | 凡是过去 皆为序曲</title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">凡是过去 皆为序曲</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archives"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-commonweal">
+          <a href="/404.html" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-heartbeat"></i> <br />
+            
+            公益404
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/02/14/TCP重点系列之快速重传/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="kevin">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="凡是过去 皆为序曲">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">TCP重点系列之快速重传tcp_fastretrans_alert</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-02-14T11:11:15+08:00">
+                2017-02-14
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/TCP-IP/" itemprop="url" rel="index">
+                    <span itemprop="name">TCP/IP</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+              <span class="post-meta-divider">|</span>
+              <span class="post-meta-item-icon">
+                <i class="fa fa-comment-o"></i>
+              </span>
+              
+                <a href="/2017/02/14/TCP重点系列之快速重传/#SOHUCS" itemprop="discussionUrl">
+                  <span id="changyan_count_unit" class="post-comments-count hc-comment-count" data-xid="2017/02/14/TCP重点系列之快速重传/" itemprop="commentsCount"></span>
+                </a>
+              
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body han-init-context" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>本文主要分析在TCP拥塞状态机的实现中，丢包后进入快速重传时，主要函数tcp_fastretrans_alert()的实现，及对一些相关函数也做了介绍。<br><a id="more"></a></p>
+<h4 id="变量介绍"><a href="#变量介绍" class="headerlink" title="变量介绍"></a>变量介绍</h4><p>@kernel version 4.10.13 /include/net/tcp.h<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">u32 packets_out; /* 表示离开网络但没被确认的包 */</div><div class="line">u32 sacked_out; </div><div class="line">/* Packets, which arrived to receiver out of order and hence not ACKed.</div><div class="line"> * With SACK this number is simply amount of SACKed data. Even withou</div><div class="line"> * SACKs it is easy to give pretty reliable estimate of this number, counting</div><div class="line"> * duplicate ACKs.</div><div class="line"> * 上面是sacked_out的英文解释，其实应该分两种情况来看，开和没开SACK选项：</div><div class="line"> * 如果开了SACK选项，那么这个值无疑就是表示被SACK的乱序包的个数，</div><div class="line"> * 如果没开SACK选项，那么该值就是表示dupack的个数。具体可参考tcp_add_reno_sack()函数相关代码.</div><div class="line"> */</div><div class="line">u32 fackets_out;/* SACK数和丢失包的总和，fackets_out = lost_out + sacked_out */</div></pre></td></tr></table></figure></p>
+<h4 id="tcp-fastretrans-alert-函数被调用条件"><a href="#tcp-fastretrans-alert-函数被调用条件" class="headerlink" title="tcp_fastretrans_alert()函数被调用条件"></a>tcp_fastretrans_alert()函数被调用条件</h4><p>(1) 每一个到来的ACK，其状态不是Open.<br>(2) ACK不是普通ack，即是：<br>    SACK，<br>    Duplicate ACK，<br>    ECE ECN</p>
+<h4 id="tcp-fastretrans-alert-函数实现细节"><a href="#tcp-fastretrans-alert-函数实现细节" class="headerlink" title="tcp_fastretrans_alert()函数实现细节"></a>tcp_fastretrans_alert()函数实现细节</h4><p>@kernel version 4.10.13 /net/ipv4/tcp_input.c<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div><div class="line">126</div><div class="line">127</div><div class="line">128</div><div class="line">129</div><div class="line">130</div><div class="line">131</div><div class="line">132</div><div class="line">133</div><div class="line">134</div><div class="line">135</div><div class="line">136</div><div class="line">137</div><div class="line">138</div></pre></td><td class="code"><pre><div class="line">static void tcp_fastretrans_alert(struct sock *sk, int pkts_acked,</div><div class="line">                   bool is_dupack, int *ack_flag, int *rexmit)</div><div class="line">&#123;</div><div class="line">    struct inet_connection_sock *icsk = inet_csk(sk);</div><div class="line">    struct tcp_sock *tp = tcp_sk(sk);</div><div class="line">    int fast_rexmit = 0, flag = *ack_flag;</div><div class="line">    /* is_dupack表示重复ack，FLAG_DATA_SACKED表示SACK中添加了新的数据*/</div><div class="line">    int do_lost = is_dupack || ((flag &amp; FLAG_DATA_SACKED) &amp;&amp;</div><div class="line">                    (tcp_fackets_out(tp) &gt; tp-&gt;reordering));</div><div class="line"></div><div class="line">    /* 如果packets_out为0，但sacked_out不为0，那么sacked_out应改为0 */</div><div class="line">    if (WARN_ON(!tp-&gt;packets_out &amp;&amp; tp-&gt;sacked_out))</div><div class="line">        tp-&gt;sacked_out = 0; </div><div class="line">    /* 如果sacked_out为0， 那么fackets_out应为0 */</div><div class="line">    if (WARN_ON(!tp-&gt;sacked_out &amp;&amp; tp-&gt;fackets_out))</div><div class="line">        tp-&gt;fackets_out = 0; </div><div class="line"></div><div class="line">    /* Now state machine starts.</div><div class="line">     * A. ECE, hence prohibit cwnd undoing, the reduction is required. </div><div class="line">     * 禁止cwnd撤销，并减小cwnd.</div><div class="line">     */</div><div class="line">    if (flag &amp; FLAG_ECE)</div><div class="line">        tp-&gt;prior_ssthresh = 0; </div><div class="line"></div><div class="line">    /* B. In all the states check for reneging SACKs.</div><div class="line">     * 检查是否为虚假SACK，虚假SACK是指：最新收到的ACK的ack_seq指向已记录的SACK</div><div class="line">     * 块，这说明记录的SACK并没有反应接收方的真实的状态.</div><div class="line">     */</div><div class="line">    if (tcp_check_sack_reneging(sk, flag))</div><div class="line">        return;</div><div class="line"></div><div class="line">    /* C. Check consistency of the current state. </div><div class="line">     * 丢失的包应该比发送出去的包少，即left_out &lt; packets_out.</div><div class="line">     */</div><div class="line">    tcp_verify_left_out(tp);</div><div class="line"></div><div class="line">    /* D. Check state exit conditions. State can be terminated</div><div class="line">     *    when high_seq is ACKed. </div><div class="line">     * 如果state = TCP_CA_Open，就不应该有重传包.</div><div class="line">     */</div><div class="line">    if (icsk-&gt;icsk_ca_state == TCP_CA_Open) &#123;</div><div class="line">        WARN_ON(tp-&gt;retrans_out != 0);</div><div class="line">        tp-&gt;retrans_stamp = 0; //将重传发送时间置0.</div><div class="line">        /* 如果snd_una &gt;= high_seq，state接下来应该从其他状态返回到Open状态 */</div><div class="line">    &#125; else if (!before(tp-&gt;snd_una, tp-&gt;high_seq)) &#123;</div><div class="line">        /* state的几种不同值表示网络处在不同的状态，在这篇blog[]()中有详细介绍. */</div><div class="line">        switch (icsk-&gt;icsk_ca_state) &#123;</div><div class="line">        case TCP_CA_CWR:</div><div class="line">            /* CWR is to be held something *above* high_seq</div><div class="line">             * is ACKed for CWR bit to reach receiver. */</div><div class="line">             /* 如果snd_una &gt; high_seq，结束快速重传，返回Open状态 */</div><div class="line">            if (tp-&gt;snd_una != tp-&gt;high_seq) &#123;</div><div class="line">                tcp_end_cwnd_reduction(sk);</div><div class="line">                tcp_set_ca_state(sk, TCP_CA_Open);</div><div class="line">            &#125;</div><div class="line">            break;</div><div class="line"></div><div class="line">        case TCP_CA_Recovery:</div><div class="line">            if (tcp_is_reno(tp)) /* 不是sack */</div><div class="line">                tcp_reset_reno_sack(tp); /* 重置sack_out = 0 */</div><div class="line">            if (tcp_try_undo_recovery(sk)) /* 尝试撤销 */</div><div class="line">                return;</div><div class="line">            /* 结束快速重传 */    </div><div class="line">            tcp_end_cwnd_reduction(sk);</div><div class="line">            break;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    if (sysctl_tcp_recovery &amp; TCP_RACK_LOST_RETRANS &amp;&amp; tcp_rack_mark_(sk)) &#123;</div><div class="line">        flag |= FLAG_LOST_RETRANS;</div><div class="line">        *ack_flag |= FLAG_LOST_RETRANS;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    /* 非正常ack处理情况 */</div><div class="line">    /* E. Process state. */</div><div class="line">    switch (icsk-&gt;icsk_ca_state) &#123;</div><div class="line">    case TCP_CA_Recovery:</div><div class="line">        /* FLAG_SND_UNA_ADVANCED表示snd_una更新了 */</div><div class="line">        if (!(flag &amp; FLAG_SND_UNA_ADVANCED)) &#123;</div><div class="line">            /* 不是sack，是一个dupack则增加sacked_out */</div><div class="line">            if (tcp_is_reno(tp) &amp;&amp; is_dupack)</div><div class="line">                tcp_add_reno_sack(sk);</div><div class="line">        &#125; else &#123;</div><div class="line">            if (tcp_try_undo_partial(sk, acked))</div><div class="line">                do_lost = tcp_is_reno(tp) || </div><div class="line">                    tcp_fackets_out(tp) &gt; tp-&gt;reordering;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        if (tcp_try_undo_dsack(sk)) &#123;</div><div class="line">            tcp_try_keep_open(sk);</div><div class="line">            return;</div><div class="line">        &#125;</div><div class="line">        break;</div><div class="line">        /* timeout后的处理*/</div><div class="line">    case TCP_CA_Loss:</div><div class="line">        tcp_process_loss(sk, flag, is_dupack, rexmit);</div><div class="line">        if (icsk-&gt;icsk_ca_state != TCP_CA_Open &amp;&amp; !(flag &amp; FLAG_LOST_RETRANS))</div><div class="line">            return;</div><div class="line">        /* Fall through to processing in Open state. */</div><div class="line">    default:</div><div class="line">        if (tcp_is_reno(tp)) &#123;</div><div class="line">            if (flag &amp; FLAG_SND_UNA_ADVANCED)</div><div class="line">                tcp_reset_reno_sack(tp); /* 重置sacked_out = 0 */</div><div class="line">            if (is_dupack)</div><div class="line">                tcp_add_reno_sack(sk);</div><div class="line">        &#125;</div><div class="line">    </div><div class="line">        if (icsk-&gt;icsk_ca_state &lt;= TCP_CA_Disorder)</div><div class="line">            tcp_try_undo_dsack(sk);</div><div class="line"></div><div class="line">        if (!tcp_time_to_recover(sk, flag)) &#123;</div><div class="line">            tcp_try_to_open(sk, flag);</div><div class="line">            return;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        /* MTU probe failure: don&apos;t reduce cwnd */</div><div class="line">        if (icsk-&gt;icsk_ca_state &lt; TCP_CA_CWR &amp;&amp;</div><div class="line">            icsk-&gt;icsk_mtup.probe_size &amp;&amp;</div><div class="line">            tp-&gt;snd_una == tp-&gt;mtu_probe.probe_seq_start) &#123;</div><div class="line">            tcp_mtup_probe_failed(sk);</div><div class="line">            /* Restores the reduction we did in tcp_mtup_probe() */</div><div class="line">            tp-&gt;snd_cwnd++;</div><div class="line">            tcp_simple_retransmit(sk);/* 做一个简单的转发，而不使用回退机制 */</div><div class="line">            return;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        /* Otherwise enter Recovery state */</div><div class="line">        tcp_enter_recovery(sk, (flag &amp; FLAG_ECE)); /* 进入恢复状态 */</div><div class="line">        fast_rexmit = 1;/* 快速重传标志 */</div><div class="line">    &#125;</div><div class="line">    /* 打上lost标志 */</div><div class="line">    if (do_lost) &#123;</div><div class="line">        /* 更新记分牌，标记丢失和超时的数据包 */</div><div class="line">        tcp_update_scoreboard(sk, fast_rexmit);</div><div class="line">    &#125;</div><div class="line">    /* 重传有lost标志的包 */</div><div class="line">    tcp_xmit_retransmit_queue(sk);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h4 id="tcp-add-reno-sack-函数"><a href="#tcp-add-reno-sack-函数" class="headerlink" title="tcp_add_reno_sack()函数"></a>tcp_add_reno_sack()函数</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">/* Emulate SACKs for SACKless connection: account for a new dupack. */</div><div class="line"></div><div class="line">static void tcp_add_reno_sack(struct sock *sk)</div><div class="line">&#123;</div><div class="line">    struct tcp_sock *tp = tcp_sk(sk);</div><div class="line">    u32 prior_sacked = tp-&gt;sacked_out;</div><div class="line"></div><div class="line">    tp-&gt;sacked_out++; /* 收到重复ack，sacked_out++*/</div><div class="line">    /* 检查乱序情况，该函数具体定义在下面介绍 */</div><div class="line">    tcp_check_reno_reordering(sk, 0); </div><div class="line">    if (tp-&gt;sacked_out &gt; prior_sacked)</div><div class="line">        /* some out_of-order packet is delivered. */</div><div class="line">        tp-&gt;delivered++; </div><div class="line">    tcp_verify_left_out(tp);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h4 id="tcp-check-reno-reordering-函数"><a href="#tcp-check-reno-reordering-函数" class="headerlink" title="tcp_check_reno_reordering()函数"></a>tcp_check_reno_reordering()函数</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">/* If we receive more dupacks than we expected counting segments</div><div class="line"> * in assumption of absent reordering, interpret this as reordering.</div><div class="line"> * The only another reason could be bug in receiver TCP.</div><div class="line"> */</div><div class="line">static void tcp_check_reno_reordering(struct sock *sk, const int addend)</div><div class="line">&#123;</div><div class="line">    struct tcp_sock *tp = tcp_sk(sk);</div><div class="line">    /* 检查sack的数量是否超过了限度，是则更新reordering */</div><div class="line">    if (tcp_limit_reno_sacked(tp))</div><div class="line">        tcp_update_reordering(sk, tp-&gt;packets_out + addend, 0);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h4 id="tcp-limit-reno-sacked-函数"><a href="#tcp-limit-reno-sacked-函数" class="headerlink" title="tcp_limit_reno_sacked()函数"></a>tcp_limit_reno_sacked()函数</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">/* Limits sacked_out so that sum with lost_out isn&apos;t ever larger than</div><div class="line"> * packets_out. Returns false if sacked_out adjustement wasn&apos;t necessary.</div><div class="line"> */</div><div class="line">static bool tcp_limit_reno_sacked(struct tcp_sock *tp) </div><div class="line">&#123;</div><div class="line">    u32 holes;</div><div class="line"></div><div class="line">    holes = max(tp-&gt;lost_out, 1U); </div><div class="line">    holes = min(holes, tp-&gt;packets_out);</div><div class="line"></div><div class="line">    if ((tp-&gt;sacked_out + holes) &gt; tp-&gt;packets_out) &#123;</div><div class="line">        tp-&gt;sacked_out = tp-&gt;packets_out - holes;</div><div class="line">        return true;</div><div class="line">    &#125;    </div><div class="line">    return false;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h4 id="tcp-update-scoreboard-函数"><a href="#tcp-update-scoreboard-函数" class="headerlink" title="tcp_update_scoreboard()函数"></a>tcp_update_scoreboard()函数</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">/* Account newly detected lost packet(s) */</div><div class="line">static void tcp_update_scoreboard(struct sock *sk, int fast_rexmit)</div><div class="line">&#123;</div><div class="line">    struct tcp_sock *tp = tcp_sk(sk);</div><div class="line"></div><div class="line">    if (tcp_is_reno(tp)) &#123;/* 不是SACK */</div><div class="line">        tcp_mark_head_lost(sk, 1, 1);/* 标记一个丢失 */</div><div class="line">    &#125; else if (tcp_is_fack(tp)) &#123;/* 如果是fack */</div><div class="line">        int lost = tp-&gt;fackets_out - tp-&gt;reordering;/* 计算所有的丢包数 */</div><div class="line">        if (lost &lt;= 0)</div><div class="line">            lost = 1; </div><div class="line">        tcp_mark_head_lost(sk, lost, 0);/* 给所有丢包打标记 */</div><div class="line">    &#125; else &#123;/* 是一个简单的sack */</div><div class="line">        int sacked_upto = tp-&gt;sacked_out - tp-&gt;reordering;</div><div class="line">        if (sacked_upto &gt;= 0)</div><div class="line">            tcp_mark_head_lost(sk, sacked_upto, 0);</div><div class="line">        else if (fast_rexmit)</div><div class="line">            tcp_mark_head_lost(sk, 1, 1);</div><div class="line">    &#125;    </div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h4 id="tcp-mark-head-lost-函数"><a href="#tcp-mark-head-lost-函数" class="headerlink" title="tcp_mark_head_lost()函数"></a>tcp_mark_head_lost()函数</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div></pre></td><td class="code"><pre><div class="line">* Detect loss in event &quot;A&quot; above by marking head of queue up as lost.</div><div class="line"> * For FACK or non-SACK(Reno) senders, the first &quot;packets&quot; number of segments</div><div class="line"> * are considered lost. For RFC3517 SACK, a segment is considered lost if it</div><div class="line"> * has at least tp-&gt;reordering SACKed seqments above it; &quot;packets&quot; refers to</div><div class="line"> * the maximum SACKed segments to pass before reaching this limit.</div><div class="line"> * high_seq：可以标记为lost的段序号的最大值。</div><div class="line"> * mark_head: 为1表示只需要标志发送队列的第一个段。</div><div class="line"> */</div><div class="line">static void tcp_mark_head_lost(struct sock *sk, int packets, int mark_head)</div><div class="line">&#123;</div><div class="line">    struct tcp_sock *tp = tcp_sk(sk);</div><div class="line">    struct sk_buff *skb;</div><div class="line">    int cnt, oldcnt, lost;</div><div class="line">    unsigned int mss;</div><div class="line">    /* Use SACK to deduce losses of new sequences sent during recovery */</div><div class="line">    const u32 loss_high = tcp_is_sack(tp) ?  tp-&gt;snd_nxt : tp-&gt;high_seq;</div><div class="line">    /* 丢失的包不可能必发出去的包还多 */</div><div class="line">    WARN_ON(packets &gt; tp-&gt;packets_out);</div><div class="line">    /* 如果已经有被标记的段了 */</div><div class="line">    if (tp-&gt;lost_skb_hint) &#123;</div><div class="line">        skb = tp-&gt;lost_skb_hint;/* 让skb指向这个段，便于后面的遍历 */</div><div class="line">        cnt = tp-&gt;lost_cnt_hint;/* 已经标记了多少段 */</div><div class="line">        /* Head already handled? */</div><div class="line">        /* 已经有标记但，skb不等于发送队列的第一个包，则返回 */</div><div class="line">        if (mark_head &amp;&amp; skb != tcp_write_queue_head(sk))</div><div class="line">            return;</div><div class="line">    &#125; else &#123;</div><div class="line">        skb = tcp_write_queue_head(sk);/* 获得发送队列第一个包 */</div><div class="line">        cnt = 0;/* 初始化标记了0个数据 */</div><div class="line">    &#125;</div><div class="line">    tcp_for_write_queue_from(skb, sk) &#123;/* 根据取出来的skb，遍历重传队列 */</div><div class="line">        if (skb == tcp_send_head(sk))</div><div class="line">            break;/* 如果遍历到snd_nxt，则停止 */</div><div class="line">        /* TODO: do this better */</div><div class="line">        /* this is not the most efficient way to do this... */</div><div class="line">        tp-&gt;lost_skb_hint = skb;</div><div class="line">        tp-&gt;lost_cnt_hint = cnt;/* 暗示已经标记有多少丢包 */</div><div class="line">        /* loss_high是最大的标记为lost的序号，end_seq不可能大于它 */</div><div class="line">        if (after(TCP_SKB_CB(skb)-&gt;end_seq, loss_high))</div><div class="line">            break;</div><div class="line"></div><div class="line">        oldcnt = cnt;</div><div class="line">        if (tcp_is_fack(tp) || tcp_is_reno(tp) ||</div><div class="line">            (TCP_SKB_CB(skb)-&gt;sacked &amp; TCPCB_SACKED_ACKED))</div><div class="line">            cnt += tcp_skb_pcount(skb);/* 此段已经被sacked */</div><div class="line"></div><div class="line">        /* 主要用于判断时机 */</div><div class="line">        if (cnt &gt; packets) &#123;</div><div class="line">            if ((tcp_is_sack(tp) &amp;&amp; !tcp_is_fack(tp)) ||</div><div class="line">                (TCP_SKB_CB(skb)-&gt;sacked &amp; TCPCB_SACKED_ACKED) ||</div><div class="line">                (oldcnt &gt;= packets))</div><div class="line">                break;</div><div class="line"></div><div class="line">            mss = tcp_skb_mss(skb);</div><div class="line">            /* If needed, chop off the prefix to mark as lost. */</div><div class="line">            lost = (packets - oldcnt) * mss;</div><div class="line">            if (lost &lt; skb-&gt;len &amp;&amp; tcp_fragment(sk, skb, lost, mss, </div><div class="line">                GFP_ATOMIC) &lt; 0)</div><div class="line">                break;</div><div class="line">            cnt = packets;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        tcp_skb_mark_lost(tp, skb);</div><div class="line"></div><div class="line">        if (mark_head)/* 只标记一段的话，那么就可以退出了 */</div><div class="line">            break;</div><div class="line">    &#125;</div><div class="line">    tcp_verify_left_out(tp);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h4 id="tcp-skb-mark-lost-函数"><a href="#tcp-skb-mark-lost-函数" class="headerlink" title="tcp_skb_mark_lost()函数"></a>tcp_skb_mark_lost()函数</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">static void tcp_skb_mark_lost(struct tcp_sock *tp, struct sk_buff *skb)</div><div class="line">&#123;</div><div class="line">    if (!(TCP_SKB_CB(skb)-&gt;sacked &amp; (TCPCB_LOST|TCPCB_SACKED_ACKED))) &#123;</div><div class="line">        tcp_verify_retransmit_hint(tp, skb);/* 更新重传队列 */</div><div class="line"></div><div class="line">        tp-&gt;lost_out += tcp_skb_pcount(skb);/* 统计丢包数 */</div><div class="line">        tcp_sum_lost(tp, skb);</div><div class="line">        TCP_SKB_CB(skb)-&gt;sacked |= TCPCB_LOST;/* 打上丢包标记 */</div><div class="line">    &#125;    </div><div class="line">&#125;</div></pre></td></tr></table></figure>
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/01/15/Linux系统内核参数的添加方法/" rel="next" title="Linux系统内核参数的添加方法">
+                <i class="fa fa-chevron-left"></i> Linux系统内核参数的添加方法
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/02/20/TCP重点系列之ACK处理/" rel="prev" title="TCP重点系列之ACK处理">
+                TCP重点系列之ACK处理 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div id="SOHUCS"></div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.gif"
+               alt="kevin" />
+          <p class="site-author-name" itemprop="name">kevin</p>
+           
+              <p class="site-description motion-element" itemprop="description"></p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">11</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">分类</span>
+              
+            </div>
+          
+
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#变量介绍"><span class="nav-number">1.</span> <span class="nav-text">变量介绍</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#tcp-fastretrans-alert-函数被调用条件"><span class="nav-number">2.</span> <span class="nav-text">tcp_fastretrans_alert()函数被调用条件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#tcp-fastretrans-alert-函数实现细节"><span class="nav-number">3.</span> <span class="nav-text">tcp_fastretrans_alert()函数实现细节</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#tcp-add-reno-sack-函数"><span class="nav-number">4.</span> <span class="nav-text">tcp_add_reno_sack()函数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#tcp-check-reno-reordering-函数"><span class="nav-number">5.</span> <span class="nav-text">tcp_check_reno_reordering()函数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#tcp-limit-reno-sacked-函数"><span class="nav-number">6.</span> <span class="nav-text">tcp_limit_reno_sacked()函数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#tcp-update-scoreboard-函数"><span class="nav-number">7.</span> <span class="nav-text">tcp_update_scoreboard()函数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#tcp-mark-head-lost-函数"><span class="nav-number">8.</span> <span class="nav-text">tcp_mark_head_lost()函数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#tcp-skb-mark-lost-函数"><span class="nav-number">9.</span> <span class="nav-text">tcp_skb_mark_lost()函数</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">kevin</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+  
+    <script type="text/javascript">
+    (function(){
+      var appid = 'cyt0MsHAj';
+      var conf = '66bcfe1dd2d805358cdeacd4effb7088';
+      var width = window.innerWidth || document.documentElement.clientWidth;
+      if (width < 960) {
+      window.document.write('<script id="changyan_mobile_js" charset="utf-8" type="text/javascript" src="https://changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf + '"><\/script>'); } else { var loadJs=function(d,a){var c=document.getElementsByTagName("head")[0]||document.head||document.documentElement;var b=document.createElement("script");b.setAttribute("type","text/javascript");b.setAttribute("charset","UTF-8");b.setAttribute("src",d);if(typeof a==="function"){if(window.attachEvent){b.onreadystatechange=function(){var e=b.readyState;if(e==="loaded"||e==="complete"){b.onreadystatechange=null;a()}}}else{b.onload=a}}c.appendChild(b)};loadJs("https://changyan.sohu.com/upload/changyan.js",function(){
+        window.changyan.api.config({appid:appid,conf:conf})});
+      }
+    })();
+    </script>
+    <script type="text/javascript" src="https://assets.changyan.sohu.com/upload/plugins/plugins.count.js"></script>
+  
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>
