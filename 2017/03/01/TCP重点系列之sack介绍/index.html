@@ -102,7 +102,7 @@
 <meta property="og:url" content="http://yoursite.com/2017/03/01/TCP重点系列之sack介绍/index.html">
 <meta property="og:site_name" content="凡是过去 皆为序曲">
 <meta property="og:description" content="&amp;emsp;&amp;emsp;在早期的TCP拥塞控制中都是通过收到duplicate ack（默认3个）来trigger fast retransmition，但是当有多个丢包时，这样每次重传一个包，收到重传包的ack后，再通过 duplicate ack trigger retransmit下一个包，容易造成timeout，于是有人提出了sack来解决这个问题。">
-<meta property="og:updated_time" content="2017-07-19T01:56:59.771Z">
+<meta property="og:updated_time" content="2017-08-23T09:08:36.209Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="TCP重点系列之sack介绍">
 <meta name="twitter:description" content="&amp;emsp;&amp;emsp;在早期的TCP拥塞控制中都是通过收到duplicate ack（默认3个）来trigger fast retransmition，但是当有多个丢包时，这样每次重传一个包，收到重传包的ack后，再通过 duplicate ack trigger retransmit下一个包，容易造成timeout，于是有人提出了sack来解决这个问题。">
@@ -377,12 +377,12 @@
 
       
         <p>&emsp;&emsp;在早期的TCP拥塞控制中都是通过收到duplicate ack（默认3个）来trigger fast retransmition，但是当有多个丢包时，这样每次重传一个包，收到重传包的ack后，再通过 duplicate ack trigger retransmit下一个包，容易造成timeout，于是有人提出了sack来解决这个问题。<br><a id="more"></a></p>
-<h3 id="什么是sack"><a href="#什么是sack" class="headerlink" title="什么是sack"></a>什么是sack</h3><p>&emsp;&emsp;sack的全称是selective acknowledgment，也就是选择性确认，添加sack功能需要在TCP包<br>头加两个选项，一个是开启选项（enabling option），另一个是sack选项（sack option）本身。开启sack选项后，receiver会将自己收到了哪些包，没收到哪些包的信息记录在sack段中告诉给sender，这样sender便可以一次性重传所有的丢包。</p>
+<h4 id="什么是sack"><a href="#什么是sack" class="headerlink" title="什么是sack"></a>什么是sack</h4><p>&emsp;&emsp;sack的全称是selective acknowledgment，也就是选择性确认，添加sack功能需要在TCP包<br>头加两个选项，一个是开启选项（enabling option），另一个是sack选项（sack option）本身。开启sack选项后，receiver会将自己收到了哪些包，没收到哪些包的信息记录在sack段中告诉给sender，这样sender便可以一次性重传所有的丢包。</p>
 <h4 id="enabling-option"><a href="#enabling-option" class="headerlink" title="enabling option"></a>enabling option</h4><p>enabling option是一个占两字节的选项，在建立连接时通过SYN来告诉对方自己是否支持sack。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">TCP Sack-Permitted Option</div><div class="line">Kind: 4</div><div class="line">+-----------+------------+</div><div class="line">|  Kind = 4 | Length = 2 |</div><div class="line">+-----------+------------+</div></pre></td></tr></table></figure></p>
 <h4 id="sack-option"><a href="#sack-option" class="headerlink" title="sack option"></a>sack option</h4><p>开启sack后，从receiver向sender发送的ack会在sack option字段中携带一些确认信息，<br>而不是单纯的duplicate ack。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">TCP SACK Option</div><div class="line">Kind: 5</div><div class="line">Length: Variable</div><div class="line">                          +-------------+-------------+</div><div class="line">                          | Kind = 5    |   Length    |</div><div class="line">+------------+------------+-------------+-------------+</div><div class="line">|            Left Edge of list Block                  |</div><div class="line">+------------+------------+-------------+-------------+</div><div class="line">|            Right Edge of list Block                 |</div><div class="line">+------------+------------+-------------+-------------+</div><div class="line">|                                                     |</div><div class="line">/                      .  .  .                        /</div><div class="line">|                                                     |</div><div class="line">+------------+------------+-------------+-------------+</div><div class="line">|            Left Edge of list Block                  |</div><div class="line">+------------+------------+-------------+-------------+</div><div class="line">|            Right Edge of list Block                 |</div><div class="line">+------------+------------+-------------+-------------+</div></pre></td></tr></table></figure></p>
 <p>sack选项一般占40字节，其中kind占4字节，length占4字节，剩下32字节，每8字节为一个sack段，一个sack段用来记录一个连续block的开始序号和结束序号，所以最多只能记录4段连续的block。在实际情况中，经常会最多只有三段block，因为sack会经常与时间戳选项结合，用于测量RTT，这需要占用额外的8字节。</p>
-<h3 id="为什么要引入sack"><a href="#为什么要引入sack" class="headerlink" title="为什么要引入sack"></a>为什么要引入sack</h3><p>&emsp;&emsp;在早期的TCP拥塞控制中，通过收到duplicate ack（默认为3个），连续三次ack某一个包来告诉sender某个丢包了，然后进入fast retransmition state，sender重传这个包，当receiver收到这个重传包后，便会发一个ack（ack新的包）给sender，告诉sender下一个要发送的包是哪一个。可以看到，通过duplicate ack每次只能重传一个包，如果有多个丢包，在等待重传过程中，很容易timeout，造成带宽利用率下降（underutilized）。<br>&emsp;&emsp;而如果开启sack，每一个sack段记录的是已经收到的连续的包，sack段与sack段之间断片的，也就是还没收到的（可能已经丢失，也可能是reorder）。通过sack段便可以知道多个可能已经丢失的包，这样便可以一次性的重传，而不是一个一个重传，避免因等待时间长造成的timeout问题。<br>&emsp;&emsp;要注意的是开启sack选项，也是有弊端的，因为丢包意味着网络很可能已经拥塞，这时如果一次重传多个包，很可能会造成网络更加拥塞。</p>
-<h3 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h3><p><a href="https://tools.ietf.org/pdf/rfc2018.pdf" target="_blank" rel="external">RFC 2018 TCP Selective Acknowledgment Options</a></p>
+<h4 id="为什么要引入sack"><a href="#为什么要引入sack" class="headerlink" title="为什么要引入sack"></a>为什么要引入sack</h4><p>&emsp;&emsp;在早期的TCP拥塞控制中，通过收到duplicate ack（默认为3个），连续三次ack某一个包来告诉sender某个丢包了，然后进入fast retransmition state，sender重传这个包，当receiver收到这个重传包后，便会发一个ack（ack新的包）给sender，告诉sender下一个要发送的包是哪一个。可以看到，通过duplicate ack每次只能重传一个包，如果有多个丢包，在等待重传过程中，很容易timeout，造成带宽利用率下降（underutilized）。<br>&emsp;&emsp;而如果开启sack，每一个sack段记录的是已经收到的连续的包，sack段与sack段之间断片的，也就是还没收到的（可能已经丢失，也可能是reorder）。通过sack段便可以知道多个可能已经丢失的包，这样便可以一次性的重传，而不是一个一个重传，避免因等待时间长造成的timeout问题。<br>&emsp;&emsp;要注意的是开启sack选项，也是有弊端的，因为丢包意味着网络很可能已经拥塞，这时如果一次重传多个包，很可能会造成网络更加拥塞。</p>
+<h4 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h4><p><a href="https://tools.ietf.org/pdf/rfc2018.pdf" target="_blank" rel="external">RFC 2018 TCP Selective Acknowledgment Options</a></p>
 
       
     </div>
@@ -505,7 +505,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">12</span>
+                <span class="site-state-item-count">13</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -560,7 +560,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#什么是sack"><span class="nav-number">1.</span> <span class="nav-text">什么是sack</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#enabling-option"><span class="nav-number">1.1.</span> <span class="nav-text">enabling option</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#sack-option"><span class="nav-number">1.2.</span> <span class="nav-text">sack option</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#为什么要引入sack"><span class="nav-number">2.</span> <span class="nav-text">为什么要引入sack</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考文献"><span class="nav-number">3.</span> <span class="nav-text">参考文献</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#什么是sack"><span class="nav-number">1.</span> <span class="nav-text">什么是sack</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#enabling-option"><span class="nav-number">2.</span> <span class="nav-text">enabling option</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#sack-option"><span class="nav-number">3.</span> <span class="nav-text">sack option</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#为什么要引入sack"><span class="nav-number">4.</span> <span class="nav-text">为什么要引入sack</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#参考文献"><span class="nav-number">5.</span> <span class="nav-text">参考文献</span></a></li></ol></div>
             
 
           </div>

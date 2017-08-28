@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2017-07-19T02:02:10.886Z</updated>
+  <updated>2017-08-28T01:04:44.792Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -14,6 +14,34 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>iperf和iperf3的问题</title>
+    <link href="http://yoursite.com/2017/08/28/iperf%E5%92%8Ciperf3%E7%9A%84%E9%97%AE%E9%A2%98/"/>
+    <id>http://yoursite.com/2017/08/28/iperf和iperf3的问题/</id>
+    <published>2017-08-28T00:13:08.000Z</published>
+    <updated>2017-08-28T01:04:44.792Z</updated>
+    
+    <content type="html"><![CDATA[<a id="more"></a>
+<h4 id="iperf的问题"><a href="#iperf的问题" class="headerlink" title="iperf的问题"></a>iperf的问题</h4><p>最近在重现TCP Incast问题时，由于服务器数量不够，只能通过测试工具iperf多开一些流，发现iperf开的流数量小于20条时还很正常，但到达30条及以上就会出现一些异常问题，如下图示：<br><a href="../../../../pictures/iperf/webwxgetmsgimg.png"></a><br>经分析，这个问题是iperf工具本身的设计bug，所以想到使用iperf3来试一试。</p>
+<h4 id="iperf3的问题"><a href="#iperf3的问题" class="headerlink" title="iperf3的问题"></a>iperf3的问题</h4><p>iperf3从下载到安装倒是非常顺利，这里给出源码安装过程:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">$wget http://downloads.es.net/pub/iperf/iperf-3.1.3.tar.gz</div><div class="line">$tar zxvf iperf-3.1.3.tar.gz</div><div class="line">$cd iperf-3.1.3</div><div class="line">$./configure --prefix=/usr/local/bin/</div><div class="line">$make</div><div class="line">$make install</div></pre></td></tr></table></figure></p>
+<p>但是当我通过iperf3 –version查看是否安装成功时，却出现了问题：<br><strong>问题一</strong><br>由于当时忘记了截图，只好手动复原一下问题<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">iperf3: error while loading shared libraries: libiperf.so.0: cannot open shared object file: No such file or directory</div></pre></td></tr></table></figure></p>
+<p>提示当载入共享库Libiperf.so.0时，不能打开共享目标文件，估计是共享库不存在，于是我根据提示进行了调试，解决办法如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">$echo $LD_LIBRARY_PATH </div><div class="line"></div><div class="line">//如果上面的命令得到的是空，那就进行下面的操作</div><div class="line">$LD_LIBRATY_PATH=/usr/local/lib</div><div class="line">//进行下面这条操作的前提是你的/usr/local/bin/中有libiperf.so.0这个file</div><div class="line">$LD_LIBRARY_PATH=$LD_LIBRATY_PATH:/usr/local/bin/libiperf.so.0</div></pre></td></tr></table></figure></p>
+<p>然后再试一试，效果如下：<br><a href="../../../../pictures/iperf/20170828084439.png"></a></p>
+<p><strong>问题二</strong><br>经过上面的一番折腾，在一个client一个server的情况下，测试了同时开40条流和同时开80条流都很好。我满心欢喜的以为可以大干一场了，于是改为3个client，同时向一个server发包，but，but，Iperf3居然不支持many client to one server的情况，截图如下：<br><a href="../../../../pictures/iperf/20170828085457.png"></a><br>iperf都支持many client to one server，why，why，为什么升级版iperf3却不支持，那我的TCP Incast还重现个锤子，哎，只好自己写一个了。</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
+&lt;h4 id=&quot;iperf的问题&quot;&gt;&lt;a href=&quot;#iperf的问题&quot; class=&quot;headerlink&quot; title=&quot;iperf的问题&quot;&gt;&lt;/a&gt;iperf的问题&lt;/h4&gt;&lt;p&gt;最近在重现TCP Incast问题时，由于服务器数量不够
+    
+    </summary>
+    
+      <category term="UNIX/LINUX" scheme="http://yoursite.com/categories/UNIX-LINUX/"/>
+    
+    
+  </entry>
   
   <entry>
     <title>TCP重点系列之ACK处理</title>
@@ -127,7 +155,7 @@
     <link href="http://yoursite.com/2017/05/18/TCP%E6%8B%A5%E5%A1%9E%E6%8E%A7%E5%88%B6%E4%B9%8BVegas/"/>
     <id>http://yoursite.com/2017/05/18/TCP拥塞控制之Vegas/</id>
     <published>2017-05-17T17:06:38.000Z</published>
-    <updated>2017-05-17T17:13:55.975Z</updated>
+    <updated>2017-08-28T00:59:51.948Z</updated>
     
     <content type="html"><![CDATA[<p>&emsp;&emsp;vegas是一种主动调整cwnd的拥塞控制算法，主要思想是设置两个阈值,alpha和beta,然后通过计算目标速率(Expected)和实际速率(Actual)差(diff)，再比较diff与alpha和beta的关系，对cwnd进行调节。vegas这篇paper的主要贡献是提供了一种拥塞检测的方法。<br><a id="more"></a></p>
 <h3 id="区分拥塞还是非拥塞状态"><a href="#区分拥塞还是非拥塞状态" class="headerlink" title="区分拥塞还是非拥塞状态"></a>区分拥塞还是非拥塞状态</h3><h4 id="定义理论速率Expected和实际速率Actual："><a href="#定义理论速率Expected和实际速率Actual：" class="headerlink" title="定义理论速率Expected和实际速率Actual："></a>定义理论速率Expected和实际速率Actual：</h4><p>$$Expected = cwnd/BaseRTT$$<br>$$Actual = cwnd/RTT$$<br>这里cwnd是当前的TCP窗口大小，BaseRTT是测量的最小往返时间，RTT是所测量的经平滑后的往返时间。</p>
@@ -289,15 +317,15 @@ beta = 4;
     <link href="http://yoursite.com/2017/03/01/TCP%E9%87%8D%E7%82%B9%E7%B3%BB%E5%88%97%E4%B9%8Bsack%E4%BB%8B%E7%BB%8D/"/>
     <id>http://yoursite.com/2017/03/01/TCP重点系列之sack介绍/</id>
     <published>2017-03-01T12:04:16.000Z</published>
-    <updated>2017-07-19T01:56:59.771Z</updated>
+    <updated>2017-08-23T09:08:36.209Z</updated>
     
     <content type="html"><![CDATA[<p>&emsp;&emsp;在早期的TCP拥塞控制中都是通过收到duplicate ack（默认3个）来trigger fast retransmition，但是当有多个丢包时，这样每次重传一个包，收到重传包的ack后，再通过 duplicate ack trigger retransmit下一个包，容易造成timeout，于是有人提出了sack来解决这个问题。<br><a id="more"></a></p>
-<h3 id="什么是sack"><a href="#什么是sack" class="headerlink" title="什么是sack"></a>什么是sack</h3><p>&emsp;&emsp;sack的全称是selective acknowledgment，也就是选择性确认，添加sack功能需要在TCP包<br>头加两个选项，一个是开启选项（enabling option），另一个是sack选项（sack option）本身。开启sack选项后，receiver会将自己收到了哪些包，没收到哪些包的信息记录在sack段中告诉给sender，这样sender便可以一次性重传所有的丢包。</p>
+<h4 id="什么是sack"><a href="#什么是sack" class="headerlink" title="什么是sack"></a>什么是sack</h4><p>&emsp;&emsp;sack的全称是selective acknowledgment，也就是选择性确认，添加sack功能需要在TCP包<br>头加两个选项，一个是开启选项（enabling option），另一个是sack选项（sack option）本身。开启sack选项后，receiver会将自己收到了哪些包，没收到哪些包的信息记录在sack段中告诉给sender，这样sender便可以一次性重传所有的丢包。</p>
 <h4 id="enabling-option"><a href="#enabling-option" class="headerlink" title="enabling option"></a>enabling option</h4><p>enabling option是一个占两字节的选项，在建立连接时通过SYN来告诉对方自己是否支持sack。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">TCP Sack-Permitted Option</div><div class="line">Kind: 4</div><div class="line">+-----------+------------+</div><div class="line">|  Kind = 4 | Length = 2 |</div><div class="line">+-----------+------------+</div></pre></td></tr></table></figure></p>
 <h4 id="sack-option"><a href="#sack-option" class="headerlink" title="sack option"></a>sack option</h4><p>开启sack后，从receiver向sender发送的ack会在sack option字段中携带一些确认信息，<br>而不是单纯的duplicate ack。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">TCP SACK Option</div><div class="line">Kind: 5</div><div class="line">Length: Variable</div><div class="line">                          +-------------+-------------+</div><div class="line">                          | Kind = 5    |   Length    |</div><div class="line">+------------+------------+-------------+-------------+</div><div class="line">|            Left Edge of list Block                  |</div><div class="line">+------------+------------+-------------+-------------+</div><div class="line">|            Right Edge of list Block                 |</div><div class="line">+------------+------------+-------------+-------------+</div><div class="line">|                                                     |</div><div class="line">/                      .  .  .                        /</div><div class="line">|                                                     |</div><div class="line">+------------+------------+-------------+-------------+</div><div class="line">|            Left Edge of list Block                  |</div><div class="line">+------------+------------+-------------+-------------+</div><div class="line">|            Right Edge of list Block                 |</div><div class="line">+------------+------------+-------------+-------------+</div></pre></td></tr></table></figure></p>
 <p>sack选项一般占40字节，其中kind占4字节，length占4字节，剩下32字节，每8字节为一个sack段，一个sack段用来记录一个连续block的开始序号和结束序号，所以最多只能记录4段连续的block。在实际情况中，经常会最多只有三段block，因为sack会经常与时间戳选项结合，用于测量RTT，这需要占用额外的8字节。</p>
-<h3 id="为什么要引入sack"><a href="#为什么要引入sack" class="headerlink" title="为什么要引入sack"></a>为什么要引入sack</h3><p>&emsp;&emsp;在早期的TCP拥塞控制中，通过收到duplicate ack（默认为3个），连续三次ack某一个包来告诉sender某个丢包了，然后进入fast retransmition state，sender重传这个包，当receiver收到这个重传包后，便会发一个ack（ack新的包）给sender，告诉sender下一个要发送的包是哪一个。可以看到，通过duplicate ack每次只能重传一个包，如果有多个丢包，在等待重传过程中，很容易timeout，造成带宽利用率下降（underutilized）。<br>&emsp;&emsp;而如果开启sack，每一个sack段记录的是已经收到的连续的包，sack段与sack段之间断片的，也就是还没收到的（可能已经丢失，也可能是reorder）。通过sack段便可以知道多个可能已经丢失的包，这样便可以一次性的重传，而不是一个一个重传，避免因等待时间长造成的timeout问题。<br>&emsp;&emsp;要注意的是开启sack选项，也是有弊端的，因为丢包意味着网络很可能已经拥塞，这时如果一次重传多个包，很可能会造成网络更加拥塞。</p>
-<h3 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h3><p><a href="https://tools.ietf.org/pdf/rfc2018.pdf" target="_blank" rel="external">RFC 2018 TCP Selective Acknowledgment Options</a></p>
+<h4 id="为什么要引入sack"><a href="#为什么要引入sack" class="headerlink" title="为什么要引入sack"></a>为什么要引入sack</h4><p>&emsp;&emsp;在早期的TCP拥塞控制中，通过收到duplicate ack（默认为3个），连续三次ack某一个包来告诉sender某个丢包了，然后进入fast retransmition state，sender重传这个包，当receiver收到这个重传包后，便会发一个ack（ack新的包）给sender，告诉sender下一个要发送的包是哪一个。可以看到，通过duplicate ack每次只能重传一个包，如果有多个丢包，在等待重传过程中，很容易timeout，造成带宽利用率下降（underutilized）。<br>&emsp;&emsp;而如果开启sack，每一个sack段记录的是已经收到的连续的包，sack段与sack段之间断片的，也就是还没收到的（可能已经丢失，也可能是reorder）。通过sack段便可以知道多个可能已经丢失的包，这样便可以一次性的重传，而不是一个一个重传，避免因等待时间长造成的timeout问题。<br>&emsp;&emsp;要注意的是开启sack选项，也是有弊端的，因为丢包意味着网络很可能已经拥塞，这时如果一次重传多个包，很可能会造成网络更加拥塞。</p>
+<h4 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h4><p><a href="https://tools.ietf.org/pdf/rfc2018.pdf" target="_blank" rel="external">RFC 2018 TCP Selective Acknowledgment Options</a></p>
 ]]></content>
     
     <summary type="html">

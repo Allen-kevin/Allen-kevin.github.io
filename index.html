@@ -277,6 +277,157 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/08/28/iperf和iperf3的问题/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="kevin">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="凡是过去 皆为序曲">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/08/28/iperf和iperf3的问题/" itemprop="url">iperf和iperf3的问题</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-08-28T08:13:08+08:00">
+                2017-08-28
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/UNIX-LINUX/" itemprop="url" rel="index">
+                    <span itemprop="name">UNIX/LINUX</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+              <span class="post-meta-divider">|</span>
+              <span class="post-meta-item-icon">
+                <i class="fa fa-comment-o"></i>
+              </span>
+              
+                <a href="/2017/08/28/iperf和iperf3的问题/#SOHUCS" itemprop="discussionUrl">
+                  <span id="url::http://yoursite.com/2017/08/28/iperf和iperf3的问题/" class="cy_cmt_count" data-xid="2017/08/28/iperf和iperf3的问题/" itemprop="commentsCount" ></span>
+                </a>
+              
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body han-init-context" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <a id="more"></a>
+<h4 id="iperf的问题"><a href="#iperf的问题" class="headerlink" title="iperf的问题"></a>iperf的问题</h4><p>最近在重现TCP Incast问题时，由于服务器数量不够，只能通过测试工具iperf多开一些流，发现iperf开的流数量小于20条时还很正常，但到达30条及以上就会出现一些异常问题，如下图示：<br><a href="../../../../pictures/iperf/webwxgetmsgimg.png"></a><br>经分析，这个问题是iperf工具本身的设计bug，所以想到使用iperf3来试一试。</p>
+<h4 id="iperf3的问题"><a href="#iperf3的问题" class="headerlink" title="iperf3的问题"></a>iperf3的问题</h4><p>iperf3从下载到安装倒是非常顺利，这里给出源码安装过程:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">$wget http://downloads.es.net/pub/iperf/iperf-3.1.3.tar.gz</div><div class="line">$tar zxvf iperf-3.1.3.tar.gz</div><div class="line">$cd iperf-3.1.3</div><div class="line">$./configure --prefix=/usr/local/bin/</div><div class="line">$make</div><div class="line">$make install</div></pre></td></tr></table></figure></p>
+<p>但是当我通过iperf3 –version查看是否安装成功时，却出现了问题：<br><strong>问题一</strong><br>由于当时忘记了截图，只好手动复原一下问题<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">iperf3: error while loading shared libraries: libiperf.so.0: cannot open shared object file: No such file or directory</div></pre></td></tr></table></figure></p>
+<p>提示当载入共享库Libiperf.so.0时，不能打开共享目标文件，估计是共享库不存在，于是我根据提示进行了调试，解决办法如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">$echo $LD_LIBRARY_PATH </div><div class="line"></div><div class="line">//如果上面的命令得到的是空，那就进行下面的操作</div><div class="line">$LD_LIBRATY_PATH=/usr/local/lib</div><div class="line">//进行下面这条操作的前提是你的/usr/local/bin/中有libiperf.so.0这个file</div><div class="line">$LD_LIBRARY_PATH=$LD_LIBRATY_PATH:/usr/local/bin/libiperf.so.0</div></pre></td></tr></table></figure></p>
+<p>然后再试一试，效果如下：<br><a href="../../../../pictures/iperf/20170828084439.png"></a></p>
+<p><strong>问题二</strong><br>经过上面的一番折腾，在一个client一个server的情况下，测试了同时开40条流和同时开80条流都很好。我满心欢喜的以为可以大干一场了，于是改为3个client，同时向一个server发包，but，but，Iperf3居然不支持many client to one server的情况，截图如下：<br><a href="../../../../pictures/iperf/20170828085457.png"></a><br>iperf都支持many client to one server，why，why，为什么升级版iperf3却不支持，那我的TCP Incast还重现个锤子，哎，只好自己写一个了。</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/07/19/TCP重点系列之ACK处理/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1609,155 +1760,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/02/14/TCP重点系列之快速重传/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="kevin">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="凡是过去 皆为序曲">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/02/14/TCP重点系列之快速重传/" itemprop="url">TCP重点系列之快速重传tcp_fastretrans_alert</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-02-14T11:11:15+08:00">
-                2017-02-14
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/TCP-IP/" itemprop="url" rel="index">
-                    <span itemprop="name">TCP/IP</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-              <span class="post-meta-divider">|</span>
-              <span class="post-meta-item-icon">
-                <i class="fa fa-comment-o"></i>
-              </span>
-              
-                <a href="/2017/02/14/TCP重点系列之快速重传/#SOHUCS" itemprop="discussionUrl">
-                  <span id="url::http://yoursite.com/2017/02/14/TCP重点系列之快速重传/" class="cy_cmt_count" data-xid="2017/02/14/TCP重点系列之快速重传/" itemprop="commentsCount" ></span>
-                </a>
-              
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    <div class="post-body han-init-context" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>本文主要分析在TCP拥塞状态机的实现中，丢包后进入快速重传时，主要函数tcp_fastretrans_alert()的实现，及对一些相关函数也做了介绍。<br>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2017/02/14/TCP重点系列之快速重传/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -1807,7 +1809,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">12</span>
+                <span class="site-state-item-count">13</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
