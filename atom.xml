@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2017-08-28T01:19:23.687Z</updated>
+  <updated>2017-08-28T01:21:37.427Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -20,7 +20,7 @@
     <link href="http://yoursite.com/2017/08/28/iperf%E5%92%8Ciperf3%E7%9A%84%E9%97%AE%E9%A2%98/"/>
     <id>http://yoursite.com/2017/08/28/iperf和iperf3的问题/</id>
     <published>2017-08-28T00:13:08.000Z</published>
-    <updated>2017-08-28T01:19:23.687Z</updated>
+    <updated>2017-08-28T01:21:37.427Z</updated>
     
     <content type="html"><![CDATA[<p>&emsp;&emsp;最近因为实验需要重现在data center networks中的TCP Incast问题，就是many client to one server发包，导致每条流分得的带宽很小，即sender window很小，当出现burst现象时，可能致使某条流整个的window都丢掉，引发timeout问题。<br><a id="more"></a></p>
 <h4 id="iperf的问题"><a href="#iperf的问题" class="headerlink" title="iperf的问题"></a>iperf的问题</h4><p>由于服务器数量不够，只能通过测试工具iperf多开一些流，发现iperf开的流数量小于20条时还很正常，但到达30条及以上就会出现一些异常问题，如下图示：<br><img src="../../../../pictures/iperf/webwxgetmsgimg.png" alt=""><br>经分析，这个问题是iperf工具本身的设计bug，所以想到使用iperf3来试一试。</p>
