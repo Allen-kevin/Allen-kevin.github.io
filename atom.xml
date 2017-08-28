@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2017-08-28T01:15:05.733Z</updated>
+  <updated>2017-08-28T01:19:23.687Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -20,9 +20,9 @@
     <link href="http://yoursite.com/2017/08/28/iperf%E5%92%8Ciperf3%E7%9A%84%E9%97%AE%E9%A2%98/"/>
     <id>http://yoursite.com/2017/08/28/iperf和iperf3的问题/</id>
     <published>2017-08-28T00:13:08.000Z</published>
-    <updated>2017-08-28T01:15:05.733Z</updated>
+    <updated>2017-08-28T01:19:23.687Z</updated>
     
-    <content type="html"><![CDATA[<p>最近因为实验需要重现在data center networks中的TCP Incast问题，就是many client to one server发包，导致每条流分得的带宽很小，即sender window很小，当出现burst现象时，可能致使某条流逇整个window都丢掉，引发timeout现象。<br><a id="more"></a></p>
+    <content type="html"><![CDATA[<p>&emsp;&emsp;最近因为实验需要重现在data center networks中的TCP Incast问题，就是many client to one server发包，导致每条流分得的带宽很小，即sender window很小，当出现burst现象时，可能致使某条流整个的window都丢掉，引发timeout问题。<br><a id="more"></a></p>
 <h4 id="iperf的问题"><a href="#iperf的问题" class="headerlink" title="iperf的问题"></a>iperf的问题</h4><p>由于服务器数量不够，只能通过测试工具iperf多开一些流，发现iperf开的流数量小于20条时还很正常，但到达30条及以上就会出现一些异常问题，如下图示：<br><img src="../../../../pictures/iperf/webwxgetmsgimg.png" alt=""><br>经分析，这个问题是iperf工具本身的设计bug，所以想到使用iperf3来试一试。</p>
 <h4 id="iperf3的问题"><a href="#iperf3的问题" class="headerlink" title="iperf3的问题"></a>iperf3的问题</h4><p>iperf3从下载到安装倒是非常顺利，这里先给出源码下载及安装过程:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">$wget http://downloads.es.net/pub/iperf/iperf-3.1.3.tar.gz</div><div class="line">$tar zxvf iperf-3.1.3.tar.gz</div><div class="line">$cd iperf-3.1.3</div><div class="line">$./configure --prefix=/usr/local/bin/</div><div class="line">$make</div><div class="line">$make install</div></pre></td></tr></table></figure></p>
 <p>但是当我通过iperf3 –version查看是否安装成功时，却出现了问题：<br><strong>问题一</strong><br>由于当时忘记了截图，只好手动复原一下问题<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">iperf3: error while loading shared libraries: libiperf.so.0: cannot open shared object file: No such file or directory</div></pre></td></tr></table></figure></p>
@@ -33,7 +33,7 @@
     
     <summary type="html">
     
-      &lt;p&gt;最近因为实验需要重现在data center networks中的TCP Incast问题，就是many client to one server发包，导致每条流分得的带宽很小，即sender window很小，当出现burst现象时，可能致使某条流逇整个window都丢掉，引发timeout现象。&lt;br&gt;
+      &lt;p&gt;&amp;emsp;&amp;emsp;最近因为实验需要重现在data center networks中的TCP Incast问题，就是many client to one server发包，导致每条流分得的带宽很小，即sender window很小，当出现burst现象时，可能致使某条流整个的window都丢掉，引发timeout问题。&lt;br&gt;
     
     </summary>
     
