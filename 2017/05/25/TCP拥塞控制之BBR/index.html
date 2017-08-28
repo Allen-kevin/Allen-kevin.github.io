@@ -1,0 +1,824 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+  
+  
+  <link rel="stylesheet" media="all" href="/lib/Han/dist/han.min.css?v=3.3">
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="凡是过去 皆为序曲" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.1" />
+
+
+
+
+
+
+<meta name="description" content="&amp;emsp;&amp;emsp;BBR是Google在2016年提出的一种拥塞控制算法，在Linux kernel@4.9及以后的版本中已添加该算法。在Google通过paper将BBR公布前，BBR算法应该在Google自家World Area Network中早已投入使用。Google后来提出基于SDN的B4网络（paper叫做B4，很有名的一篇paper），其拥塞控制算法也是使用的BBR。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="TCP拥塞控制之：BBR">
+<meta property="og:url" content="http://yoursite.com/2017/05/25/TCP拥塞控制之BBR/index.html">
+<meta property="og:site_name" content="凡是过去 皆为序曲">
+<meta property="og:description" content="&amp;emsp;&amp;emsp;BBR是Google在2016年提出的一种拥塞控制算法，在Linux kernel@4.9及以后的版本中已添加该算法。在Google通过paper将BBR公布前，BBR算法应该在Google自家World Area Network中早已投入使用。Google后来提出基于SDN的B4网络（paper叫做B4，很有名的一篇paper），其拥塞控制算法也是使用的BBR。">
+<meta property="og:image" content="http://yoursite.com/pictures/paper%20read/20170525154759.png">
+<meta property="og:image" content="http://yoursite.com/pictures/paper%20read/20170620164658.png">
+<meta property="og:image" content="http://yoursite.com/pictures/state/20170719170709.png">
+<meta property="og:updated_time" content="2017-07-19T12:32:06.008Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="TCP拥塞控制之：BBR">
+<meta name="twitter:description" content="&amp;emsp;&amp;emsp;BBR是Google在2016年提出的一种拥塞控制算法，在Linux kernel@4.9及以后的版本中已添加该算法。在Google通过paper将BBR公布前，BBR算法应该在Google自家World Area Network中早已投入使用。Google后来提出基于SDN的B4网络（paper叫做B4，很有名的一篇paper），其拥塞控制算法也是使用的BBR。">
+<meta name="twitter:image" content="http://yoursite.com/pictures/paper%20read/20170525154759.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2017/05/25/TCP拥塞控制之BBR/"/>
+
+
+
+
+
+  <title>TCP拥塞控制之：BBR | 凡是过去 皆为序曲</title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  ga('create', 'your-analytics-id', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">凡是过去 皆为序曲</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archives"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-commonweal">
+          <a href="/404.html" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-heartbeat"></i> <br />
+            
+            公益404
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/05/25/TCP拥塞控制之BBR/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="kevin">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="凡是过去 皆为序曲">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">TCP拥塞控制之：BBR</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-25T14:49:05+08:00">
+                2017-05-25
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/私人文献阅读/" itemprop="url" rel="index">
+                    <span itemprop="name">私人文献阅读</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+              <span class="post-meta-divider">|</span>
+              <span class="post-meta-item-icon">
+                <i class="fa fa-comment-o"></i>
+              </span>
+              
+                <a href="/2017/05/25/TCP拥塞控制之BBR/#SOHUCS" itemprop="discussionUrl">
+                  <span id="changyan_count_unit" class="post-comments-count hc-comment-count" data-xid="2017/05/25/TCP拥塞控制之BBR/" itemprop="commentsCount"></span>
+                </a>
+              
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body han-init-context" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>&emsp;&emsp;BBR是Google在2016年提出的一种拥塞控制算法，在Linux kernel@4.9及以后的版本中已添加该算法。在Google通过paper将BBR公布前，BBR算法应该在Google自家World Area Network中早已投入使用。Google后来提出基于SDN的B4网络（paper叫做B4，很有名的一篇paper），其拥塞控制算法也是使用的BBR。<br><a id="more"></a><br>&emsp;&emsp;丢包即拥塞的思想已经沿用了很多年，很多拥塞控制算法也是基于此的，比如当前Linux kernel的默认拥塞控制算法CUBIC，还有Reno和FAST TCP等，都是基于这一思想进行的拥塞控制。在技术受限的年代，这一思想（丢包即拥塞）没有错，但是，现在，当NIC（network interface controllers）的处理能力从Mbps升级到Gpbs，memory chips从KB升级到GB，拥塞和丢包的关系就没那么紧密了。<br>&emsp;&emsp;在现在high BDP网络环境下，丢包即拥塞思想带来的问题包括：当因为bottelneck buffers满而出现丢包时，会引起bufferbloat现象，网络延迟高；但是，当bottleneck buffers很小时，这时出现丢包，网络会误认为是发生了拥塞，从而降低发送窗口，这样就会造成low throughput。想要解决上面的问题，那么就需要抛弃基于丢包的拥塞控制思想，换个新的。</p>
+<p><img src="../../../../pictures/paper read/20170525154759.png" alt=""><br>&emsp;&emsp;上图其实是两个图，只不过有共同的横坐标，想当初弱智的我看了半天，才明白这是两个图。图中的一些符号解释如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">RTprop = round-trip propagation</div><div class="line">BtlBw = bottleneck bandwidth</div><div class="line">blue lines show the RTprop constraint;</div><div class="line">green lines show the BtlBw constraint;</div><div class="line">red lines show the bottleneck buffer;</div></pre></td></tr></table></figure></p>
+<p>基于丢包的拥塞控制如图中指出的那样，其作用域在bandwidth limited，这时bottleneck buffers慢慢被填满，最后导致buffer溢出，出现丢包。在早前，memory价格较贵时，buffer sizes约等于一个link BDP，现在由于技术的进步，memory价格一直下降，buffer sizes越来越大，都快高出link BDP一个数量级。这样，delay也由以前的milliseconds升到了seconds，自然也带来了bufferbloat（缓冲区爆满，排队延迟影响网络整体性能）。其实之前有paper专门针对bottelneck buffer设置为多大给出了其研究结果，等于一个link BDP是最好的。</p>
+<h3 id="Characterizing-the-bottleneck"><a href="#Characterizing-the-bottleneck" class="headerlink" title="Characterizing the bottleneck"></a>Characterizing the bottleneck</h3><p>&emsp;&emsp;要达到highest throughput和lowest delay，connection必须同时满足两个条件：</p>
+<blockquote>
+<ol>
+<li>the bottleneck packet arrival rate equals BtlBw;</li>
+<li>the total data in flight is equal to the BDP(BtlBw*Rtprop);</li>
+</ol>
+</blockquote>
+<p>第一个条件保证bottelneck被100%的利用，第二个条件防止bottleneck出现饥饿，但又不会溢出。<br>&emsp;&emsp;因为$BtlBw$和$PTprop$在整个过程中一直是变动的，所以需要一直不断的测量。在任何时刻$t$，<br>$$RTT_t = RTprop_t + \eta_t$$<br>这里$\eta&gt;=0$表示‘noise’，比如接收端的延迟ack策略，ack aggregation策略等。因此$RTprop$是不可能准确测量的，只能估算，像大多数算法测量最小$RTT$做的那样：<br>$$\hat{RT}prop = RTprop + min(\eta_t) = min(RTT_t)$$<br>&emsp;&emsp;根据从receiver返回的ack，我们可以知道当前ack确认数据包的$RTT$和离开sender留存在网络中的确切数据包数。因为我们可以准确知道当前的发送序号snd_nxt，以及其确认序号snd_una，如果开启了SACK也可以准确知道，只不过需要walk一遍SACK段。这样我们便可以测量平均delivery rate:$deliveryRate = \Delta delivered/\Delta t$。在这个过程中delivered是可以准确知道的，而$\Delta t$则会大于真实interval，因为受网络噪声的影响，所以$delivery rate &lt;= bottleneck rate$，那么我们可以这样评估BtlBw:<br>$$\hat{BtlBw} = max(deliveryRate_t)$$</p>
+<h3 id="MATCHING-THE-PACKET-FLOW-TO-THE-DELIVERY-PATH"><a href="#MATCHING-THE-PACKET-FLOW-TO-THE-DELIVERY-PATH" class="headerlink" title="MATCHING THE PACKET FLOW TO THE DELIVERY PATH"></a>MATCHING THE PACKET FLOW TO THE DELIVERY PATH</h3><p>The core BBR algorithm has two parts:</p>
+<h4 id="When-an-ack-is-received"><a href="#When-an-ack-is-received" class="headerlink" title="When an ack is received"></a>When an ack is received</h4><p>&emsp;&emsp;每一个ack都会提供一个新的RTT和delivery rate值，用来更新$RTprop$和$BtlBw$，伪代码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">function onAck(packet)</div><div class="line">    rtt = now - packet.sendtime</div><div class="line">    update_min_filter(RTpropFilter, rtt)</div><div class="line">    delivery_time = now</div><div class="line">    deliveryRate = (delivered - packet.delivered)/(now - packet.delivered_time)</div><div class="line">    if (deliveryRate &gt; BtlBwFilter.curentMax || !packet.app_limited)</div><div class="line">        update_max_filter(BtlBwFilter, deliveryRate)</div><div class="line">    if (app_limited_until &gt; 0)</div><div class="line">        app_limited_until -= packet.size</div></pre></td></tr></table></figure></p>
+<p>&emsp;&emsp;在数据传输过程中，senders可能成为application limited，也就是application有机会发送更多的数据，但是没有数据可以发送，这是一个很普遍的现象。</p>
+<h4 id="When-data-is-sent"><a href="#When-data-is-sent" class="headerlink" title="When data is sent"></a>When data is sent</h4><p>&emsp;&emsp;为了使packet-arrival rate和bottleneck link’s departure rate相匹配，BBR必须paces每一个数据包。pacing_rate是BBR的主要控制参数，另外一个参数是cwnd_gain，用来限定inflight为小倍数的BDP，伪代码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">function send(packet)</div><div class="line">    bdp = BtlBwFilter.currentMax*RTpropFilter.currentMin</div><div class="line">    if (inflight &gt;= cwnd_gain*bdp)</div><div class="line">        //wait for ack or timeout</div><div class="line">        return</div><div class="line">    if (now &gt;= nextSendTime)</div><div class="line">        packet = nextPacketToSend()</div><div class="line">        if (!packet)</div><div class="line">            app_limited_until = inflight</div><div class="line">            return</div><div class="line">        packet.app_limited = (app_limited_until &gt; 0)</div><div class="line">        packet.sendtime = now</div><div class="line">        packet.delivered = delivered</div><div class="line">        packet.delivered_time = delivered_time</div><div class="line">        ship(packet)</div><div class="line">        nextSendTime = now + packet.size/(pacing_gain * BtlBwFilter.currentMax)</div><div class="line">    timerCallbackAt(send, nextSendTime)</div></pre></td></tr></table></figure></p>
+<h4 id="Steady-state-behavior"><a href="#Steady-state-behavior" class="headerlink" title="Steady-state behavior"></a>Steady-state behavior</h4><p>&emsp;&emsp;由上面可知，测量$BtlBw$和$RTprop$都有独立的函数去完成，在bottleneck的约束下会形成一个控制循环，那么带来的效果如下图所示：<br><img src="../../../../pictures/paper read/20170620164658.png" alt=""><br>图中蓝线是RTT， 绿线是inflight，红线代表delivery rate，delivery rate上方的粗灰线表示BtlBw max filter的状态。<br>&emsp;&emsp;BBR通过保证inflight大多数时候为一个BDP来最小化delay。这样bottleneck就被转移到了sender，因为sender看不到BtlBw的变化，因此BBR需要周期性的通过pacing_gain &gt; 1来测量BtlBw是否变化，当发现形成queueing delay时， 将pacing_gain设为小于1便可消除queueing delay。<br>&emsp;&emsp;BBR除了探测网络带宽是否变化外，还会周期性的探测往返传播延迟（RTProp），因为要考虑到传输路径等一些其他能影响到传播延迟的因素。每收到一个ack都会更新RTProp，但当RTProp有一段时间（比如10s）没更新了，BBR便会进入探测RTT模式，其探测方式主要是通过将inflight减少为4个数据包（比如设置cwnd=4），这种状态维持至少一个往返延迟，然后回到探测前的状态。需要注意的是并不是只对一条数据流这样设置来探测，而是所有的数据流一起进入探测模式。</p>
+<h3 id="BBR自己的状态机"><a href="#BBR自己的状态机" class="headerlink" title="BBR自己的状态机"></a>BBR自己的状态机</h3><p>首先给出其状态切换图<br><img src="../../../../pictures/state/20170719170709.png" alt=""><br>&emsp;&emsp;google的BBR是一种对丢包不敏感的拥塞控制算法，理论上它是不care外部的TCP拥塞状态（loss, recovery）的，它只根据自己测量的即时rate来调整cwnd的大小，即BBR只负责发送多少数据包，至于发哪些数据包它不管。而传统的拥塞控制算法，当碰到丢包时，网络便交给了快速恢复算法（比如PRR）接管，拥塞控制算法是不能插足的，直到重传结束返回到open状态。所以当网络丢包率比较大的时候，网络可能一直处于重传阶段，而CUBIC可能就短暂的接管过网络，之后一直是PRR接管，造成带宽利用率低下。<br>&emsp;&emsp;BBR自己的状态机的PROBE_RTT保证即时探测min rtt，从而保证网络的低延迟；而PROBE_BW保证即时探测网络带宽变化，从而保证充分利用带宽；DRAIN保证STARTUP结束时带来的queueing delay即时被排空。<br>&emsp;&emsp;还有一点需要注意的是BBR没有ssthresh，因为根据计算的delivery rate就可以大致推断sender的发送速率是否达到网络带宽上限。</p>
+<p><strong>总结</strong><br>&emsp;&emsp;其实BBR的思想和CUBIC相比很简单，其最终的效果据google自己说很好。本人在自己搭建的环境中，在同样的参数下，对比过CUBIC和BBR，快速恢复算法都使用的PRR，BBR明显的比CUBIC要好。但没有实际跑过和vegas、westwood等传统的拥塞控制算法做对比。不过各类拥塞控制算法都有其适用环境，具体看需求。</p>
+<p><strong>参考文献：</strong><br><a href="http://delivery.acm.org/10.1145/3030000/3022184/p50-vanjacobson.pdf?ip=159.226.43.30&amp;id=3022184&amp;acc=OPEN&amp;key=33E289E220520BFB%2ED25FD1BB8C28ADF7%2E4D4702B0C3E38B35%2E6D218144511F3437&amp;CFID=950630525&amp;CFTOKEN=77242094&amp;__acm__=1497963804_1df76caeda50f66015a40a5651745817" target="_blank" rel="external">BBR Congestion-Based Congestion Control</a><br><a href="http://an.kaist.ac.kr/courses/2009/cs540/papers/Nick.pdf" target="_blank" rel="external">Sizing Router Buffers</a></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/05/18/TCP拥塞控制之FASTTCP/" rel="next" title="TCP拥塞控制之：FAST TCP">
+                <i class="fa fa-chevron-left"></i> TCP拥塞控制之：FAST TCP
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/07/19/TCP重点系列之ACK处理/" rel="prev" title="TCP重点系列之ACK处理">
+                TCP重点系列之ACK处理 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMDQ5OS83MDUz"></div>
+    
+  </div>
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/uploads/avatar.jpg"
+               alt="kevin" />
+          <p class="site-author-name" itemprop="name">kevin</p>
+           
+              <p class="site-description motion-element" itemprop="description"></p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">13</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#Characterizing-the-bottleneck"><span class="nav-number">1.</span> <span class="nav-text">Characterizing the bottleneck</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MATCHING-THE-PACKET-FLOW-TO-THE-DELIVERY-PATH"><span class="nav-number">2.</span> <span class="nav-text">MATCHING THE PACKET FLOW TO THE DELIVERY PATH</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#When-an-ack-is-received"><span class="nav-number">2.1.</span> <span class="nav-text">When an ack is received</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#When-data-is-sent"><span class="nav-number">2.2.</span> <span class="nav-text">When data is sent</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Steady-state-behavior"><span class="nav-number">2.3.</span> <span class="nav-text">Steady-state behavior</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#BBR自己的状态机"><span class="nav-number">3.</span> <span class="nav-text">BBR自己的状态机</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">kevin</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <div id="lv-container" data-id="city" data-uid="MTAyMC8zMDQ5OS83MDUz">
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+
+        if (typeof LivereTower === 'function') { return; }
+
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+
+        e.parentNode.insertBefore(j, e);
+     })(document, 'script');
+    </script>
+    <noscript>为正常使用来必力评论功能请激活JavaScript</noscript>
+    </div>
+  
+
+
+
+
+  
+    <script type="text/javascript">
+    (function(){
+      var appid = 'cyt0MsHAj';
+      var conf = '66bcfe1dd2d805358cdeacd4effb7088';
+      var width = window.innerWidth || document.documentElement.clientWidth;
+      if (width < 960) {
+      window.document.write('<script id="changyan_mobile_js" charset="utf-8" type="text/javascript" src="https://changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf + '"><\/script>'); } else { var loadJs=function(d,a){var c=document.getElementsByTagName("head")[0]||document.head||document.documentElement;var b=document.createElement("script");b.setAttribute("type","text/javascript");b.setAttribute("charset","UTF-8");b.setAttribute("src",d);if(typeof a==="function"){if(window.attachEvent){b.onreadystatechange=function(){var e=b.readyState;if(e==="loaded"||e==="complete"){b.onreadystatechange=null;a()}}}else{b.onload=a}}c.appendChild(b)};loadJs("https://changyan.sohu.com/upload/changyan.js",function(){
+        window.changyan.api.config({appid:appid,conf:conf})});
+      }
+    })();
+    </script>
+    <script type="text/javascript" src="https://assets.changyan.sohu.com/upload/plugins/plugins.count.js"></script>
+  
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>
