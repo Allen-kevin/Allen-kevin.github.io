@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2017-08-31T11:38:59.075Z</updated>
+  <updated>2017-08-31T13:21:37.656Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -20,7 +20,7 @@
     <link href="http://yoursite.com/2017/08/31/TFC/"/>
     <id>http://yoursite.com/2017/08/31/TFC/</id>
     <published>2017-08-31T00:45:22.000Z</published>
-    <updated>2017-08-31T11:38:59.075Z</updated>
+    <updated>2017-08-31T13:21:37.656Z</updated>
     
     <content type="html"><![CDATA[<p>&emsp;&emsp;Token Flow Control (TFC)是为在数据中心网络中获得高带宽利用率，极低延迟，快速收敛，基本不丢包而提出的一种传输控制机制。<br><a id="more"></a></p>
 <h3 id="问题是什么"><a href="#问题是什么" class="headerlink" title="问题是什么"></a>问题是什么</h3><h4 id="应用需求"><a href="#应用需求" class="headerlink" title="应用需求"></a>应用需求</h4><p>&emsp;&emsp;现代数据中心网络对服务性能要求一直在增加。比如支持online数据处理的流计算对平均和尾延迟比一些像MapReduce这类的offline处理模式更加敏感；在memcachedsystems中，零包丢失是一个重要的性能刻画尺度，因为丢包后的重传会严重影响网络传输性能。</p>
@@ -32,7 +32,7 @@
 <blockquote>
 <p>Token T[n]. T[n] represents how many data can be transmited by a link in time slot n(n = 0, 1, …). T[n] can be computed as $c*t$, where c is the link bandwidth and t is the duration of a time slot.<br>Number of effective flows E[n]. E[n] stands for the number of full windows of data packets injected by all the passing flows in time slot n.</p>
 </blockquote>
-<p>之所以要计算有效流数，是因为有些流是间歇性的传输数据，所以间歇期时间要被剔除。还有一点要说明的是，这里的有效流，根据原文的解释，应该是在时间段$t$内，满发送窗口的个数。下面给出了$E[n]$的计算公式；<br>$$E[n] = \sum_{f} \frac{t}{rtt_f} \quad (1)$$<br>表达式（1）中的$t$是指持续时间长度，$rtt_f$表示流f的$rtt$，这样算是因为，一个$rtt$可以发送一个满窗口的数据包。<br>$$W[n+1] = \frac{T[n]}{E[n]} \quad (2)$$<br>知道了满窗口的个数和总共发送了多少数据包，当然就知道了拥塞窗口的大小。<br>下图是一个计算例子：<br><a href="../../../../pictures/DCN/20170831125800.png"></a></p>
+<p>之所以要计算有效流数，是因为有些流是间歇性的传输数据，所以间歇期时间要被剔除。还有一点要说明的是，这里的有效流，根据原文的解释，应该是在时间段$t$内，满发送窗口的个数。下面给出了$E[n]$的计算公式；<br>$$E[n] = \sum_{f} \frac{t}{rtt_f} \quad (1)$$<br>表达式（1）中的$t$是指持续时间长度，$rtt_f$表示流f的$rtt$，这样算是因为，一个$rtt$可以发送一个满窗口的数据包。<br>$$W[n+1] = \frac{T[n]}{E[n]} \quad (2)$$<br>知道了满窗口的个数和总共发送了多少数据包，当然就知道了拥塞窗口的大小。<br>下图是一个计算例子：<br><img src="../../../../pictures/DCN/20170831125800.png" alt=""></p>
 <h4 id="Measuring-the-Number-of-Effective-Flows"><a href="#Measuring-the-Number-of-Effective-Flows" class="headerlink" title="Measuring the Number of Effective Flows"></a>Measuring the Number of Effective Flows</h4><p>&emsp;&emsp;精确的知道有效流数有以下几个方法。方法一每条流可以在每个回合发送一个额外特殊的数据包，switches只需要测量在时间段$n$内收到的特殊数据包数就可以知道有效流的个数，但这种方法引入的开销太大。方法二在时间段$n$内的有效流数$E[n]$可以通过等式$\frac{A[n]}{W[n-1]}$得到，但是这个$W[n-1]$是上一个时间段得到的，除非bottleneck switch在上一个时间段记录的拥塞窗口值一直到当前都保持不变。<br>&emsp;&emsp;TFC在这里通过在每个回合标记一个数据包来告诉switch有效流数，而不是发送一个额外的数据包。这样，switch只需要数被标记过的数据包就可以知道有效流数了。</p>
 <h4 id="Duration-of-a-Time-Slot"><a href="#Duration-of-a-Time-Slot" class="headerlink" title="Duration of a Time Slot"></a>Duration of a Time Slot</h4><p>&emsp;&emsp;理论上这个时间长度可以是任意值但是，在实际环境中，考虑到收敛速度，计算有效流的精确性，还是需要确定一个合适的值。一方面呢，这个值不能太大，如果太大，switchs就不能即时的通过得到的有效流数更新拥塞窗口，以至于无法做到快速收敛。也不能太小，如果太小，这样计数的有效流数就会太小，就会得到一很大的拥塞窗口值，导致不准确。一般选择某条流的$rtt$作为基准，根据经验，在数据中心网络中,流与流之间的$rtt$相差不超过3倍。</p>
 <h4 id="Achieving-Rare-Packets-Loss"><a href="#Achieving-Rare-Packets-Loss" class="headerlink" title="Achieving Rare Packets Loss"></a>Achieving Rare Packets Loss</h4><p>&emsp;&emsp;当并发流的数量足够大，即时每条流只发一个数据包，也会出现拥塞，然而这种情形在数据中心网络中还比较普遍。一个比较常见的方法就是改变MSS的大小，这样一来，每个数据包中，包头占的比重就会增加，带宽利用率因此会下降。另外一个方法就是延迟发送时间，每$\frac{MSS}{W}$个$RTT$发送一个数据包。这样的话就需要精确的测量$RTT$，以及一个高分辨率的计时器来计数$\frac{RTT}{W}$,然而采用高分辨率定时器会引入大量的中断，产生额外的负载，如频繁地打乱处理器高速缓存并增加耗电。<br>&emsp;&emsp;每一个switch都有了一个counter来记录还可以发送多少数据包，这个计数器会随着时间而增加。当一个ACK到达时switch时，如果它携带的拥塞窗口小于一个包大小，但是switch的counter记录的可发送的值大于一个数据包，那么，switch会将ACK头部的拥塞窗口值修改为一个数据包大小，然后，counter减1；如果counter小于1，那么这个ACK会被放入到一个delay queue中，等到counter大于1了，再做处理。还有如果ACK通报给sender的拥塞窗口值本身就大于一个数据包，那么ACK会直接被转发，counter减1。</p>
@@ -40,7 +40,7 @@
 <blockquote>
 <p>During the establishment phase, the sender and receiver negotiate<br>whether to use TFC or not. Then at the data transmission<br>phase, the sender sets the RM bit in the TFC header<br>of the first data packet to 1. After receiving a RMA marked<br>packet, the sender sets the RM bit in the TFC header of the<br>next sending data packet to 1.</p>
 </blockquote>
-<p>想法是挺好的，但是，万一这个带有标记的数据包丢了怎么办，paper没有给出说明。如果丢了，paper中对有效流的计数将无法实现。<br>&emsp;&emsp;要实现TFC的功能，switch需要做三件事，computing tokens, measuring the number of effective flows and updating congestion windows。这些功能都在上面介绍过了，这里就不多说了。实现结构图如下图示：<br><a href="../../../../pictures/DCN/20170831192042.png"></a></p>
+<p>想法是挺好的，但是，万一这个带有标记的数据包丢了怎么办，paper没有给出说明。如果丢了，paper中对有效流的计数将无法实现。<br>&emsp;&emsp;要实现TFC的功能，switch需要做三件事，computing tokens, measuring the number of effective flows and updating congestion windows。这些功能都在上面介绍过了，这里就不多说了。实现结构图如下图示：<br><img src="../../../../pictures/DCN/20170831192042.png" alt=""></p>
 <p><strong>参考文献：</strong><br><a href="https://nns.cs.tsinghua.edu.cn/paper/eurosys16_jz.pdf" target="_blank" rel="external">TFC: Token Flow Control in Data Center Networks</a><br><a href="http://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=6203387" target="_blank" rel="external">ICTCP: Incast Congestion Control for TCP in Data-Center Networks</a><br><a href="https://www.usenix.org/system/files/conference/nsdi12/nsdi12-final126.pdf" target="_blank" rel="external">The TCP Outcast Problem: Exposing Unfairness in Data Center Networks</a></p>
 ]]></content>
     
