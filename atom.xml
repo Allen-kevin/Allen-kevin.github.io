@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2017-08-31T11:28:45.155Z</updated>
+  <updated>2017-08-31T11:34:23.830Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -20,7 +20,7 @@
     <link href="http://yoursite.com/2017/08/31/TFC/"/>
     <id>http://yoursite.com/2017/08/31/TFC/</id>
     <published>2017-08-31T00:45:22.000Z</published>
-    <updated>2017-08-31T11:28:45.155Z</updated>
+    <updated>2017-08-31T11:34:23.830Z</updated>
     
     <content type="html"><![CDATA[<p>&emsp;&emsp;Token Flow Control (TFC)是为在数据中心网络中获得高带宽利用率，极低延迟，快速收敛，基本不丢包而提出的一种传输控制机制。<br><a id="more"></a></p>
 <h3 id="问题是什么"><a href="#问题是什么" class="headerlink" title="问题是什么"></a>问题是什么</h3><h4 id="应用需求"><a href="#应用需求" class="headerlink" title="应用需求"></a>应用需求</h4><p>&emsp;&emsp;现代数据中心网络对服务性能要求一直在增加。比如支持online数据处理的流计算对平均和尾延迟比一些像MapReduce这类的offline处理模式更加敏感；在memcachedsystems中，零包丢失是一个重要的性能刻画尺度，因为丢包后的重传会严重影响网络传输性能。</p>
