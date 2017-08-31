@@ -2,6 +2,20 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://yoursite.com/2017/08/31/TFC/</loc>
+    
+    <lastmod>2017-08-31T11:22:22.620Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://yoursite.com/2017/08/28/iperf%E5%92%8Ciperf3%E7%9A%84%E9%97%AE%E9%A2%98/</loc>
+    
+    <lastmod>2017-08-31T00:44:37.712Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://yoursite.com/about-me/index.html</loc>
     
     <lastmod>2017-08-28T03:04:11.190Z</lastmod>
@@ -19,13 +33,6 @@
     <loc>http://yoursite.com/tags/index.html</loc>
     
     <lastmod>2017-08-28T03:01:18.326Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://yoursite.com/2017/08/28/iperf%E5%92%8Ciperf3%E7%9A%84%E9%97%AE%E9%A2%98/</loc>
-    
-    <lastmod>2017-08-28T01:21:37.427Z</lastmod>
     
   </url>
   
