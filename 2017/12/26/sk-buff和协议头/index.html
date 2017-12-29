@@ -1,0 +1,826 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+  
+  
+  <link rel="stylesheet" media="all" href="/lib/Han/dist/han.min.css?v=3.3">
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Linux," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="凡是过去 皆为序曲" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.1" />
+
+
+
+
+
+
+<meta name="description" content="&amp;emsp;&amp;emsp;在Linux TCP/IP协议栈中，sk_buff是代表网络报文的网络缓冲区。sk_buff有三个构成部分：sk_buff、线性数据缓冲区、分页数据（struct_skb_shared_info）。当请求sk_buff时，需要传递线性数据区域的长度。sk_buff中有一些页分别指向传输层、网络层和链路层头。&amp;emsp;&amp;emsp;这篇博客主要讨论sk_buff结构中的各个域">
+<meta name="keywords" content="Linux">
+<meta property="og:type" content="article">
+<meta property="og:title" content="sk_buff和协议头">
+<meta property="og:url" content="http://yoursite.com/2017/12/26/sk-buff和协议头/index.html">
+<meta property="og:site_name" content="凡是过去 皆为序曲">
+<meta property="og:description" content="&amp;emsp;&amp;emsp;在Linux TCP/IP协议栈中，sk_buff是代表网络报文的网络缓冲区。sk_buff有三个构成部分：sk_buff、线性数据缓冲区、分页数据（struct_skb_shared_info）。当请求sk_buff时，需要传递线性数据区域的长度。sk_buff中有一些页分别指向传输层、网络层和链路层头。&amp;emsp;&amp;emsp;这篇博客主要讨论sk_buff结构中的各个域">
+<meta property="og:image" content="http://yoursite.com/pictures/TCP/20171226114708.png">
+<meta property="og:image" content="http://yoursite.com/pictures/TCP/20171227101518.png">
+<meta property="og:image" content="http://yoursite.com/pictures/TCP/20171227102803.png">
+<meta property="og:image" content="http://yoursite.com/pictures/TCP/20171229115947.png">
+<meta property="og:updated_time" content="2017-12-29T04:57:42.321Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="sk_buff和协议头">
+<meta name="twitter:description" content="&amp;emsp;&amp;emsp;在Linux TCP/IP协议栈中，sk_buff是代表网络报文的网络缓冲区。sk_buff有三个构成部分：sk_buff、线性数据缓冲区、分页数据（struct_skb_shared_info）。当请求sk_buff时，需要传递线性数据区域的长度。sk_buff中有一些页分别指向传输层、网络层和链路层头。&amp;emsp;&amp;emsp;这篇博客主要讨论sk_buff结构中的各个域">
+<meta name="twitter:image" content="http://yoursite.com/pictures/TCP/20171226114708.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2017/12/26/sk-buff和协议头/"/>
+
+
+
+
+
+  <title>sk_buff和协议头 | 凡是过去 皆为序曲</title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  ga('create', 'your-analytics-id', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">凡是过去 皆为序曲</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archives"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-commonweal">
+          <a href="/404.html" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-heartbeat"></i> <br />
+            
+            公益404
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/12/26/sk-buff和协议头/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="kevin">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="凡是过去 皆为序曲">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">sk_buff和协议头</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-26T08:23:44+08:00">
+                2017-12-26
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/TCP-IP架构、设计及应用/" itemprop="url" rel="index">
+                    <span itemprop="name">TCP/IP架构、设计及应用</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+              <span class="post-meta-divider">|</span>
+              <span class="post-meta-item-icon">
+                <i class="fa fa-comment-o"></i>
+              </span>
+              
+                <a href="/2017/12/26/sk-buff和协议头/#SOHUCS" itemprop="discussionUrl">
+                  <span id="changyan_count_unit" class="post-comments-count hc-comment-count" data-xid="2017/12/26/sk-buff和协议头/" itemprop="commentsCount"></span>
+                </a>
+              
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body han-init-context" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>&emsp;&emsp;在Linux TCP/IP协议栈中，sk_buff是代表网络报文的网络缓冲区。sk_buff有三个构成部分：sk_buff、线性数据缓冲区、分页数据（struct_skb_shared_info）。当请求sk_buff时，需要传递线性数据区域的长度。sk_buff中有一些页分别指向传输层、网络层和链路层头。<br>&emsp;&emsp;这篇博客主要讨论sk_buff结构中的各个域，以及处理sk_buff结构的头、尾、结束、数据以及长度域的函数，将对sk_buff结构的data_len域和处理该域的函数做出说明。还将阐述skb_shared_info结构以及该结构的用途，然后描述了各种与sk_buff复制和排队操作相关的各种函数。<br>&emsp;&emsp;sk_buff包含线性和非线性两部分的数据。线性数据由sk_buff的数据域表示。一般来说，能够在单页中容纳的IP报文才分配一页的线性数据。如果整个IP报文的长度超过了一页的容量，处理该报文就有两个选择。一种是分配一个长度可容纳整个IP报文的先行数据区，另一种是使用分页数据区来容纳报文的剩余部分（线性数据=1页，IP剩余部分则存储在sk_buff的分页数据区中）。<br><a id="more"></a></p>
+<h4 id="结构sk-buff"><a href="#结构sk-buff" class="headerlink" title="结构sk_buff"></a>结构sk_buff</h4><p>&emsp;&emsp;在Linux中，sk_buff结构代表了一个报文，它由三个部分组成。<br>&emsp;&emsp;（1）sk_buff结构，也称为sk_buff头；<br>&emsp;&emsp;（2）包含数据的线性数据块；<br>&emsp;&emsp;（3）由struct skb_shared_info表示的非线性数据部分；<br>&emsp;&emsp;sk_buff结构包含指向特定协议头数据结构的指针域，因此，有些域包含了每一层的控制信息，以便构建协议头，同时还可以用来根据特定事件判断下一步的处理动作。有些域包含IP校验和，以及下一个协议信息。任何时候当要从某接口接收或者发送新报文时，都要为该数据块分配一个sk_buff结构，并将数据复制到sk_buff中，然后才进一步处理报文。根据需要，可以克隆（只复制sk_buff结构，但是共享数据块）或完全复制sk_buff（完全复制sk_buff结构，同时也复制了一份数据块）。<br>&emsp;&emsp;下面是sk_buff结构定义的代码块实现：<br>include/linux/skbuff.h<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div></pre></td><td class="code"><pre><div class="line">struct sk_buff &#123;</div><div class="line">    /*next和prev这两个域链接相关的sk_buff结构，当报文分段时，原始报文的每个分段</div><div class="line">     *通过next域链接在一起。</div><div class="line">     */</div><div class="line">    struct sk_buff *next; //指向下一个分段   </div><div class="line">    struct sk_buff *prev; //指向前一个分段</div><div class="line"></div><div class="line">    //list指针指向该sk_buff当前放置的队列或者列表</div><div class="line">    struct sk_buff_head *list;</div><div class="line">    struct sock *sk; //指向报文（sk_buff）所属套接字的指针</div><div class="line">    struct timeval stamp; //该域记录接收或者传输报文时刻的时间戳</div><div class="line"></div><div class="line">    /* 这是指向设备（struct net_device）的指针，报文通过此设备接收或者发送。</div><div class="line">     * net_device记录网络接口（数据链路层）信息以及该设备的相关操作。</div><div class="line">     */</div><div class="line">    struct net_device *dev;</div><div class="line"></div><div class="line">    /* 这是一个不同传输层头的指针联合，该域指向传输层头在报文中开始的位置 */</div><div class="line">    union &#123;</div><div class="line">        struct tcphdr  *th;</div><div class="line">        struct udphdr  *uh;</div><div class="line">        struct icmphdr *icmph;</div><div class="line">        struct igmphdr *igmph;</div><div class="line">        struct iphdr   *ipiph;</div><div class="line">        struct spxhdr  *spxh;</div><div class="line">        unsigned char  *raw;</div><div class="line">    &#125;h;</div><div class="line"></div><div class="line">    /* 这是一个不同网络层头的指针联合，该域指向网络层头在报文中开始的位置 */</div><div class="line">    union &#123;</div><div class="line">        struct iphdr    *iph;</div><div class="line">        struct ipv6hdr  *ipv6h;</div><div class="line">        struct arphdr   *arph;</div><div class="line">        struct ipxhdr   *ipxh;</div><div class="line">        unsigned char   *raw;</div><div class="line">    &#125;nh;</div><div class="line"></div><div class="line">    /* 这是一个不同MAC层头的指针联合，该域指向MAC层头在报文中开始的位置 */</div><div class="line">    union &#123;</div><div class="line">        struct ethhdr *ethernet;</div><div class="line">        unsigned char *raw;</div><div class="line">    &#125;max;</div><div class="line"></div><div class="line">    /* dst 指向dst_entry结构，该结构记录了到达给定目的地的路由信息，也记录了一</div><div class="line">     *些给定连接相关的网络特征信息，如PMTU、RTT等。</div><div class="line">     */</div><div class="line">    struct dst_entry *dst;</div><div class="line">    /* 该域保存协议相关的控制信息，每个协议层可能独立的使用这些信息。*/</div><div class="line">    char             cb[48];</div><div class="line"></div><div class="line">    unsigned int len; //该域记录sk_buff中数据的总长度</div><div class="line">    unsigned int data_len; //只有当sk_buff中有非线性数据时才使用该域</div><div class="line">    unsigned int csum; //这是某时刻协议的校验和</div><div class="line">    unsigned int char __unused, </div><div class="line">                 cloned, //该域保存当前sk_buff是原始数据还是克隆数据的信息</div><div class="line">                 /* 该域包含报文类型信息。类型通常为多播、广播、回路、主机、其</div><div class="line">                  * 他主机、传出等。</div><div class="line">                  */</div><div class="line">                 pkt_type,</div><div class="line">                 ip_summed; //该域表示驱动是否计算IP校验和</div><div class="line">    __u32 priority; //该域保存报文的排队优先级信息，这基于IP头中的TOS域</div><div class="line">    atomic_t users; //该域保存引用了sk_buff的数量</div><div class="line"></div><div class="line">     /* 该域保存了下一个协议层信息，在处理报文时由当前协议层设置 */</div><div class="line">    unsigned short protocol;</div><div class="line">    unsigned short security; //该域保存报文的安全级别</div><div class="line"></div><div class="line">     /* 该域保存为该缓冲区所分配的总内存。它包括sk_buff结构的大小+分配给该</div><div class="line">      * sk_buff的数据块的大小。</div><div class="line">      */</div><div class="line">    unsigned int truesize;</div><div class="line"></div><div class="line">    /* 该域指向线性数据区的开始（为sk_buff分配的线性数据区的首字节） */</div><div class="line">    unsigned char *head; </div><div class="line">    /* 该域指向驻留在线性数据区的数据的起始位置。驻留在线性数据区中的数据可能并</div><div class="line">     * 不总是从线性数据区的起始head开始。</div><div class="line">     */</div><div class="line">    unsigned char *data;</div><div class="line">    unsigned char *tail; //该域指向驻留在线性数据区的最后一个字节的数据</div><div class="line"></div><div class="line">    /* 该域指向线性数据区的结尾，与tail不同。驻留在线性数据区中的数据结尾并不是</div><div class="line">     * 总是在线性数据区的结尾。利用该域可以确保我们没有使用超出可用存储的缓冲区</div><div class="line">     */</div><div class="line">    unsigned char *end;</div><div class="line">    ......</div><div class="line">&#125;;</div></pre></td></tr></table></figure></p>
+<p>&emsp;&emsp;head、data、end、tail这4个域维护了线性数据区，当为新的sk_buff分配缓冲区时，需要提供线性数据区的大小。同时还要初始化sk_buff的这4个域，以指向线性数据区中合适的位置。下图是当skb_alloc()刚返回时的sk_buff结构：<br><img src="../../../../pictures/TCP/20171226114708.png" alt=""></p>
+<h4 id="结构skb-shared-info"><a href="#结构skb-shared-info" class="headerlink" title="结构skb_shared_info"></a>结构skb_shared_info</h4><p>&emsp;&emsp;处于线性数据区结尾的结构，包含sk_buff的分段信息和非线性数据信息。<br>include/linux/skbuff.h<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">struct skb_shared_info &#123;</div><div class="line">    atomic_t        dataref; //该域保存skb_shared_info对象的引用次数</div><div class="line"></div><div class="line">     /* 该域保存sk_buff分页段的数目，它表示frags[]</div><div class="line">      * 数组的元素数量，该数组包含sk_buff的分页数据。</div><div class="line">      */</div><div class="line">    unsigned int nr_frags;</div><div class="line"></div><div class="line">    /* 该域是一个指向原始报文（frag_list所属的sk_buff）sk_buffs分段列表的指针。</div><div class="line">     * 如果原始报文需要分段，所有表示这些分配的sk_buffs将链接到该链表中。</div><div class="line">     */ </div><div class="line">    struct sk_buff  *frag_list;</div><div class="line">    /* 该域是分段的数组，这些分段包含sk_buff的分页数据。分页数据由</div><div class="line">    *  skb_frag_struct表示，分页数据（由frags[]表示）的数据长度是每个页段中所含字节数（frags[i]-&gt;size）的总和，并存储在sk_buff的data_len域。</div><div class="line">    */</div><div class="line">    skb_frag_t      frags[MAX_SKB_FRAGS]; </div><div class="line">&#125;;</div></pre></td></tr></table></figure></p>
+<h4 id="sk-buff和DMA-skb-frag-struct"><a href="#sk-buff和DMA-skb-frag-struct" class="headerlink" title="sk_buff和DMA-skb_frag_struct"></a>sk_buff和DMA-skb_frag_struct</h4><p>&emsp;&emsp;该结构是一个描述符，描述了包含sk_buff分页数据的每个分页段。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">struct skb_frag_struct &#123;</div><div class="line">    /* 该域是一个指向页结构的指针，页结构包含了分页数据。每个分页段都包含了一页</div><div class="line">     * 所容纳的最大数据。</div><div class="line">     */</div><div class="line">    struct page *page; </div><div class="line">    __u16 page_offset; //该域是页偏移量指针，指向本页数据的起始位置</div><div class="line">    __u16 size; //该域是page域所指页中数据的总长度</div><div class="line">&#125;;</div></pre></td></tr></table></figure></p>
+<h4 id="sk-buff例程操作"><a href="#sk-buff例程操作" class="headerlink" title="sk_buff例程操作"></a>sk_buff例程操作</h4><p>（1） alloc_skb()<br>&emsp;&emsp;该函数分配一个新的sk_buff，该函数的参数为数据区的长度和内存分配的模式。数据区是分配给sk_buff的内存块，报文在这个数据区中构造。当alloc_skb()放回时，head、data、tail和end指针的位置在前面的图中已经给出了。可以看出，内存分配完成后，tail空间等于为sk_buff所请求的数据块的长度，head空间和数据长度则为0。<br>（2） skb_reserve()<br>&emsp;&emsp;该函数会改变sk_buff的head和tail空间，它主要用来为协议头预留空间。当需要为协议头保留空间时，就调用该函数，并向其传递头空间的长度。如下图所示。<br><img src="../../../../pictures/TCP/20171227101518.png" alt=""><br>（3） skb_put()<br>&emsp;&emsp;该例程用来处理sk_buff的线性数据区。该函数为分段数据在线性数据区的结尾预留空间。在大部分情况下，用户数据将在此处理，或者说TCP/UDP载荷在此处复制，它为报文载荷创建空间，如下图所示。<br><img src="../../../../pictures/TCP/20171227102803.png" alt=""><br>下面是skb_put()的源码<br>include/linux/skbuff.h<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">static inline unsigned char *skb_put(struct sk_buff *skb, unsigned int len)</div><div class="line">&#123;</div><div class="line">    unsigned char *tmp = skb-&gt;tail; //记录sk_buff的原始tail域</div><div class="line">    SKB_LINEAR_ASSERT(skb);</div><div class="line">    /* tail域加上请求的长度值，修改后的tail域扩展了sk_buff的总长度。</div><div class="line">     * 同样skb-&gt;len也要加上请求的长度值。</div><div class="line">     */</div><div class="line">    skb-&gt;tail += len; </div><div class="line">    skb-&gt;len += len;</div><div class="line">    /* 做完善性检查，以确保tail没有超过线性数据区的结束（skb-&gt;end）*/</div><div class="line">    if (skb-&gt;tail&gt;skb-&gt;end) &#123;</div><div class="line">        skb_over_panic(skb, len, current_text_addr());</div><div class="line">    &#125;</div><div class="line">    return tmp;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>（4） skb_push()<br>&emsp;&emsp;该函数处理sk_buff的data域，仅操作线性数据区。它将data域向head推进一个值，该值是以参数传递给该函数的字节数。数据长度增加多少，头空间就减少多少。skb_push()函数的源码如下所示。<br>include/linux/skbuff.h<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">static inline unsigned char *skb_push()</div><div class="line">&#123;</div><div class="line">    skb-&gt;data -= len; //data根据请求的长度减少</div><div class="line">    /* data域向head的推导导致整个sk_buff长度的扩展，sk_buff的长度将增加请求的长</div><div class="line">     * 度。</div><div class="line">     */</div><div class="line">    skb-&gt;len += len;</div><div class="line">    /* 进行完善性检查*/</div><div class="line">    if (skb-&gt;data&lt;skb-&gt;head) &#123;</div><div class="line">        skb_under_panic(skb, len, current_text_addr());</div><div class="line">    &#125;</div><div class="line">    /* 检查通过，将一个数据指针引用放回给调用者。 */</div><div class="line">    return skb-&gt;data;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p><img src="../../../../pictures/TCP/20171229115947.png" alt=""><br>&emsp;&emsp;下图给出了调用skb_push()来处理data域的情形。$l_0$是sk_buff的原始长度，其中虚线表示data域指针。$l_r$是调用skb_push()所请求的长度。skb_push()处理完sk_buff后，线性数据区的总长度变为$l<em>r+l</em> 0$，黑线表示数据指针。<br>（5）skb_pull()<br>&emsp;&emsp;这个函数根据字节移动数据指针，字节数则以参数的形式传递给该函数，然后返回新的数据指针。它通过修改sk_buff的data域来处理sk_buff的线性数据区。该函数将skb-&gt;len减小请求的字节数大小，从而增加了sk_buff线性数据区头空间的大小。下面是源代码。<br>include/linux/skbuff.h<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">static inline unsigned char *skb_pull(struct sk_buff *skb, unsigned int len)</div><div class="line">&#123;</div><div class="line">    if (len &gt; skb-&gt;len)</div><div class="line">        return NULL;</div><div class="line">    return __skb_pull(skb, len);</div><div class="line">&#125;</div><div class="line"></div><div class="line">static inline char *__skb_pull(struct sk_buff *skb, unsigned int len)</div><div class="line">&#123;</div><div class="line">    skb-&gt;len -= len;</div><div class="line">    if (skb-&gt;len &lt; skb-&gt;data_len)</div><div class="line">        out_of_line_bug();</div><div class="line">    return skb-&gt;data += len;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Linux/" rel="tag"># Linux</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/12/21/TCP拥塞控制之CUBIC/" rel="next" title="TCP拥塞控制之CUBIC">
+                <i class="fa fa-chevron-left"></i> TCP拥塞控制之CUBIC
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMDQ5OS83MDUz"></div>
+    
+  </div>
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/uploads/avatar.jpg"
+               alt="kevin" />
+          <p class="site-author-name" itemprop="name">kevin</p>
+           
+              <p class="site-description motion-element" itemprop="description"></p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">21</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#结构sk-buff"><span class="nav-number">1.</span> <span class="nav-text">结构sk_buff</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#结构skb-shared-info"><span class="nav-number">2.</span> <span class="nav-text">结构skb_shared_info</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#sk-buff和DMA-skb-frag-struct"><span class="nav-number">3.</span> <span class="nav-text">sk_buff和DMA-skb_frag_struct</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#sk-buff例程操作"><span class="nav-number">4.</span> <span class="nav-text">sk_buff例程操作</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">kevin</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <div id="lv-container" data-id="city" data-uid="MTAyMC8zMDQ5OS83MDUz">
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+
+        if (typeof LivereTower === 'function') { return; }
+
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+
+        e.parentNode.insertBefore(j, e);
+     })(document, 'script');
+    </script>
+    <noscript>为正常使用来必力评论功能请激活JavaScript</noscript>
+    </div>
+  
+
+
+
+
+  
+    <script type="text/javascript">
+    (function(){
+      var appid = 'cyt0MsHAj';
+      var conf = '66bcfe1dd2d805358cdeacd4effb7088';
+      var width = window.innerWidth || document.documentElement.clientWidth;
+      if (width < 960) {
+      window.document.write('<script id="changyan_mobile_js" charset="utf-8" type="text/javascript" src="https://changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf + '"><\/script>'); } else { var loadJs=function(d,a){var c=document.getElementsByTagName("head")[0]||document.head||document.documentElement;var b=document.createElement("script");b.setAttribute("type","text/javascript");b.setAttribute("charset","UTF-8");b.setAttribute("src",d);if(typeof a==="function"){if(window.attachEvent){b.onreadystatechange=function(){var e=b.readyState;if(e==="loaded"||e==="complete"){b.onreadystatechange=null;a()}}}else{b.onload=a}}c.appendChild(b)};loadJs("https://changyan.sohu.com/upload/changyan.js",function(){
+        window.changyan.api.config({appid:appid,conf:conf})});
+      }
+    })();
+    </script>
+    <script type="text/javascript" src="https://assets.changyan.sohu.com/upload/plugins/plugins.count.js"></script>
+  
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>
