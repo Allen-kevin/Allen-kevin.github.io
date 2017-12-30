@@ -105,7 +105,7 @@
 <meta property="og:description" content="&amp;emsp;&amp;emsp;CUBIC是当前Linux系统上默认的拥塞控制算法。它的拥塞控制窗口增长函数是一个三次函数，这样设计的目的是为了在当前的快速和长距离网络环境中有更好的扩展性。CUBIC的拥塞窗口增长独立于RTT，因此能更好的保证流与流之间的公平性。">
 <meta property="og:image" content="http://yoursite.com/pictures/paper%20read/20171223094737.png">
 <meta property="og:image" content="http://yoursite.com/pictures/paper%20read/20171223095005.png">
-<meta property="og:updated_time" content="2017-12-25T02:33:02.233Z">
+<meta property="og:updated_time" content="2017-12-30T01:06:25.615Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="TCP拥塞控制之CUBIC">
 <meta name="twitter:description" content="&amp;emsp;&amp;emsp;CUBIC是当前Linux系统上默认的拥塞控制算法。它的拥塞控制窗口增长函数是一个三次函数，这样设计的目的是为了在当前的快速和长距离网络环境中有更好的扩展性。CUBIC的拥塞窗口增长独立于RTT，因此能更好的保证流与流之间的公平性。">
@@ -399,7 +399,7 @@
 <h4 id="凹区域"><a href="#凹区域" class="headerlink" title="凹区域"></a>凹区域</h4><p>&emsp;&emsp;当在拥塞避免阶段收到一个ACK，如果协议不处于TCP模式，且$cwnd$小于$W_max$，那么，协议就处于凹区域，在这个区域，$cwnd$的增量为<br>$$\frac{W(t+RTT)-cwnd}{cwnd}$$</p>
 <h4 id="凸区域"><a href="#凸区域" class="headerlink" title="凸区域"></a>凸区域</h4><p>&emsp;&emsp;如果协议不处于TCP模式，且$cwnd$大于饱和点$W_max$，那么协议处于凸区域，$cwnd$的增量为<br>$$\frac{W(t+RTT)-cwnd}{cwnd}$$<br>其实凸区域的增长函数和凹区域的增长函数一样，只不过凸区域越过了饱和点，而其区域没有越过饱和点。</p>
 <h4 id="乘法降低"><a href="#乘法降低" class="headerlink" title="乘法降低"></a>乘法降低</h4><p>&emsp;&emsp;当出现数据包丢失时，CUBIC会通过乘以因子$\beta$来降低拥塞窗口，这里取$\beta=0.2$，设置$\beta$小于0.5的副作用是收敛较慢。虽然更适应性的设置会导致更快的收敛，但是会使协议的分析变得更加困难，并影响协议的稳定性。</p>
-<h4 id="快速收敛"><a href="#快速收敛" class="headerlink" title="快速收敛"></a>快速收敛</h4><p>&emsp;&emsp;为了提高CUBIC的收敛速度，在协议中加入了启发式。当新的流量加入网络时，网络中的现有流量需要放弃其带宽份额，以使新流量有一定的增长空间。下面详细描述一下快速收敛的过程。在发生丢包前，CUBIC会记录一个最大窗口值$W_max$，当发生丢包后，在降低窗口前，CUBIC又会记录当前的窗口值作为新的$W_max$，为了不至于混淆，可以将之前记录的$W_max$标记位$W_lastmax$。当发生丢包时，CUBIC会比较$W_lastmax$的$W_max$大小，如果$W_max$小于$W_lastmax$，这表明由于可用带宽的变化，该流所经历的饱和点正在降低。这种情况下，CUBIC的做法是通过进一步的减小$W_max$来释放更过的可用带宽。</p>
+<h4 id="快速收敛"><a href="#快速收敛" class="headerlink" title="快速收敛"></a>快速收敛</h4><p>&emsp;&emsp;为了提高CUBIC的收敛速度，在协议中加入了启发式。当新的流量加入网络时，网络中的现有流量需要放弃其带宽份额，以使新流量有一定的增长空间。下面详细描述一下快速收敛的过程。在发生丢包前，CUBIC会记录一个最大窗口值$W_max$，当发生丢包后，在降低窗口前，CUBIC又会记录当前的窗口值作为新的$W_max$，为了不至于混淆，可以将之前记录的$W_max$标记位$W_lastmax$。当发生丢包时，CUBIC会比较$W_lastmax$的$W_max$大小，如果$W_max$小于$W_lastmax$，这表明由于可用带宽的变化，该流所经历的饱和点正在降低。这种情况下，CUBIC的做法是通过进一步的减小$W_max$来释放更多的可用带宽。</p>
 
       
     </div>
@@ -529,7 +529,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">21</span>
+                <span class="site-state-item-count">22</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>

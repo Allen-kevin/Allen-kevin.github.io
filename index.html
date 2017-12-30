@@ -286,6 +286,155 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/12/29/构建和解析协议层的协议头/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="kevin">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="凡是过去 皆为序曲">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/12/29/构建和解析协议层的协议头/" itemprop="url">构建和解析协议层的协议头</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-29T15:06:24+08:00">
+                2017-12-29
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/TCP-IP架构、设计及应用/" itemprop="url" rel="index">
+                    <span itemprop="name">TCP/IP架构、设计及应用</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+              <span class="post-meta-divider">|</span>
+              <span class="post-meta-item-icon">
+                <i class="fa fa-comment-o"></i>
+              </span>
+              
+                <a href="/2017/12/29/构建和解析协议层的协议头/#SOHUCS" itemprop="discussionUrl">
+                  <span id="url::http://yoursite.com/2017/12/29/构建和解析协议层的协议头/" class="cy_cmt_count" data-xid="2017/12/29/构建和解析协议层的协议头/" itemprop="commentsCount" ></span>
+                </a>
+              
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body han-init-context" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>&emsp;&emsp;在上一篇博客说了sk_buff和协议头，这里说下如何构建向下遍历协议层时的协议头和解析向上遍历协议层时的协议头。<br>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/12/29/构建和解析协议层的协议头/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/12/26/sk-buff和协议头/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -684,13 +833,14 @@
 
       
         
-          
-            <h3 id="I-O模型"><a href="#I-O模型" class="headerlink" title="I/O模型"></a>I/O模型</h3><p>在Unix下5种可用的I/O模型：<br>阻塞式I/O；<br>非阻塞式I/O；<br>I/O复用；<br>信号驱动式I/O；<br>异步I/O；</p>
-<h4 id="阻塞式I-O模型"><a href="#阻塞式I-O模型" class="headerlink" title="阻塞式I/O模型"></a>阻塞式I/O模型</h4><p>&emsp;&emsp;阻塞式I/O模型的基本思想是当应用进程调用recvfrom系统调用时，如果内核到用户空间的数据没有准备好，那么进程一直阻塞于recvfrom调用，直到数据从内核复制到用户空间，这时recvfrom返回。<br><img src="../../../../pictures/阻塞式I-O模型.png" alt=""></p>
-<h4 id="非阻塞式I-O模型"><a href="#非阻塞式I-O模型" class="headerlink" title="非阻塞式I/O模型"></a>非阻塞式I/O模型</h4><p>&emsp;&emsp;当应用进程调用recvfrom系统调用时，如果内核到用户空间的数据没有准备好，那么recvfrom返回一个EWOULDBLOCK错误。应用进程会不断的调用recvfrom，然后recvfrom不断的返回EWOULDBLOCK，直到内核到用户空间的数据准备好为止，然后recrfrom成功返回。<br>&emsp;&emsp;当一个应用进程对一个非阻塞描述符循环调用recvfrom时，这个过程称之为轮询（polling）。应用进程持续轮询内核，以查看某个操作是否就绪，这么做往往消耗大量CPU时间。<br><img src="../../../../pictures/非阻塞式I-O模型。png" alt=""></p>
-<h4 id="I-O复用模型"><a href="#I-O复用模型" class="headerlink" title="I/O复用模型"></a>I/O复用模型</h4><p><img src="../../../../pictures/I-O复用模型.png" alt=""></p>
-
-          
+          <p>在Unix下5种可用的I/O模型：<br>阻塞式I/O；<br>非阻塞式I/O；<br>I/O复用；<br>信号驱动式I/O；<br>异步I/O；<br>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/11/20/I-O复用/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -1619,155 +1769,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/05/18/TCP拥塞控制之FASTTCP/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="kevin">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/uploads/avatar.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="凡是过去 皆为序曲">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/05/18/TCP拥塞控制之FASTTCP/" itemprop="url">TCP拥塞控制之：FAST TCP</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-18T19:11:52+08:00">
-                2017-05-18
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/私人文献阅读/" itemprop="url" rel="index">
-                    <span itemprop="name">私人文献阅读</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-              <span class="post-meta-divider">|</span>
-              <span class="post-meta-item-icon">
-                <i class="fa fa-comment-o"></i>
-              </span>
-              
-                <a href="/2017/05/18/TCP拥塞控制之FASTTCP/#SOHUCS" itemprop="discussionUrl">
-                  <span id="url::http://yoursite.com/2017/05/18/TCP拥塞控制之FASTTCP/" class="cy_cmt_count" data-xid="2017/05/18/TCP拥塞控制之FASTTCP/" itemprop="commentsCount" ></span>
-                </a>
-              
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    <div class="post-body han-init-context" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>&emsp;&emsp;经典的TCP拥塞控制算法TCP Reno从被提出后很长一段时间一直作为Linux kernel的默认算法，但随着Internet在规模、传输速度、负载、连接数上的增长，TCP Reno迟早会成为性能瓶颈。<br>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2017/05/18/TCP拥塞控制之FASTTCP/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -1818,7 +1819,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">21</span>
+                <span class="site-state-item-count">22</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>

@@ -96,19 +96,21 @@
 
 
 
-<meta name="description" content="I/O模型在Unix下5种可用的I/O模型：阻塞式I/O；非阻塞式I/O；I/O复用；信号驱动式I/O；异步I/O； 阻塞式I/O模型&amp;emsp;&amp;emsp;阻塞式I/O模型的基本思想是当应用进程调用recvfrom系统调用时，如果内核到用户空间的数据没有准备好，那么进程一直阻塞于recvfrom调用，直到数据从内核复制到用户空间，这时recvfrom返回。 非阻塞式I/O模型&amp;emsp;&amp;ems">
+<meta name="description" content="在Unix下5种可用的I/O模型：阻塞式I/O；非阻塞式I/O；I/O复用；信号驱动式I/O；异步I/O；">
 <meta property="og:type" content="article">
 <meta property="og:title" content="I&#x2F;O复用">
 <meta property="og:url" content="http://yoursite.com/2017/11/20/I-O复用/index.html">
 <meta property="og:site_name" content="凡是过去 皆为序曲">
-<meta property="og:description" content="I/O模型在Unix下5种可用的I/O模型：阻塞式I/O；非阻塞式I/O；I/O复用；信号驱动式I/O；异步I/O； 阻塞式I/O模型&amp;emsp;&amp;emsp;阻塞式I/O模型的基本思想是当应用进程调用recvfrom系统调用时，如果内核到用户空间的数据没有准备好，那么进程一直阻塞于recvfrom调用，直到数据从内核复制到用户空间，这时recvfrom返回。 非阻塞式I/O模型&amp;emsp;&amp;ems">
+<meta property="og:description" content="在Unix下5种可用的I/O模型：阻塞式I/O；非阻塞式I/O；I/O复用；信号驱动式I/O；异步I/O；">
 <meta property="og:image" content="http://yoursite.com/pictures/阻塞式I-O模型.png">
-<meta property="og:image" content="http://yoursite.com/pictures/非阻塞式I-O模型。png">
+<meta property="og:image" content="http://yoursite.com/pictures/非阻塞式I-O模型.png">
 <meta property="og:image" content="http://yoursite.com/pictures/I-O复用模型.png">
-<meta property="og:updated_time" content="2017-11-20T14:48:54.399Z">
+<meta property="og:image" content="http://yoursite.com/pictures/信号驱动式I-O模型.png">
+<meta property="og:image" content="http://yoursite.com/pictures/异步I-O模型.png">
+<meta property="og:updated_time" content="2017-12-30T01:08:16.786Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="I&#x2F;O复用">
-<meta name="twitter:description" content="I/O模型在Unix下5种可用的I/O模型：阻塞式I/O；非阻塞式I/O；I/O复用；信号驱动式I/O；异步I/O； 阻塞式I/O模型&amp;emsp;&amp;emsp;阻塞式I/O模型的基本思想是当应用进程调用recvfrom系统调用时，如果内核到用户空间的数据没有准备好，那么进程一直阻塞于recvfrom调用，直到数据从内核复制到用户空间，这时recvfrom返回。 非阻塞式I/O模型&amp;emsp;&amp;ems">
+<meta name="twitter:description" content="在Unix下5种可用的I/O模型：阻塞式I/O；非阻塞式I/O；I/O复用；信号驱动式I/O；异步I/O；">
 <meta name="twitter:image" content="http://yoursite.com/pictures/阻塞式I-O模型.png">
 
 
@@ -389,10 +391,13 @@
       
 
       
-        <h3 id="I-O模型"><a href="#I-O模型" class="headerlink" title="I/O模型"></a>I/O模型</h3><p>在Unix下5种可用的I/O模型：<br>阻塞式I/O；<br>非阻塞式I/O；<br>I/O复用；<br>信号驱动式I/O；<br>异步I/O；</p>
+        <p>在Unix下5种可用的I/O模型：<br>阻塞式I/O；<br>非阻塞式I/O；<br>I/O复用；<br>信号驱动式I/O；<br>异步I/O；<br><a id="more"></a></p>
 <h4 id="阻塞式I-O模型"><a href="#阻塞式I-O模型" class="headerlink" title="阻塞式I/O模型"></a>阻塞式I/O模型</h4><p>&emsp;&emsp;阻塞式I/O模型的基本思想是当应用进程调用recvfrom系统调用时，如果内核到用户空间的数据没有准备好，那么进程一直阻塞于recvfrom调用，直到数据从内核复制到用户空间，这时recvfrom返回。<br><img src="../../../../pictures/阻塞式I-O模型.png" alt=""></p>
-<h4 id="非阻塞式I-O模型"><a href="#非阻塞式I-O模型" class="headerlink" title="非阻塞式I/O模型"></a>非阻塞式I/O模型</h4><p>&emsp;&emsp;当应用进程调用recvfrom系统调用时，如果内核到用户空间的数据没有准备好，那么recvfrom返回一个EWOULDBLOCK错误。应用进程会不断的调用recvfrom，然后recvfrom不断的返回EWOULDBLOCK，直到内核到用户空间的数据准备好为止，然后recrfrom成功返回。<br>&emsp;&emsp;当一个应用进程对一个非阻塞描述符循环调用recvfrom时，这个过程称之为轮询（polling）。应用进程持续轮询内核，以查看某个操作是否就绪，这么做往往消耗大量CPU时间。<br><img src="../../../../pictures/非阻塞式I-O模型。png" alt=""></p>
-<h4 id="I-O复用模型"><a href="#I-O复用模型" class="headerlink" title="I/O复用模型"></a>I/O复用模型</h4><p><img src="../../../../pictures/I-O复用模型.png" alt=""></p>
+<h4 id="非阻塞式I-O模型"><a href="#非阻塞式I-O模型" class="headerlink" title="非阻塞式I/O模型"></a>非阻塞式I/O模型</h4><p>&emsp;&emsp;当应用进程调用recvfrom系统调用时，如果内核到用户空间的数据没有准备好，那么recvfrom返回一个EWOULDBLOCK错误。应用进程会不断的调用recvfrom，然后recvfrom不断的返回EWOULDBLOCK，直到内核到用户空间的数据准备好为止，然后recvfrom成功返回。<br>&emsp;&emsp;当一个应用进程对一个非阻塞描述符循环调用recvfrom时，这个过程称之为轮询（polling）。应用进程持续轮询内核，以查看某个操作是否就绪，这么做往往消耗大量CPU时间。<br><img src="../../../../pictures/非阻塞式I-O模型.png" alt=""></p>
+<h4 id="I-O复用模型"><a href="#I-O复用模型" class="headerlink" title="I/O复用模型"></a>I/O复用模型</h4><p>&emsp;&emsp;应用进程阻塞于select调用，等待数据报套接字变为可读，当select返回套接字可读这一条件时，调用recvfrom把所读数据报复制到应用进程缓冲区。<br><img src="../../../../pictures/I-O复用模型.png" alt=""></p>
+<h4 id="信号驱动式I-O模型"><a href="#信号驱动式I-O模型" class="headerlink" title="信号驱动式I/O模型"></a>信号驱动式I/O模型</h4><p>&emsp;&emsp;让内核在描述符就绪时发送SIGIO信号通知应用进程，然后调用recvfrom将数据报复制到应用进程缓冲区，这种模型称为信号驱动式I/O模型。无论如何处理SIGIO信号，这种模型的优势在于等待数据包到达期间进程不被阻塞。<br><img src="../../../../pictures/信号驱动式I-O模型.png" alt=""></p>
+<h4 id="异步I-O模型"><a href="#异步I-O模型" class="headerlink" title="异步I/O模型"></a>异步I/O模型</h4><p>&emsp;&emsp;应用进程调用aio<em>read函数(POSIX异步I/O函数以aio</em>或lio_开头)，给内核传递描述符、缓冲区指针、缓冲区大小（与read相同的三个参数）和文件偏移（与lseek类似），并告诉内核当整个操作完成时如何通知应用进程。<br><img src="../../../../pictures/异步I-O模型.png" alt=""></p>
+<p>注：该篇博客参考自《UNIX网络编程》</p>
 
       
     </div>
@@ -516,7 +521,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">21</span>
+                <span class="site-state-item-count">22</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -580,7 +585,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#I-O模型"><span class="nav-number">1.</span> <span class="nav-text">I/O模型</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#阻塞式I-O模型"><span class="nav-number">1.1.</span> <span class="nav-text">阻塞式I/O模型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#非阻塞式I-O模型"><span class="nav-number">1.2.</span> <span class="nav-text">非阻塞式I/O模型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#I-O复用模型"><span class="nav-number">1.3.</span> <span class="nav-text">I/O复用模型</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#阻塞式I-O模型"><span class="nav-number">1.</span> <span class="nav-text">阻塞式I/O模型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#非阻塞式I-O模型"><span class="nav-number">2.</span> <span class="nav-text">非阻塞式I/O模型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#I-O复用模型"><span class="nav-number">3.</span> <span class="nav-text">I/O复用模型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#信号驱动式I-O模型"><span class="nav-number">4.</span> <span class="nav-text">信号驱动式I/O模型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#异步I-O模型"><span class="nav-number">5.</span> <span class="nav-text">异步I/O模型</span></a></li></ol></div>
             
 
           </div>

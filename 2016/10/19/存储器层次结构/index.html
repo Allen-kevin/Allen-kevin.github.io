@@ -96,17 +96,17 @@
 
 
 
-<meta name="description" content="高速缓存存储器有关写的问题写命中要写到内存中的字已经缓存在了高速缓存中叫做写命中。写操作分为直写和回写两种。直写：当高速缓存更新后立即将高速缓存块写回到紧接着的低一层中。虽然简单，但是直写的缺点是每次写都会引起总线流量。写回：尽可能的推迟存储器更新，只有当替换算法要驱逐更新过的块时，才把它写到的紧接着的低一层中。由于局部性，写回能显著地减少总线流量，但是它的缺点是增加了复杂性。高数缓存必须为每个">
+<meta name="description" content="&amp;emsp;&amp;emsp;这里对高速缓存器的写命中和写不命中做一点简单的介绍。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="存储器层次结构">
 <meta property="og:url" content="http://yoursite.com/2016/10/19/存储器层次结构/index.html">
 <meta property="og:site_name" content="凡是过去 皆为序曲">
-<meta property="og:description" content="高速缓存存储器有关写的问题写命中要写到内存中的字已经缓存在了高速缓存中叫做写命中。写操作分为直写和回写两种。直写：当高速缓存更新后立即将高速缓存块写回到紧接着的低一层中。虽然简单，但是直写的缺点是每次写都会引起总线流量。写回：尽可能的推迟存储器更新，只有当替换算法要驱逐更新过的块时，才把它写到的紧接着的低一层中。由于局部性，写回能显著地减少总线流量，但是它的缺点是增加了复杂性。高数缓存必须为每个">
+<meta property="og:description" content="&amp;emsp;&amp;emsp;这里对高速缓存器的写命中和写不命中做一点简单的介绍。">
 <meta property="og:image" content="http://yoursite.com/pictures/Computer%20System/Snip20170316_58.png">
-<meta property="og:updated_time" content="2017-10-02T09:56:58.105Z">
+<meta property="og:updated_time" content="2017-12-30T01:06:25.553Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="存储器层次结构">
-<meta name="twitter:description" content="高速缓存存储器有关写的问题写命中要写到内存中的字已经缓存在了高速缓存中叫做写命中。写操作分为直写和回写两种。直写：当高速缓存更新后立即将高速缓存块写回到紧接着的低一层中。虽然简单，但是直写的缺点是每次写都会引起总线流量。写回：尽可能的推迟存储器更新，只有当替换算法要驱逐更新过的块时，才把它写到的紧接着的低一层中。由于局部性，写回能显著地减少总线流量，但是它的缺点是增加了复杂性。高数缓存必须为每个">
+<meta name="twitter:description" content="&amp;emsp;&amp;emsp;这里对高速缓存器的写命中和写不命中做一点简单的介绍。">
 <meta name="twitter:image" content="http://yoursite.com/pictures/Computer%20System/Snip20170316_58.png">
 
 
@@ -387,7 +387,7 @@
       
 
       
-        <a id="more"></a>
+        <p>&emsp;&emsp;这里对高速缓存器的写命中和写不命中做一点简单的介绍。<br><a id="more"></a></p>
 <h3 id="高速缓存存储器"><a href="#高速缓存存储器" class="headerlink" title="高速缓存存储器"></a>高速缓存存储器</h3><h4 id="有关写的问题"><a href="#有关写的问题" class="headerlink" title="有关写的问题"></a>有关写的问题</h4><h5 id="写命中"><a href="#写命中" class="headerlink" title="写命中"></a>写命中</h5><p>要写到内存中的字已经缓存在了高速缓存中叫做写命中。写操作分为直写和回写两种。<br><strong>直写：</strong>当高速缓存更新后立即将高速缓存块写回到紧接着的低一层中。虽然简单，但是直写的缺点是每次写都会引起总线流量。<br><strong>写回：</strong>尽可能的推迟存储器更新，只有当替换算法要驱逐更新过的块时，才把它写到的紧接着的低一层中。由于局部性，写回能显著地减少总线流量，但是它的缺点是增加了复杂性。高数缓存必须为每个高速缓存行维护一个额外的修改为，表明这个高速缓存块是否被修改过。</p>
 <h5 id="写不命中"><a href="#写不命中" class="headerlink" title="写不命中"></a>写不命中</h5><p>要写到内存中的字没有缓存在高速缓存中叫做写不命中。写操作分为写分配和非写分配两种。<br><strong>写分配：</strong>加载相应的低一层中的块到高数缓存中，然后更新这个高速缓存。写分配试图写的空间局部性，但是缺点是每次写不命中都会导致一个快从第一层传送到高速缓存。<br><strong>非写分配：</strong>避开高速缓存，直接把这个字写到低一层中。<br>直写高速缓存通常是非写分配的，写回高速缓存通常是写分配的。</p>
 <h4 id="真实的高速缓存层次结构的解剖"><a href="#真实的高速缓存层次结构的解剖" class="headerlink" title="真实的高速缓存层次结构的解剖"></a>真实的高速缓存层次结构的解剖</h4><p>高速缓存既保存数据，也保存指令。<br><strong>i-cache:</strong>只保存的指令的高速缓存，i-cache通常是只读的。<br><strong>d-cache:</strong>只保存的数据的高速缓存，d-cache通常是可读和可写的。<br><strong>统一的高速缓存：</strong>既保存指令又保存数据的高速缓存叫做统一的高速缓存。<br>现代处理器包括独立的i-cache和d-cache，有两个独立的高速缓存，处理器能同时读一个指令字和一个数据字。下图给出了Intel Core i7处理器的高速缓存层次结构。<br><img src="../../../../pictures/Computer System/Snip20170316_58.png" alt=""></p>
@@ -510,7 +510,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">21</span>
+                <span class="site-state-item-count">22</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>

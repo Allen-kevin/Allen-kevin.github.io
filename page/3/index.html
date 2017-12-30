@@ -286,6 +286,155 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/10/19/异常控制流/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="kevin">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="凡是过去 皆为序曲">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/10/19/异常控制流/" itemprop="url">异常控制流</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-10-19T12:44:34+08:00">
+                2016-10-19
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/深入理解计算机系统/" itemprop="url" rel="index">
+                    <span itemprop="name">深入理解计算机系统</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+              <span class="post-meta-divider">|</span>
+              <span class="post-meta-item-icon">
+                <i class="fa fa-comment-o"></i>
+              </span>
+              
+                <a href="/2016/10/19/异常控制流/#SOHUCS" itemprop="discussionUrl">
+                  <span id="url::http://yoursite.com/2016/10/19/异常控制流/" class="cy_cmt_count" data-xid="2016/10/19/异常控制流/" itemprop="commentsCount" ></span>
+                </a>
+              
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body han-init-context" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>&emsp;&emsp;这篇博客主要介绍了异常，异常处理和异常的类别。<br>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2016/10/19/异常控制流/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/10/19/存储器层次结构/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -386,13 +535,14 @@
 
       
         
-          
-            <a id="more"></a>
-<h3 id="高速缓存存储器"><a href="#高速缓存存储器" class="headerlink" title="高速缓存存储器"></a>高速缓存存储器</h3><h4 id="有关写的问题"><a href="#有关写的问题" class="headerlink" title="有关写的问题"></a>有关写的问题</h4><h5 id="写命中"><a href="#写命中" class="headerlink" title="写命中"></a>写命中</h5><p>要写到内存中的字已经缓存在了高速缓存中叫做写命中。写操作分为直写和回写两种。<br><strong>直写：</strong>当高速缓存更新后立即将高速缓存块写回到紧接着的低一层中。虽然简单，但是直写的缺点是每次写都会引起总线流量。<br><strong>写回：</strong>尽可能的推迟存储器更新，只有当替换算法要驱逐更新过的块时，才把它写到的紧接着的低一层中。由于局部性，写回能显著地减少总线流量，但是它的缺点是增加了复杂性。高数缓存必须为每个高速缓存行维护一个额外的修改为，表明这个高速缓存块是否被修改过。</p>
-<h5 id="写不命中"><a href="#写不命中" class="headerlink" title="写不命中"></a>写不命中</h5><p>要写到内存中的字没有缓存在高速缓存中叫做写不命中。写操作分为写分配和非写分配两种。<br><strong>写分配：</strong>加载相应的低一层中的块到高数缓存中，然后更新这个高速缓存。写分配试图写的空间局部性，但是缺点是每次写不命中都会导致一个快从第一层传送到高速缓存。<br><strong>非写分配：</strong>避开高速缓存，直接把这个字写到低一层中。<br>直写高速缓存通常是非写分配的，写回高速缓存通常是写分配的。</p>
-<h4 id="真实的高速缓存层次结构的解剖"><a href="#真实的高速缓存层次结构的解剖" class="headerlink" title="真实的高速缓存层次结构的解剖"></a>真实的高速缓存层次结构的解剖</h4><p>高速缓存既保存数据，也保存指令。<br><strong>i-cache:</strong>只保存的指令的高速缓存，i-cache通常是只读的。<br><strong>d-cache:</strong>只保存的数据的高速缓存，d-cache通常是可读和可写的。<br><strong>统一的高速缓存：</strong>既保存指令又保存数据的高速缓存叫做统一的高速缓存。<br>现代处理器包括独立的i-cache和d-cache，有两个独立的高速缓存，处理器能同时读一个指令字和一个数据字。下图给出了Intel Core i7处理器的高速缓存层次结构。<br><img src="../../../../pictures/Computer System/Snip20170316_58.png" alt=""></p>
-
-          
+          <p>&emsp;&emsp;这里对高速缓存器的写命中和写不命中做一点简单的介绍。<br>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2016/10/19/存储器层次结构/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -475,7 +625,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">21</span>
+                <span class="site-state-item-count">22</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
