@@ -982,16 +982,14 @@
 
       
         
-          
-            <h4 id="套接字地址结构"><a href="#套接字地址结构" class="headerlink" title="套接字地址结构"></a>套接字地址结构</h4><p>IPv4套接字地址结构通常也称为“网际套接字地址结构”，下面是其POSIX定义<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">struct in_addr &#123;</div><div class="line">    in_addr_t s_addr;</div><div class="line">&#125;;</div><div class="line"></div><div class="line">struct sockaddr_in &#123;</div><div class="line">    uint8_t         sin_len;</div><div class="line">    sa_family_t     sin_family;</div><div class="line">    in_port_t       sin_port;</div><div class="line"></div><div class="line">    struct in_addr  sin_addr;</div><div class="line"></div><div class="line">    char            sin_zero[8];</div><div class="line">&#125;;</div></pre></td></tr></table></figure></p>
-<p>1.IPv4地址和TCP或UDP端口号在套接字地址结构中总是以网络字节序来存储；<br>2.sin_zero字段未曾使用，不过在填写这中套接字地址结构时，总是把该字段置为0；<br>3.套接字地址结构仅在给定主机上使用；</p>
-<h4 id="值-结果参数"><a href="#值-结果参数" class="headerlink" title="值-结果参数"></a>值-结果参数</h4><p>当往一个套接字函数传递一个套接字地址结构时，该结构总是以引用形式来传递，也就是说传递的是指向该结构的一个指针。<br>（1）从进程到内核传递套接字地址结构的函数有三个：bind、connect、sendto。这些函数的一个参数是指向某个套接字地址结构的指针，另一个参数是该结构的整数大小，例如<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">struct sockaddr_in serv;</div><div class="line"></div><div class="line">connect(sockfd, (SA *) &amp;serv, sizeof(serv));</div></pre></td></tr></table></figure></p>
-<p>（2）从内核到进程传递套接字地址结构的函数有4个：accept、recvfrom、getsockname和getpeername。这4个函数的其中两个参数是指向某个套接字地址结构的指针和指向表示该结构大小的整数变量的指针。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">struct sockaddr_un cli;</div><div class="line">socklen_t len;</div><div class="line">len = sizeof(cli);</div><div class="line">getpeername(unixfd, (SA *) &amp;cli, &amp;len);</div></pre></td></tr></table></figure></p>
-<h4 id="字节排序函数"><a href="#字节排序函数" class="headerlink" title="字节排序函数"></a>字节排序函数</h4><p>小端字节序（little-endlian）：将低序字节存储在起始地址；<br>大端字节序（big-endian）：将高序字节存储在起始地址；<br>主机字节序：整数在内存中保存的顺序；<br>网络字节序：是TCP/IP中规定好的一种数据表示格式，他与具体的CPU类型、操作系统等无关，从而保证数据在不同主机之间传输时能够被正确解释。网络字节序采用big-endian。<br><img src="../../../../pictures/UNIX/20170919153411.png" alt=""></p>
-<h4 id="字节操纵函数"><a href="#字节操纵函数" class="headerlink" title="字节操纵函数"></a>字节操纵函数</h4><p>操纵多字节字段的函数有两组，一组是名字以b开头的函数起源于4.2BSD几乎所有现今支持套接字函数的系统仍然提供它们；另一组是以mem开头的第二组函数起源于ANSI C标准，支持ANSI C函数库的所有系统都提供它们。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">#include &lt;strings.h&gt;</div><div class="line">//将目标字节串指定书目的字节置为0</div><div class="line">void bzero(void *dest, size_t nbytes); </div><div class="line"> //将指针syc指向的大小为nbytes的字节赋给指针dest</div><div class="line">void bcopy(const void *syc, void *dest, size_t nbytes);</div><div class="line">//比较大小，若相同返回0，否则返回非0</div><div class="line">int bmcp(const void *ptr1, const void *ptr2, size_t nbytes);</div></pre></td></tr></table></figure></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">#include &lt;strings.h&gt;</div><div class="line">//将目标地址大小为len的字节置为值c</div><div class="line">void *memset(void *dest, int c, size_t len);</div><div class="line">//将指针syc指向的大小为nbytes的字节赋给指针dest</div><div class="line">void *memcpy(void *dest, const void *syc, size_t nbytes);</div><div class="line">//比较两个任意的字节串大小，若相同返回0，否则返回非0 </div><div class="line">int memcmp(const void *ptr1, const void *ptr2, size_t nbytes);</div></pre></td></tr></table></figure>
-
-          
+          <p>&emsp;&emsp;本文对套接字地址结构，什么是值-结果参数，还有字节排序函数和字节操作函数做了简单的介绍。<br>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/09/18/套接字编程简介/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
