@@ -78,7 +78,7 @@
 <link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="Hexo, NexT" />
+  <meta name="keywords" content="Linux," />
 
 
 
@@ -96,18 +96,17 @@
 
 
 
-<meta name="description" content="&amp;emsp;&amp;emsp;这里对高速缓存器的写命中和写不命中做一点简单的介绍。">
+<meta name="description" content="&amp;emsp;&amp;emsp;TCP是一个事件驱动的状态机。TCP为实现可靠的传输，主要定义并实现了以下定时器：重传定时器、延时确认定时器、零窗口探测定时器（持久定时器）、keepalive定时器、TIME_WAIT定时器、SYN-ACK定时器（监听套接字定时器）。">
+<meta name="keywords" content="Linux">
 <meta property="og:type" content="article">
-<meta property="og:title" content="存储器层次结构">
-<meta property="og:url" content="http://yoursite.com/2016/10/19/存储器层次结构/index.html">
+<meta property="og:title" content="TCP定时器（一）">
+<meta property="og:url" content="http://yoursite.com/2018/01/02/TCP定时器（一）/index.html">
 <meta property="og:site_name" content="凡是过去 皆为序曲">
-<meta property="og:description" content="&amp;emsp;&amp;emsp;这里对高速缓存器的写命中和写不命中做一点简单的介绍。">
-<meta property="og:image" content="http://yoursite.com/pictures/Computer%20System/Snip20170316_58.png">
-<meta property="og:updated_time" content="2017-12-30T01:06:25.553Z">
+<meta property="og:description" content="&amp;emsp;&amp;emsp;TCP是一个事件驱动的状态机。TCP为实现可靠的传输，主要定义并实现了以下定时器：重传定时器、延时确认定时器、零窗口探测定时器（持久定时器）、keepalive定时器、TIME_WAIT定时器、SYN-ACK定时器（监听套接字定时器）。">
+<meta property="og:updated_time" content="2018-01-02T07:19:35.584Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="存储器层次结构">
-<meta name="twitter:description" content="&amp;emsp;&amp;emsp;这里对高速缓存器的写命中和写不命中做一点简单的介绍。">
-<meta name="twitter:image" content="http://yoursite.com/pictures/Computer%20System/Snip20170316_58.png">
+<meta name="twitter:title" content="TCP定时器（一）">
+<meta name="twitter:description" content="&amp;emsp;&amp;emsp;TCP是一个事件驱动的状态机。TCP为实现可靠的传输，主要定义并实现了以下定时器：重传定时器、延时确认定时器、零窗口探测定时器（持久定时器）、keepalive定时器、TIME_WAIT定时器、SYN-ACK定时器（监听套接字定时器）。">
 
 
 
@@ -135,13 +134,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2016/10/19/存储器层次结构/"/>
+  <link rel="canonical" href="http://yoursite.com/2018/01/02/TCP定时器（一）/"/>
 
 
 
 
 
-  <title>存储器层次结构 | 凡是过去 皆为序曲</title>
+  <title>TCP定时器（一） | 凡是过去 皆为序曲</title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -290,7 +289,7 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/10/19/存储器层次结构/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/02/TCP定时器（一）/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="kevin">
@@ -307,7 +306,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">存储器层次结构</h1>
+          <h1 class="post-title" itemprop="name headline">TCP定时器（一）</h1>
         
 
         <div class="post-meta">
@@ -319,8 +318,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-10-19T12:44:34+08:00">
-                2016-10-19
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-02T01:55:01+08:00">
+                2018-01-02
               </time>
             
 
@@ -342,8 +341,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/深入理解计算机系统/" itemprop="url" rel="index">
-                    <span itemprop="name">深入理解计算机系统</span>
+                  <a href="/categories/TCP-IP架构、设计及应用/" itemprop="url" rel="index">
+                    <span itemprop="name">TCP/IP架构、设计及应用</span>
                   </a>
                 </span>
 
@@ -361,8 +360,8 @@
                 <i class="fa fa-comment-o"></i>
               </span>
               
-                <a href="/2016/10/19/存储器层次结构/#SOHUCS" itemprop="discussionUrl">
-                  <span id="changyan_count_unit" class="post-comments-count hc-comment-count" data-xid="2016/10/19/存储器层次结构/" itemprop="commentsCount"></span>
+                <a href="/2018/01/02/TCP定时器（一）/#SOHUCS" itemprop="discussionUrl">
+                  <span id="changyan_count_unit" class="post-comments-count hc-comment-count" data-xid="2018/01/02/TCP定时器（一）/" itemprop="commentsCount"></span>
                 </a>
               
             
@@ -387,10 +386,13 @@
       
 
       
-        <p>&emsp;&emsp;这里对高速缓存器的写命中和写不命中做一点简单的介绍。<br><a id="more"></a></p>
-<h3 id="高速缓存存储器"><a href="#高速缓存存储器" class="headerlink" title="高速缓存存储器"></a>高速缓存存储器</h3><h4 id="有关写的问题"><a href="#有关写的问题" class="headerlink" title="有关写的问题"></a>有关写的问题</h4><h5 id="写命中"><a href="#写命中" class="headerlink" title="写命中"></a>写命中</h5><p>要写到内存中的字已经缓存在了高速缓存中叫做写命中。写操作分为直写和回写两种。<br><strong>直写：</strong>当高速缓存更新后立即将高速缓存块写回到紧接着的低一层中。虽然简单，但是直写的缺点是每次写都会引起总线流量。<br><strong>写回：</strong>尽可能的推迟存储器更新，只有当替换算法要驱逐更新过的块时，才把它写到的紧接着的低一层中。由于局部性，写回能显著地减少总线流量，但是它的缺点是增加了复杂性。高数缓存必须为每个高速缓存行维护一个额外的修改为，表明这个高速缓存块是否被修改过。</p>
-<h5 id="写不命中"><a href="#写不命中" class="headerlink" title="写不命中"></a>写不命中</h5><p>要写到内存中的字没有缓存在高速缓存中叫做写不命中。写操作分为写分配和非写分配两种。<br><strong>写分配：</strong>加载相应的低一层中的块到高数缓存中，然后更新这个高速缓存。写分配试图写的空间局部性，但是缺点是每次写不命中都会导致一个快从第一层传送到高速缓存。<br><strong>非写分配：</strong>避开高速缓存，直接把这个字写到低一层中。<br>直写高速缓存通常是非写分配的，写回高速缓存通常是写分配的。</p>
-<h4 id="真实的高速缓存层次结构的解剖"><a href="#真实的高速缓存层次结构的解剖" class="headerlink" title="真实的高速缓存层次结构的解剖"></a>真实的高速缓存层次结构的解剖</h4><p>高速缓存既保存数据，也保存指令。<br><strong>i-cache:</strong>只保存的指令的高速缓存，i-cache通常是只读的。<br><strong>d-cache:</strong>只保存的数据的高速缓存，d-cache通常是可读和可写的。<br><strong>统一的高速缓存：</strong>既保存指令又保存数据的高速缓存叫做统一的高速缓存。<br>现代处理器包括独立的i-cache和d-cache，有两个独立的高速缓存，处理器能同时读一个指令字和一个数据字。下图给出了Intel Core i7处理器的高速缓存层次结构。<br><img src="../../../../pictures/Computer System/Snip20170316_58.png" alt=""></p>
+        <p>&emsp;&emsp;TCP是一个事件驱动的状态机。TCP为实现可靠的传输，主要定义并实现了以下定时器：重传定时器、延时确认定时器、零窗口探测定时器（持久定时器）、keepalive定时器、TIME_WAIT定时器、SYN-ACK定时器（监听套接字定时器）。<br><a id="more"></a><br>&emsp;&emsp;重传定时器、延时确认定时器和零窗口探测定时器是TCP状态机核心实现的一部分。keepalive定时器用来管理已建立的连接。TIME_WAIT定时器用来管理关闭的连接，并等待2*MSL后超时。SYN-ACK定时器用来管理新连接请求。TCP提供了如下三个函数来管理这些定时器：<br>&emsp;&emsp;tcp_reset_xmit_timeer()<br>&emsp;&emsp;tcp_reset_keepalive_timer()<br>&emsp;&emsp;tcp_clear_xmit_timer()<br>&emsp;&emsp;tcp_reset_xmit_timer()是用来重置TCP状态机定时器的通用函数。tcp_reset_keepalive_timer()是重置连接管理定时器的接口，如keepalive定时器和SYN-ACK定时器。tcp_clear_xmit_timer()用来清楚或删除已安装的TCP定时器。</p>
+<h3 id="Linux中的定时器"><a href="#Linux中的定时器" class="headerlink" title="Linux中的定时器"></a>Linux中的定时器</h3><p>&emsp;&emsp;Linxu实现定时器的数据结构是struct timer_list，源码如下：<br>include/linux/timer.h<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">struct timer_list &#123;</div><div class="line">    /* list指向列表头的指针，这时定时器所在的位置 */</div><div class="line">    struct list_head list;</div><div class="line">    /* 存储定时器启动所需的时钟周期数 */</div><div class="line">    unsigned long expires;</div><div class="line">    /* 包含传递给定时器回调函数的参数 */</div><div class="line">    unsigned long data;</div><div class="line">    /* 定时器超时时，所需要执行的回调函数 */</div><div class="line">    void (*functian) (unsigned long);</div><div class="line">&#125;;</div></pre></td></tr></table></figure></p>
+<h4 id="mod-timer"><a href="#mod-timer" class="headerlink" title="mod_timer()"></a>mod_timer()</h4><p>&emsp;&emsp;当需要修改定时器的超时时间时，就需要调用mod_timer()，源码如下：<br>kernel/timer.c<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">int mod_timer(struct time_list *timer, unsigned long expires)</div><div class="line">&#123;</div><div class="line">    int ret;</div><div class="line">    unsigned long flags;</div><div class="line">    /* 修改定时器的expires域要获取全局定时器旋转锁timerlist_lock */</div><div class="line">    spin_lock_irqsave(&amp;timertlist_lock, flags);</div><div class="line">    timer-&gt;expires = expires;</div><div class="line">    /* 将已安装定时器从全局列表中删除 */</div><div class="line">    ret = detach_timer(timer);</div><div class="line">    /* 在全局列表中添加定时器 */</div><div class="line">    internal_add_timer(timer);</div><div class="line">    spin_unlockirqrestore(&amp;timerlist_lock, flags);</div><div class="line">    return ret;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h4 id="detach-timer"><a href="#detach-timer" class="headerlink" title="detach_timer()"></a>detach_timer()</h4><p>&emsp;&emsp;该函数将已安装的定时器从全局列表中分离，源码如下：<br>kernel/timer.c<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">static inline int detach_timer()</div><div class="line">&#123;</div><div class="line">   /* timer_pending()函数检查定时器是否安装在全局列表中，如果没有安装，那么定</div><div class="line">    * 时器列表头的next域为NULL，直接返回0. </div><div class="line">    */</div><div class="line">   if (!timer_pending(timer));</div><div class="line">       return 0;</div><div class="line">   /* 如果已经安装，那么调用list_del()将已安装定时器从全局列表中分离 */</div><div class="line">   list_del(&amp;timer-&gt;list);</div><div class="line">   return 1;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h4 id="del-timer"><a href="#del-timer" class="headerlink" title="del_timer()"></a>del_timer()</h4><p>&emsp;&emsp;当要求取消某定时器时，首先调用timer_pending()来检查该定时器是否安装。如果定时器已经安装，就调用del_timer()从列表中删除定时器，将定时器从全局列表中删除的操作需要获取全局宣转锁timerlist_lock。源码如下：<br>kernel/timer.c<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">int del_timer(struct timer_list *timer)</div><div class="line">&#123;</div><div class="line">    int ret;</div><div class="line">    unsigned long flags;</div><div class="line"></div><div class="line">    spin_lock_irqsave(&amp;timertlist_lock, flags);</div><div class="line">    /* 调用detach_timer()来从全局列表中分离该定时器 */</div><div class="line">    ret = detach-timer(timer);</div><div class="line">    /* 将定时器列表头的next和previous域置为NULL */</div><div class="line">    timer-&gt;list.next = timer-&gt;list.prev = NULL;</div><div class="line">    spin_unlockirqrestore(&amp;timerlist_lock, flags);</div><div class="line">    return ret;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h4 id="执行定时器函数的时机"><a href="#执行定时器函数的时机" class="headerlink" title="执行定时器函数的时机"></a>执行定时器函数的时机</h4><p>&emsp;&emsp;定时器中断每10ms一次，也就是说，一个时钟周期产生一次。该中断通过从do_timer()调用mark_bh()来产生软中断处理定时器。调用mark_bh()要传递bh_task_vec[]中的偏移量，mark_bh()调用tasklet_hi_schedule()来调度bh_task_vec[TIMER_BH]所指向的任务。在此要首先检查是否已经调度了该任务，如果该任务还没有调度，就调度<strong>tasklet_hi_schedule()来调度它，这可以保证一个任务仅在一个CPU上调度，同样的任务不能也不能在同一个CUP上调用两次。</strong>tasklet_hi_schedule()将在当前的CPU上调度该定时器任务。在每个CPU的tasklet_hi_vec[cpu].list列表中添加任务，然后产生HI_SOFTIRQ软中断。<br>kernel/timer.c<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">void __tasklet_hi_schedule(struct tasklet_struct *t)</div><div class="line">&#123;</div><div class="line">    int cpu = smp_processor_id();</div><div class="line">    unsigned long flags;</div><div class="line"></div><div class="line">    local_irq_save(flags);</div><div class="line">    t-&gt;next = tasklet_hi_vec[cpu].list;</div><div class="line">    tasklet_hi_vec[cpu].list = t;</div><div class="line">    cpu_raise_softirq(cpu, HI_SOFTIRQ);</div><div class="line">    local_irq_restore(flags);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p><strong>参考文献</strong>：<br><a href="https://aavmqxaxn.updog.co/YWF2bXF4YXhuMDQ3MDE0NzczMw.pdf" target="_blank" rel="external">TCP/IP架构、设计及应用</a></p>
 
       
     </div>
@@ -418,6 +420,12 @@
 
     <footer class="post-footer">
       
+        <div class="post-tags">
+          
+            <a href="/tags/Linux/" rel="tag"># Linux</a>
+          
+        </div>
+      
 
       
         
@@ -427,14 +435,18 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
+              <a href="/2017/12/31/TCP接收/" rel="next" title="TCP接收">
+                <i class="fa fa-chevron-left"></i> TCP接收
+              </a>
+            
           </div>
 
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2016/10/19/异常控制流/" rel="prev" title="异常控制流">
-                异常控制流 <i class="fa fa-chevron-right"></i>
+              <a href="/2018/01/02/TCP定时器（二）/" rel="prev" title="TCP重传定时器">
+                TCP重传定时器 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -574,7 +586,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#高速缓存存储器"><span class="nav-number">1.</span> <span class="nav-text">高速缓存存储器</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#有关写的问题"><span class="nav-number">1.1.</span> <span class="nav-text">有关写的问题</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#写命中"><span class="nav-number">1.1.1.</span> <span class="nav-text">写命中</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#写不命中"><span class="nav-number">1.1.2.</span> <span class="nav-text">写不命中</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#真实的高速缓存层次结构的解剖"><span class="nav-number">1.2.</span> <span class="nav-text">真实的高速缓存层次结构的解剖</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#Linux中的定时器"><span class="nav-number">1.</span> <span class="nav-text">Linux中的定时器</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#mod-timer"><span class="nav-number">1.1.</span> <span class="nav-text">mod_timer()</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#detach-timer"><span class="nav-number">1.2.</span> <span class="nav-text">detach_timer()</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#del-timer"><span class="nav-number">1.3.</span> <span class="nav-text">del_timer()</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#执行定时器函数的时机"><span class="nav-number">1.4.</span> <span class="nav-text">执行定时器函数的时机</span></a></li></ol></li></ol></div>
             
 
           </div>

@@ -78,10 +78,12 @@
 <link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="Hexo, NexT" />
+  <meta name="keywords" content="Linux," />
 
 
 
+
+  
 
 
   <link rel="alternate" href="/atom.xml" title="凡是过去 皆为序曲" type="application/atom+xml" />
@@ -96,18 +98,17 @@
 
 
 
-<meta name="description" content="&amp;emsp;&amp;emsp;这里对高速缓存器的写命中和写不命中做一点简单的介绍。">
+<meta name="description" content="&amp;emsp;&amp;emsp;TCP重传定时器是TCP状态机的一部分，用来检查网络拥塞/数据丢失。TCP就其所接收到的每个字节发出确认，一次来维护数据完整性。发送端根据确认报文中的时间戳选型来计算RTT（往返时间），然后根据RTT计算重传超时时间。">
+<meta name="keywords" content="Linux">
 <meta property="og:type" content="article">
-<meta property="og:title" content="存储器层次结构">
-<meta property="og:url" content="http://yoursite.com/2016/10/19/存储器层次结构/index.html">
+<meta property="og:title" content="TCP重传定时器">
+<meta property="og:url" content="http://yoursite.com/2018/01/02/TCP定时器（二）/index.html">
 <meta property="og:site_name" content="凡是过去 皆为序曲">
-<meta property="og:description" content="&amp;emsp;&amp;emsp;这里对高速缓存器的写命中和写不命中做一点简单的介绍。">
-<meta property="og:image" content="http://yoursite.com/pictures/Computer%20System/Snip20170316_58.png">
-<meta property="og:updated_time" content="2017-12-30T01:06:25.553Z">
+<meta property="og:description" content="&amp;emsp;&amp;emsp;TCP重传定时器是TCP状态机的一部分，用来检查网络拥塞/数据丢失。TCP就其所接收到的每个字节发出确认，一次来维护数据完整性。发送端根据确认报文中的时间戳选型来计算RTT（往返时间），然后根据RTT计算重传超时时间。">
+<meta property="og:updated_time" content="2018-01-02T10:20:26.982Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="存储器层次结构">
-<meta name="twitter:description" content="&amp;emsp;&amp;emsp;这里对高速缓存器的写命中和写不命中做一点简单的介绍。">
-<meta name="twitter:image" content="http://yoursite.com/pictures/Computer%20System/Snip20170316_58.png">
+<meta name="twitter:title" content="TCP重传定时器">
+<meta name="twitter:description" content="&amp;emsp;&amp;emsp;TCP重传定时器是TCP状态机的一部分，用来检查网络拥塞/数据丢失。TCP就其所接收到的每个字节发出确认，一次来维护数据完整性。发送端根据确认报文中的时间戳选型来计算RTT（往返时间），然后根据RTT计算重传超时时间。">
 
 
 
@@ -135,13 +136,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2016/10/19/存储器层次结构/"/>
+  <link rel="canonical" href="http://yoursite.com/2018/01/02/TCP定时器（二）/"/>
 
 
 
 
 
-  <title>存储器层次结构 | 凡是过去 皆为序曲</title>
+  <title>TCP重传定时器 | 凡是过去 皆为序曲</title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -290,7 +291,7 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/10/19/存储器层次结构/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/02/TCP定时器（二）/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="kevin">
@@ -307,7 +308,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">存储器层次结构</h1>
+          <h1 class="post-title" itemprop="name headline">TCP重传定时器</h1>
         
 
         <div class="post-meta">
@@ -319,8 +320,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-10-19T12:44:34+08:00">
-                2016-10-19
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-02T15:21:20+08:00">
+                2018-01-02
               </time>
             
 
@@ -342,8 +343,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/深入理解计算机系统/" itemprop="url" rel="index">
-                    <span itemprop="name">深入理解计算机系统</span>
+                  <a href="/categories/TCP-IP架构、设计及应用/" itemprop="url" rel="index">
+                    <span itemprop="name">TCP/IP架构、设计及应用</span>
                   </a>
                 </span>
 
@@ -361,8 +362,8 @@
                 <i class="fa fa-comment-o"></i>
               </span>
               
-                <a href="/2016/10/19/存储器层次结构/#SOHUCS" itemprop="discussionUrl">
-                  <span id="changyan_count_unit" class="post-comments-count hc-comment-count" data-xid="2016/10/19/存储器层次结构/" itemprop="commentsCount"></span>
+                <a href="/2018/01/02/TCP定时器（二）/#SOHUCS" itemprop="discussionUrl">
+                  <span id="changyan_count_unit" class="post-comments-count hc-comment-count" data-xid="2018/01/02/TCP定时器（二）/" itemprop="commentsCount"></span>
                 </a>
               
             
@@ -387,10 +388,12 @@
       
 
       
-        <p>&emsp;&emsp;这里对高速缓存器的写命中和写不命中做一点简单的介绍。<br><a id="more"></a></p>
-<h3 id="高速缓存存储器"><a href="#高速缓存存储器" class="headerlink" title="高速缓存存储器"></a>高速缓存存储器</h3><h4 id="有关写的问题"><a href="#有关写的问题" class="headerlink" title="有关写的问题"></a>有关写的问题</h4><h5 id="写命中"><a href="#写命中" class="headerlink" title="写命中"></a>写命中</h5><p>要写到内存中的字已经缓存在了高速缓存中叫做写命中。写操作分为直写和回写两种。<br><strong>直写：</strong>当高速缓存更新后立即将高速缓存块写回到紧接着的低一层中。虽然简单，但是直写的缺点是每次写都会引起总线流量。<br><strong>写回：</strong>尽可能的推迟存储器更新，只有当替换算法要驱逐更新过的块时，才把它写到的紧接着的低一层中。由于局部性，写回能显著地减少总线流量，但是它的缺点是增加了复杂性。高数缓存必须为每个高速缓存行维护一个额外的修改为，表明这个高速缓存块是否被修改过。</p>
-<h5 id="写不命中"><a href="#写不命中" class="headerlink" title="写不命中"></a>写不命中</h5><p>要写到内存中的字没有缓存在高速缓存中叫做写不命中。写操作分为写分配和非写分配两种。<br><strong>写分配：</strong>加载相应的低一层中的块到高数缓存中，然后更新这个高速缓存。写分配试图写的空间局部性，但是缺点是每次写不命中都会导致一个快从第一层传送到高速缓存。<br><strong>非写分配：</strong>避开高速缓存，直接把这个字写到低一层中。<br>直写高速缓存通常是非写分配的，写回高速缓存通常是写分配的。</p>
-<h4 id="真实的高速缓存层次结构的解剖"><a href="#真实的高速缓存层次结构的解剖" class="headerlink" title="真实的高速缓存层次结构的解剖"></a>真实的高速缓存层次结构的解剖</h4><p>高速缓存既保存数据，也保存指令。<br><strong>i-cache:</strong>只保存的指令的高速缓存，i-cache通常是只读的。<br><strong>d-cache:</strong>只保存的数据的高速缓存，d-cache通常是可读和可写的。<br><strong>统一的高速缓存：</strong>既保存指令又保存数据的高速缓存叫做统一的高速缓存。<br>现代处理器包括独立的i-cache和d-cache，有两个独立的高速缓存，处理器能同时读一个指令字和一个数据字。下图给出了Intel Core i7处理器的高速缓存层次结构。<br><img src="../../../../pictures/Computer System/Snip20170316_58.png" alt=""></p>
+        <p>&emsp;&emsp;TCP重传定时器是TCP状态机的一部分，用来检查网络拥塞/数据丢失。TCP就其所接收到的每个字节发出确认，一次来维护数据完整性。发送端根据确认报文中的时间戳选型来计算RTT（往返时间），然后根据RTT计算重传超时时间。<br><a id="more"></a><br>&emsp;&emsp;当发出窗口中的第一个分段时，就需要安装一个重传定时器，超时时间为一个RTO。这确保TCP在分段发送后的RTO时间内收到ACK，如果没有得到确认，重传定时器就超时，据此判断出所有窗口中的数据都已丢失。</p>
+<h4 id="安装重传定时器的时机"><a href="#安装重传定时器的时机" class="headerlink" title="安装重传定时器的时机"></a>安装重传定时器的时机</h4><p>&emsp;&emsp;传输当前窗口的第一个报文时就需要安装重传定时器。packet_out记录了已经传输但还没确认的报文，一旦传输一个新的报文，就要将packet_out加一。在传输结束后，检查packet_out是否为零，如果是，就启动重传定时器在tp-&gt;rto时间后超时。<br>net/ipv4/tcp_output.c<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">static __inline__ </div><div class="line">void update_send_head(struct sock *sk, struct tcp_opt *tp, struct sk_buff *skb)</div><div class="line">&#123;</div><div class="line">    ......</div><div class="line">    /* tcp_write_xmit()在成功传输完第一个分段后，将调用updata_send_head()</div><div class="line">     * 重置第一个分段的重传定时器。</div><div class="line">     */</div><div class="line">    if (tp-&gt;packets_out++ == 0)</div><div class="line">        tcp_reset_xmit_timer(sk, TCP_TIME_RETRANS, tp-&gt;rto); </div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h4 id="重置或取消重传定时器的时机"><a href="#重置或取消重传定时器的时机" class="headerlink" title="重置或取消重传定时器的时机"></a>重置或取消重传定时器的时机</h4><p>&emsp;&emsp;每收到一个ACK，TCP都要重置重传定时器，该ACK通告了一个发送窗口，调用顺序是tcp_ack()-&gt;tcp_clean_rtx_queue()调用tcp_ack_packets_out()。源码如下：<br>net/ipv4/tcp_output.c<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">static __inline__ void tcp_ack_packets_out(struct sock *sk, struct tcp_opt *tp)</div><div class="line">&#123;</div><div class="line">    /* 如果所有分段都收到确认，就删除重传定时器 */</div><div class="line">    if (tp-&gt;packets_out == 0) &#123;</div><div class="line">        tcp_clear-xmit_timer(sk, TCP_TIME_RETRANS);</div><div class="line">    /* 否则重置重传定时器 */</div><div class="line">    &#125; else &#123;</div><div class="line">        tcp_reset_xmit_timer(sk, TCP_TIME_RETRANS, tp-&gt;rto);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>&emsp;&emsp;在丢失恢复过程中传输分段时，如果在tcp_xmit_retransmit_queue()中重新传输重传队列的第一个分段，就重置重传定时器。重传定时器不仅仅考虑重传，还要调整超时值、重置路由、检查重试次数是否超出了限度等。<br>net/ipv4/tcp_output.c<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div></pre></td><td class="code"><pre><div class="line">static void tcp_retransmit_timer(struct sock *sk)</div><div class="line">&#123;</div><div class="line">    struct tcp_opt *tp = &amp;sk-&gt;tp_pinfo.af_tcp;</div><div class="line">    /* 乳沟没有报文传输，就返回，表示没有要重传的分段 */</div><div class="line">    if (tp-&gt;packets_out == 0)</div><div class="line">        goto out;</div><div class="line">    ......</div><div class="line">    /* 检查发送窗口是否关闭，套接字是否仍然活跃 */</div><div class="line">    if (tp-&gt;snd_wnd == 0 &amp;&amp; !sk-&gt;dead &amp;&amp; </div><div class="line">        !(1 &lt;&lt; sk-&gt;state)&amp;(TCPF_SYN_SENT|TCPF_SYN_RECV)) &#123;</div><div class="line">            ......</div><div class="line">            /* 如果超过了TCP_RTO_MAX的时间后还没有收到ACK，就需要设置该连接为超</div><div class="line">             * 时。</div><div class="line">             */</div><div class="line">            if (tcp_time_stamp - tp-&gt;rcv_tstamp &gt; TCP_RTO_MAX) &#123;</div><div class="line">                tcp_write_err(sk);</div><div class="line">                goto out;</div><div class="line">            &#125;</div><div class="line">            /* 如果该连接没有超时，就进入慢启动表示进入报文丢失状态 */</div><div class="line">            tcp_entry_loss(sk, 0);</div><div class="line">            /* 重新传输重传队列的头部 */</div><div class="line">            tcp_retransmit_skb(sk, skb_peek(&amp;sk-&gt;write_queue));</div><div class="line">            /* 使目的地址失效 */</div><div class="line">            __sk_dst_reset(sk);</div><div class="line">            /* 无法与对等端通信时，会导致窗口无法更新，这时会产生替代路由 */</div><div class="line">            goto out_reset_timer;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        /* 检查是否已超出重传次数 */</div><div class="line">        if (tcp_write_timeout(sk))</div><div class="line">            goto out;</div><div class="line">            ......</div><div class="line">        /* 表示没有超出重传次数，进入慢启动阶段 */</div><div class="line">        tcp_entry_loss(sk, 0);</div><div class="line"></div><div class="line">        /* 返回值大于0表示重传失败 */</div><div class="line">        if (tcp_retransmit_skb(sk, skb_peek(&amp;sk-&gt;write_queue)) &gt; 0) &#123;</div><div class="line">            /* tp-&gt;retransmits记录了重传丢失分段的次数 */</div><div class="line">            if (!tp-&gt;retransmits)</div><div class="line">                tp-&gt;retransmits = 1;</div><div class="line">            /* 重置重传定时器为rto和TCP_RESOURCE_PROBE_INTERVAL的较小值 */</div><div class="line">            tcp_reset_xmit_timer(sk, TCP_TIME_RETRANS, </div><div class="line">                min(tp-&gt;rto, TCP_RESOURSE_INTERVAL));</div><div class="line">            goto out;</div><div class="line">        &#125;</div><div class="line">        ......</div><div class="line">        /* 表示成功传输了丢失的分段 */</div><div class="line">        tp-&gt;backoff++;</div><div class="line">        tp-&gt;retransmits++;</div><div class="line"></div><div class="line">out_reset_timer:</div><div class="line">        /* 超时值取tp-&gt;rto和TCP_RTO_MAX中的较小值 */</div><div class="line">        tp-&gt;rto = min(tp-&gt;rto&lt;&lt;1, TCP_RTO_MAX);</div><div class="line">        /* 重置重传定时器 */</div><div class="line">        tcp_reset_xmit_timer(sk, TCP_TIME_RETRANS, tp-&gt;rto);</div><div class="line">        /* 检查重传最大次数是否超出了路由复位的次数 */</div><div class="line">        if (tp-&gt;retransmits &gt; sysctl_tcp_retries1)</div><div class="line">            __sk_dst_reset(sk);</div><div class="line"></div><div class="line">out:;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>&emsp;&emsp;连接超时有4个系统控制参数：<br>&emsp;&emsp;sysctl_tcp_retries1<br>&emsp;&emsp;sysctl_tcp_retries2<br>&emsp;&emsp;sysctl_tcp_syn_retries<br>&emsp;&emsp;sysctl_tcp_orphan_retries<br>&emsp;&emsp;sysctl_tcp_retries1是最大重传次数，超出该次数之后，要检查中间路由器是否失效。sysctl_tcp_retries2是分段重传的最大尝试次数，超出重试次数后，将放弃该连接。sysctl_tcp_syn_retries是重传SYN分段的最大尝试次数，在此之后，将放弃重试。sysctl_tcp_orphan_retries是孤立套接字的最大重试次数。</p>
+<p><strong>参考文献</strong>：<br><a href="https://aavmqxaxn.updog.co/YWF2bXF4YXhuMDQ3MDE0NzczMw.pdf" target="_blank" rel="external">TCP/IP架构、设计及应用</a></p>
 
       
     </div>
@@ -418,6 +421,12 @@
 
     <footer class="post-footer">
       
+        <div class="post-tags">
+          
+            <a href="/tags/Linux/" rel="tag"># Linux</a>
+          
+        </div>
+      
 
       
         
@@ -427,15 +436,15 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
+              <a href="/2018/01/02/TCP定时器（一）/" rel="next" title="TCP定时器（一）">
+                <i class="fa fa-chevron-left"></i> TCP定时器（一）
+              </a>
+            
           </div>
 
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2016/10/19/异常控制流/" rel="prev" title="异常控制流">
-                异常控制流 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -574,7 +583,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#高速缓存存储器"><span class="nav-number">1.</span> <span class="nav-text">高速缓存存储器</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#有关写的问题"><span class="nav-number">1.1.</span> <span class="nav-text">有关写的问题</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#写命中"><span class="nav-number">1.1.1.</span> <span class="nav-text">写命中</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#写不命中"><span class="nav-number">1.1.2.</span> <span class="nav-text">写不命中</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#真实的高速缓存层次结构的解剖"><span class="nav-number">1.2.</span> <span class="nav-text">真实的高速缓存层次结构的解剖</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#安装重传定时器的时机"><span class="nav-number">1.</span> <span class="nav-text">安装重传定时器的时机</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#重置或取消重传定时器的时机"><span class="nav-number">2.</span> <span class="nav-text">重置或取消重传定时器的时机</span></a></li></ol></div>
             
 
           </div>
