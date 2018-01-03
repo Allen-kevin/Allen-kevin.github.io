@@ -96,17 +96,17 @@
 
 
 
-<meta name="description" content="&amp;emsp;&amp;emsp;TCP是一个事件驱动的状态机。TCP为实现可靠的传输，主要定义并实现了以下定时器：重传定时器、延时确认定时器、零窗口探测定时器（持久定时器）、keepalive定时器、TIME_WAIT定时器、SYN-ACK定时器（监听套接字定时器）。">
+<meta name="description" content="&amp;emsp;&amp;emsp;接收端TCP在接受缓冲区满时，通告零窗口一旦应用程序从接受缓冲区中读取数据，就检查是否在接受缓冲区中释放了足够的空间，以向发送端通告新窗口。如果是，就发出通告新窗口的ACK分段。如果该分段丢失，在仅有单向数据流动时，很可能会导致发送端和接收端之间产生死锁。为了避免这种情况发生，发送端实现了零窗口探测定时器。">
 <meta name="keywords" content="Linux">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Linux中的定时器">
-<meta property="og:url" content="http://yoursite.com/2018/01/02/TCP定时器（一）/index.html">
+<meta property="og:title" content="零窗口探测定时器">
+<meta property="og:url" content="http://yoursite.com/2018/01/02/TCP定时器（三）/index.html">
 <meta property="og:site_name" content="凡是过去 皆为序曲">
-<meta property="og:description" content="&amp;emsp;&amp;emsp;TCP是一个事件驱动的状态机。TCP为实现可靠的传输，主要定义并实现了以下定时器：重传定时器、延时确认定时器、零窗口探测定时器（持久定时器）、keepalive定时器、TIME_WAIT定时器、SYN-ACK定时器（监听套接字定时器）。">
-<meta property="og:updated_time" content="2018-01-02T10:23:27.174Z">
+<meta property="og:description" content="&amp;emsp;&amp;emsp;接收端TCP在接受缓冲区满时，通告零窗口一旦应用程序从接受缓冲区中读取数据，就检查是否在接受缓冲区中释放了足够的空间，以向发送端通告新窗口。如果是，就发出通告新窗口的ACK分段。如果该分段丢失，在仅有单向数据流动时，很可能会导致发送端和接收端之间产生死锁。为了避免这种情况发生，发送端实现了零窗口探测定时器。">
+<meta property="og:updated_time" content="2018-01-03T02:55:32.061Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Linux中的定时器">
-<meta name="twitter:description" content="&amp;emsp;&amp;emsp;TCP是一个事件驱动的状态机。TCP为实现可靠的传输，主要定义并实现了以下定时器：重传定时器、延时确认定时器、零窗口探测定时器（持久定时器）、keepalive定时器、TIME_WAIT定时器、SYN-ACK定时器（监听套接字定时器）。">
+<meta name="twitter:title" content="零窗口探测定时器">
+<meta name="twitter:description" content="&amp;emsp;&amp;emsp;接收端TCP在接受缓冲区满时，通告零窗口一旦应用程序从接受缓冲区中读取数据，就检查是否在接受缓冲区中释放了足够的空间，以向发送端通告新窗口。如果是，就发出通告新窗口的ACK分段。如果该分段丢失，在仅有单向数据流动时，很可能会导致发送端和接收端之间产生死锁。为了避免这种情况发生，发送端实现了零窗口探测定时器。">
 
 
 
@@ -134,13 +134,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2018/01/02/TCP定时器（一）/"/>
+  <link rel="canonical" href="http://yoursite.com/2018/01/02/TCP定时器（三）/"/>
 
 
 
 
 
-  <title>Linux中的定时器 | 凡是过去 皆为序曲</title>
+  <title>零窗口探测定时器 | 凡是过去 皆为序曲</title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -289,7 +289,7 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/02/TCP定时器（一）/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/02/TCP定时器（三）/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="kevin">
@@ -306,7 +306,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">Linux中的定时器</h1>
+          <h1 class="post-title" itemprop="name headline">零窗口探测定时器</h1>
         
 
         <div class="post-meta">
@@ -318,7 +318,7 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-02T01:55:01+08:00">
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-02T18:23:59+08:00">
                 2018-01-02
               </time>
             
@@ -360,8 +360,8 @@
                 <i class="fa fa-comment-o"></i>
               </span>
               
-                <a href="/2018/01/02/TCP定时器（一）/#SOHUCS" itemprop="discussionUrl">
-                  <span id="changyan_count_unit" class="post-comments-count hc-comment-count" data-xid="2018/01/02/TCP定时器（一）/" itemprop="commentsCount"></span>
+                <a href="/2018/01/02/TCP定时器（三）/#SOHUCS" itemprop="discussionUrl">
+                  <span id="changyan_count_unit" class="post-comments-count hc-comment-count" data-xid="2018/01/02/TCP定时器（三）/" itemprop="commentsCount"></span>
                 </a>
               
             
@@ -386,12 +386,10 @@
       
 
       
-        <p>&emsp;&emsp;TCP是一个事件驱动的状态机。TCP为实现可靠的传输，主要定义并实现了以下定时器：重传定时器、延时确认定时器、零窗口探测定时器（持久定时器）、keepalive定时器、TIME_WAIT定时器、SYN-ACK定时器（监听套接字定时器）。<br><a id="more"></a><br>&emsp;&emsp;重传定时器、延时确认定时器和零窗口探测定时器是TCP状态机核心实现的一部分。keepalive定时器用来管理已建立的连接。TIME_WAIT定时器用来管理关闭的连接，并等待2*MSL后超时。SYN-ACK定时器用来管理新连接请求。TCP提供了如下三个函数来管理这些定时器：<br>&emsp;&emsp;tcp_reset_xmit_timeer()<br>&emsp;&emsp;tcp_reset_keepalive_timer()<br>&emsp;&emsp;tcp_clear_xmit_timer()<br>&emsp;&emsp;tcp_reset_xmit_timer()是用来重置TCP状态机定时器的通用函数。tcp_reset_keepalive_timer()是重置连接管理定时器的接口，如keepalive定时器和SYN-ACK定时器。tcp_clear_xmit_timer()用来清楚或删除已安装的TCP定时器。</p>
-<h3 id="Linux中的定时器"><a href="#Linux中的定时器" class="headerlink" title="Linux中的定时器"></a>Linux中的定时器</h3><p>&emsp;&emsp;Linxu实现定时器的数据结构是struct timer_list，源码如下：<br>include/linux/timer.h<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">struct timer_list &#123;</div><div class="line">    /* list指向列表头的指针，这时定时器所在的位置 */</div><div class="line">    struct list_head list;</div><div class="line">    /* 存储定时器启动所需的时钟周期数 */</div><div class="line">    unsigned long expires;</div><div class="line">    /* 包含传递给定时器回调函数的参数 */</div><div class="line">    unsigned long data;</div><div class="line">    /* 定时器超时时，所需要执行的回调函数 */</div><div class="line">    void (*functian) (unsigned long);</div><div class="line">&#125;;</div></pre></td></tr></table></figure></p>
-<h4 id="mod-timer"><a href="#mod-timer" class="headerlink" title="mod_timer()"></a>mod_timer()</h4><p>&emsp;&emsp;当需要修改定时器的超时时间时，就需要调用mod_timer()，源码如下：<br>kernel/timer.c<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">int mod_timer(struct time_list *timer, unsigned long expires)</div><div class="line">&#123;</div><div class="line">    int ret;</div><div class="line">    unsigned long flags;</div><div class="line">    /* 修改定时器的expires域要获取全局定时器旋转锁timerlist_lock */</div><div class="line">    spin_lock_irqsave(&amp;timertlist_lock, flags);</div><div class="line">    timer-&gt;expires = expires;</div><div class="line">    /* 将已安装定时器从全局列表中删除 */</div><div class="line">    ret = detach_timer(timer);</div><div class="line">    /* 在全局列表中添加定时器 */</div><div class="line">    internal_add_timer(timer);</div><div class="line">    spin_unlockirqrestore(&amp;timerlist_lock, flags);</div><div class="line">    return ret;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<h4 id="detach-timer"><a href="#detach-timer" class="headerlink" title="detach_timer()"></a>detach_timer()</h4><p>&emsp;&emsp;该函数将已安装的定时器从全局列表中分离，源码如下：<br>kernel/timer.c<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">static inline int detach_timer()</div><div class="line">&#123;</div><div class="line">   /* timer_pending()函数检查定时器是否安装在全局列表中，如果没有安装，那么定</div><div class="line">    * 时器列表头的next域为NULL，直接返回0. </div><div class="line">    */</div><div class="line">   if (!timer_pending(timer));</div><div class="line">       return 0;</div><div class="line">   /* 如果已经安装，那么调用list_del()将已安装定时器从全局列表中分离 */</div><div class="line">   list_del(&amp;timer-&gt;list);</div><div class="line">   return 1;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<h4 id="del-timer"><a href="#del-timer" class="headerlink" title="del_timer()"></a>del_timer()</h4><p>&emsp;&emsp;当要求取消某定时器时，首先调用timer_pending()来检查该定时器是否安装。如果定时器已经安装，就调用del_timer()从列表中删除定时器，将定时器从全局列表中删除的操作需要获取全局宣转锁timerlist_lock。源码如下：<br>kernel/timer.c<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">int del_timer(struct timer_list *timer)</div><div class="line">&#123;</div><div class="line">    int ret;</div><div class="line">    unsigned long flags;</div><div class="line"></div><div class="line">    spin_lock_irqsave(&amp;timertlist_lock, flags);</div><div class="line">    /* 调用detach_timer()来从全局列表中分离该定时器 */</div><div class="line">    ret = detach-timer(timer);</div><div class="line">    /* 将定时器列表头的next和previous域置为NULL */</div><div class="line">    timer-&gt;list.next = timer-&gt;list.prev = NULL;</div><div class="line">    spin_unlockirqrestore(&amp;timerlist_lock, flags);</div><div class="line">    return ret;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<h4 id="执行定时器函数的时机"><a href="#执行定时器函数的时机" class="headerlink" title="执行定时器函数的时机"></a>执行定时器函数的时机</h4><p>&emsp;&emsp;定时器中断每10ms一次，也就是说，一个时钟周期产生一次。该中断通过从do_timer()调用mark_bh()来产生软中断处理定时器。调用mark_bh()要传递bh_task_vec[]中的偏移量，mark_bh()调用tasklet_hi_schedule()来调度bh_task_vec[TIMER_BH]所指向的任务。在此要首先检查是否已经调度了该任务，如果该任务还没有调度，就调度<strong>tasklet_hi_schedule()来调度它，这可以保证一个任务仅在一个CPU上调度，同样的任务不能也不能在同一个CUP上调用两次。</strong>tasklet_hi_schedule()将在当前的CPU上调度该定时器任务。在每个CPU的tasklet_hi_vec[cpu].list列表中添加任务，然后产生HI_SOFTIRQ软中断。<br>kernel/timer.c<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">void __tasklet_hi_schedule(struct tasklet_struct *t)</div><div class="line">&#123;</div><div class="line">    int cpu = smp_processor_id();</div><div class="line">    unsigned long flags;</div><div class="line"></div><div class="line">    local_irq_save(flags);</div><div class="line">    t-&gt;next = tasklet_hi_vec[cpu].list;</div><div class="line">    tasklet_hi_vec[cpu].list = t;</div><div class="line">    cpu_raise_softirq(cpu, HI_SOFTIRQ);</div><div class="line">    local_irq_restore(flags);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+        <p>&emsp;&emsp;接收端TCP在接受缓冲区满时，通告零窗口一旦应用程序从接受缓冲区中读取数据，就检查是否在接受缓冲区中释放了足够的空间，以向发送端通告新窗口。如果是，就发出通告新窗口的ACK分段。如果该分段丢失，在仅有单向数据流动时，很可能会导致发送端和接收端之间产生死锁。为了避免这种情况发生，发送端实现了零窗口探测定时器。<br><a id="more"></a></p>
+<h4 id="首次安装探测定时器的时机"><a href="#首次安装探测定时器的时机" class="headerlink" title="首次安装探测定时器的时机"></a>首次安装探测定时器的时机</h4><p>&emsp;&emsp;当要传输新分段时，需要在很多地方做检查：<strong>tcp_push_pending_frames()、tcp_data_snd_check()。</strong>tcp_push_pending_frames()在将数据从应用程序发往套接字传输队列时调用，tcp_data_snd_check()在从对等段接收到分段时调用。这些函数检查是否能够发出新分段，如果不能，就调用tcp_check_probe_timer()检查是否接收窗口不允许数据分段发送而引发的。tcp_check_probe_timer()检查是否没有未确认数据（!tp-&gt;packets_out）且没有安装定时器（!tp-&gt;pending）。源码如下：<br>include/net/tcp.h<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">static __inline__ </div><div class="line">void tcp_check_probe_timer(struct sock *sk, struct tcp_opt *tp)</div><div class="line">&#123;   </div><div class="line">    /* 检查是否有未确认数据且没有安装定时器 */</div><div class="line">    if (!tp-&gt;packets_out &amp;&amp; !tp-&gt;pending)</div><div class="line">        /* 设置零窗口定时器的超时值为tp-&gt;rto */</div><div class="line">        tcp_reset_xmit_timer(sk, TCP_TIME_PROBE0, tp-&gt;rto);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h4 id="取消连接探测定时器的时机"><a href="#取消连接探测定时器的时机" class="headerlink" title="取消连接探测定时器的时机"></a>取消连接探测定时器的时机</h4><p>&emsp;&emsp;当在tcp_ack()中处理输入ACK时，我们要检查这是否是一个有效的ACK，同时还有没有未确认的数据。如果是一个有效ACK，且有未确认的数据，那么可以判断这可能是窗口更新或者零窗口探测而引发的ACK。于是需要处理窗口更新，首先清除探测计数器（tp-&gt;probes_out），此外，如果还有任何待传输的新分段（tp-&gt;send_head != NULL），就调用tcp_ack_probe()来做进一步处理。源码如下：<br>net/ipv4/tcp_input.c<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">static void tcp_ack_probe(struct sock *sk)</div><div class="line">&#123;</div><div class="line">    struct tcp_opt *tp = &amp;(sk-&gt;tp_pinfo.af_tcp);</div><div class="line">    ......</div><div class="line">    /* 检查下一要传输的分段是否位于对等端所打开的窗口内 */</div><div class="line">    if (!after(TCP_SKB_CB(tp-&gt;send_head)-&gt;end_seq, tp-&gt;snd_una + tp-&gt;snd_wnd)) &#123;</div><div class="line">        tp-&gt;backoff = 0;</div><div class="line">        /* 如果传输队列头的结束序列号（tp-&gt;send_head）位于所打开窗口序</div><div class="line">         * 列空间内，就可以调用tcp_clear_xmit_timer()来停止零窗口探测。</div><div class="line">         */</div><div class="line">        tcp_clear_xmit_timer(sk, TCP_TIME_PROBE0);</div><div class="line">        ......</div><div class="line">    &#125; else &#123;</div><div class="line">        /* 否则，表示没有足够的空间来容纳传输队列头中的全部数据，因此，重置</div><div class="line">         * 有tp-&gt;rto和tp-&gt;backoff控制的定时器超时值，以继续零窗口探测。</div><div class="line">         */</div><div class="line">        tcp_reset_xmit_timer(sk, TCP_TIME_PROBE0, min(tp-&gt;rto &lt;&lt; tp-&gt;backoff, TCP_RTO_MAX));</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h4 id="窗口探测定时器的工作原理"><a href="#窗口探测定时器的工作原理" class="headerlink" title="窗口探测定时器的工作原理"></a>窗口探测定时器的工作原理</h4><p>&emsp;&emsp;重传定时器和窗口探测定时器有一个公共的定时器回调函数，即tcp_write_timer()。tcp_write_timer()根据tp-&gt;pending标志来决定所要调用的函数。在任何时刻，只能安装一个定时器，也就是说，重传定时器或者窗口探测定时器。当窗口探测定时器超时时，需要调用tcp_probe_timer()来传输零窗口探测分段。源码如下：<br>net/ipv4/tcp_timer.c<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div></pre></td><td class="code"><pre><div class="line">static void tcp_probe_timer(struct sock *sk)</div><div class="line">&#123;</div><div class="line">    struct tcp_opt *tp = &amp;sk-&gt;tp_pinfo.af_tcp;</div><div class="line">    int max_probes;</div><div class="line"></div><div class="line">    /* 检查是否有未确认数据，如果tp-&gt;packets_out大于1，就意味着安装了零窗口探测</div><div class="line">     * 定时器后，已传输了一些新分段。第二个条件检查是否有要传输的新分段，如果没</div><div class="line">     * 有新数据要传输，就没有必要安装窗口探测器了。</div><div class="line">     */</div><div class="line">    if (tp-&gt;packets_out || !tp-&gt;send_head) &#123;</div><div class="line">        tp-&gt;probes_out = 0;</div><div class="line">        return;</div><div class="line">    &#125;</div><div class="line">    ......</div><div class="line">    max_probes = sysctl_tcp_retries2;</div><div class="line">    /* 检查与连接相关联的套接字是否已经死亡，如果是，就检查是否可以放弃该连接*/</div><div class="line">    if (sk-&gt;dead) &#123;</div><div class="line">        int alive = ((tp-&gt;rto &lt;&lt; tp-&gt;backoff) &lt; TCP_RTO_MAX);</div><div class="line">        ......</div><div class="line">        /* 检查是否可以立即放弃该连接。如果TCP套接字已经处于死亡状态，就需要根</div><div class="line">         * 据系统中孤立套接字的总量来对死亡套接字做出某种操作，也就是说，如果连</div><div class="line">         * 接很长时间内没有任何操作，就确认立即关闭该连接，以释放所占用的资源。</div><div class="line">         */</div><div class="line">        if (tcp_out_of_resources(sk, alive || tp-&gt;probes_out &lt;= max_probes))</div><div class="line">            return;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    /* 检查探测次数是否超出了系统级控制参数 */</div><div class="line">    if (tp-&gt;probes_out &gt; max_probes) &#123;</div><div class="line">        /* 如果是，就放弃该连接 */</div><div class="line">        tcp_write_err(sk);</div><div class="line">    &#125; else &#123;</div><div class="line">        /* 否则发出零窗口探测 */</div><div class="line">        tcp_send_probe0(sk);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
 <p><strong>参考文献</strong>：<br><a href="https://aavmqxaxn.updog.co/YWF2bXF4YXhuMDQ3MDE0NzczMw.pdf" target="_blank" rel="external">TCP/IP架构、设计及应用</a></p>
 
       
@@ -435,8 +433,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2017/12/31/TCP接收/" rel="next" title="TCP接收">
-                <i class="fa fa-chevron-left"></i> TCP接收
+              <a href="/2018/01/02/TCP定时器（二）/" rel="next" title="TCP重传定时器">
+                <i class="fa fa-chevron-left"></i> TCP重传定时器
               </a>
             
           </div>
@@ -444,10 +442,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2018/01/02/TCP定时器（二）/" rel="prev" title="TCP重传定时器">
-                TCP重传定时器 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -586,7 +580,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#Linux中的定时器"><span class="nav-number">1.</span> <span class="nav-text">Linux中的定时器</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#mod-timer"><span class="nav-number">1.1.</span> <span class="nav-text">mod_timer()</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#detach-timer"><span class="nav-number">1.2.</span> <span class="nav-text">detach_timer()</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#del-timer"><span class="nav-number">1.3.</span> <span class="nav-text">del_timer()</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#执行定时器函数的时机"><span class="nav-number">1.4.</span> <span class="nav-text">执行定时器函数的时机</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#首次安装探测定时器的时机"><span class="nav-number">1.</span> <span class="nav-text">首次安装探测定时器的时机</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#取消连接探测定时器的时机"><span class="nav-number">2.</span> <span class="nav-text">取消连接探测定时器的时机</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#窗口探测定时器的工作原理"><span class="nav-number">3.</span> <span class="nav-text">窗口探测定时器的工作原理</span></a></li></ol></div>
             
 
           </div>

@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2018-01-02T10:20:26.982Z</updated>
+  <updated>2018-01-03T02:55:32.061Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -14,6 +14,33 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>零窗口探测定时器</title>
+    <link href="http://yoursite.com/2018/01/02/TCP%E5%AE%9A%E6%97%B6%E5%99%A8%EF%BC%88%E4%B8%89%EF%BC%89/"/>
+    <id>http://yoursite.com/2018/01/02/TCP定时器（三）/</id>
+    <published>2018-01-02T10:23:59.000Z</published>
+    <updated>2018-01-03T02:55:32.061Z</updated>
+    
+    <content type="html"><![CDATA[<p>&emsp;&emsp;接收端TCP在接受缓冲区满时，通告零窗口一旦应用程序从接受缓冲区中读取数据，就检查是否在接受缓冲区中释放了足够的空间，以向发送端通告新窗口。如果是，就发出通告新窗口的ACK分段。如果该分段丢失，在仅有单向数据流动时，很可能会导致发送端和接收端之间产生死锁。为了避免这种情况发生，发送端实现了零窗口探测定时器。<br><a id="more"></a></p>
+<h4 id="首次安装探测定时器的时机"><a href="#首次安装探测定时器的时机" class="headerlink" title="首次安装探测定时器的时机"></a>首次安装探测定时器的时机</h4><p>&emsp;&emsp;当要传输新分段时，需要在很多地方做检查：<strong>tcp_push_pending_frames()、tcp_data_snd_check()。</strong>tcp_push_pending_frames()在将数据从应用程序发往套接字传输队列时调用，tcp_data_snd_check()在从对等段接收到分段时调用。这些函数检查是否能够发出新分段，如果不能，就调用tcp_check_probe_timer()检查是否接收窗口不允许数据分段发送而引发的。tcp_check_probe_timer()检查是否没有未确认数据（!tp-&gt;packets_out）且没有安装定时器（!tp-&gt;pending）。源码如下：<br>include/net/tcp.h<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">static __inline__ </div><div class="line">void tcp_check_probe_timer(struct sock *sk, struct tcp_opt *tp)</div><div class="line">&#123;   </div><div class="line">    /* 检查是否有未确认数据且没有安装定时器 */</div><div class="line">    if (!tp-&gt;packets_out &amp;&amp; !tp-&gt;pending)</div><div class="line">        /* 设置零窗口定时器的超时值为tp-&gt;rto */</div><div class="line">        tcp_reset_xmit_timer(sk, TCP_TIME_PROBE0, tp-&gt;rto);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h4 id="取消连接探测定时器的时机"><a href="#取消连接探测定时器的时机" class="headerlink" title="取消连接探测定时器的时机"></a>取消连接探测定时器的时机</h4><p>&emsp;&emsp;当在tcp_ack()中处理输入ACK时，我们要检查这是否是一个有效的ACK，同时还有没有未确认的数据。如果是一个有效ACK，且有未确认的数据，那么可以判断这可能是窗口更新或者零窗口探测而引发的ACK。于是需要处理窗口更新，首先清除探测计数器（tp-&gt;probes_out），此外，如果还有任何待传输的新分段（tp-&gt;send_head != NULL），就调用tcp_ack_probe()来做进一步处理。源码如下：<br>net/ipv4/tcp_input.c<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">static void tcp_ack_probe(struct sock *sk)</div><div class="line">&#123;</div><div class="line">    struct tcp_opt *tp = &amp;(sk-&gt;tp_pinfo.af_tcp);</div><div class="line">    ......</div><div class="line">    /* 检查下一要传输的分段是否位于对等端所打开的窗口内 */</div><div class="line">    if (!after(TCP_SKB_CB(tp-&gt;send_head)-&gt;end_seq, tp-&gt;snd_una + tp-&gt;snd_wnd)) &#123;</div><div class="line">        tp-&gt;backoff = 0;</div><div class="line">        /* 如果传输队列头的结束序列号（tp-&gt;send_head）位于所打开窗口序</div><div class="line">         * 列空间内，就可以调用tcp_clear_xmit_timer()来停止零窗口探测。</div><div class="line">         */</div><div class="line">        tcp_clear_xmit_timer(sk, TCP_TIME_PROBE0);</div><div class="line">        ......</div><div class="line">    &#125; else &#123;</div><div class="line">        /* 否则，表示没有足够的空间来容纳传输队列头中的全部数据，因此，重置</div><div class="line">         * 有tp-&gt;rto和tp-&gt;backoff控制的定时器超时值，以继续零窗口探测。</div><div class="line">         */</div><div class="line">        tcp_reset_xmit_timer(sk, TCP_TIME_PROBE0, min(tp-&gt;rto &lt;&lt; tp-&gt;backoff, TCP_RTO_MAX));</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h4 id="窗口探测定时器的工作原理"><a href="#窗口探测定时器的工作原理" class="headerlink" title="窗口探测定时器的工作原理"></a>窗口探测定时器的工作原理</h4><p>&emsp;&emsp;重传定时器和窗口探测定时器有一个公共的定时器回调函数，即tcp_write_timer()。tcp_write_timer()根据tp-&gt;pending标志来决定所要调用的函数。在任何时刻，只能安装一个定时器，也就是说，重传定时器或者窗口探测定时器。当窗口探测定时器超时时，需要调用tcp_probe_timer()来传输零窗口探测分段。源码如下：<br>net/ipv4/tcp_timer.c<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div></pre></td><td class="code"><pre><div class="line">static void tcp_probe_timer(struct sock *sk)</div><div class="line">&#123;</div><div class="line">    struct tcp_opt *tp = &amp;sk-&gt;tp_pinfo.af_tcp;</div><div class="line">    int max_probes;</div><div class="line"></div><div class="line">    /* 检查是否有未确认数据，如果tp-&gt;packets_out大于1，就意味着安装了零窗口探测</div><div class="line">     * 定时器后，已传输了一些新分段。第二个条件检查是否有要传输的新分段，如果没</div><div class="line">     * 有新数据要传输，就没有必要安装窗口探测器了。</div><div class="line">     */</div><div class="line">    if (tp-&gt;packets_out || !tp-&gt;send_head) &#123;</div><div class="line">        tp-&gt;probes_out = 0;</div><div class="line">        return;</div><div class="line">    &#125;</div><div class="line">    ......</div><div class="line">    max_probes = sysctl_tcp_retries2;</div><div class="line">    /* 检查与连接相关联的套接字是否已经死亡，如果是，就检查是否可以放弃该连接*/</div><div class="line">    if (sk-&gt;dead) &#123;</div><div class="line">        int alive = ((tp-&gt;rto &lt;&lt; tp-&gt;backoff) &lt; TCP_RTO_MAX);</div><div class="line">        ......</div><div class="line">        /* 检查是否可以立即放弃该连接。如果TCP套接字已经处于死亡状态，就需要根</div><div class="line">         * 据系统中孤立套接字的总量来对死亡套接字做出某种操作，也就是说，如果连</div><div class="line">         * 接很长时间内没有任何操作，就确认立即关闭该连接，以释放所占用的资源。</div><div class="line">         */</div><div class="line">        if (tcp_out_of_resources(sk, alive || tp-&gt;probes_out &lt;= max_probes))</div><div class="line">            return;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    /* 检查探测次数是否超出了系统级控制参数 */</div><div class="line">    if (tp-&gt;probes_out &gt; max_probes) &#123;</div><div class="line">        /* 如果是，就放弃该连接 */</div><div class="line">        tcp_write_err(sk);</div><div class="line">    &#125; else &#123;</div><div class="line">        /* 否则发出零窗口探测 */</div><div class="line">        tcp_send_probe0(sk);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p><strong>参考文献</strong>：<br><a href="https://aavmqxaxn.updog.co/YWF2bXF4YXhuMDQ3MDE0NzczMw.pdf" target="_blank" rel="external">TCP/IP架构、设计及应用</a></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;&amp;emsp;&amp;emsp;接收端TCP在接受缓冲区满时，通告零窗口一旦应用程序从接受缓冲区中读取数据，就检查是否在接受缓冲区中释放了足够的空间，以向发送端通告新窗口。如果是，就发出通告新窗口的ACK分段。如果该分段丢失，在仅有单向数据流动时，很可能会导致发送端和接收端之间产生死锁。为了避免这种情况发生，发送端实现了零窗口探测定时器。&lt;br&gt;
+    
+    </summary>
+    
+      <category term="TCP/IP架构、设计及应用" scheme="http://yoursite.com/categories/TCP-IP%E6%9E%B6%E6%9E%84%E3%80%81%E8%AE%BE%E8%AE%A1%E5%8F%8A%E5%BA%94%E7%94%A8/"/>
+    
+    
+      <category term="Linux" scheme="http://yoursite.com/tags/Linux/"/>
+    
+  </entry>
   
   <entry>
     <title>TCP重传定时器</title>
@@ -44,11 +71,11 @@
   </entry>
   
   <entry>
-    <title>TCP定时器（一）</title>
+    <title>Linux中的定时器</title>
     <link href="http://yoursite.com/2018/01/02/TCP%E5%AE%9A%E6%97%B6%E5%99%A8%EF%BC%88%E4%B8%80%EF%BC%89/"/>
     <id>http://yoursite.com/2018/01/02/TCP定时器（一）/</id>
     <published>2018-01-01T17:55:01.000Z</published>
-    <updated>2018-01-02T07:19:35.584Z</updated>
+    <updated>2018-01-02T10:23:27.174Z</updated>
     
     <content type="html"><![CDATA[<p>&emsp;&emsp;TCP是一个事件驱动的状态机。TCP为实现可靠的传输，主要定义并实现了以下定时器：重传定时器、延时确认定时器、零窗口探测定时器（持久定时器）、keepalive定时器、TIME_WAIT定时器、SYN-ACK定时器（监听套接字定时器）。<br><a id="more"></a><br>&emsp;&emsp;重传定时器、延时确认定时器和零窗口探测定时器是TCP状态机核心实现的一部分。keepalive定时器用来管理已建立的连接。TIME_WAIT定时器用来管理关闭的连接，并等待2*MSL后超时。SYN-ACK定时器用来管理新连接请求。TCP提供了如下三个函数来管理这些定时器：<br>&emsp;&emsp;tcp_reset_xmit_timeer()<br>&emsp;&emsp;tcp_reset_keepalive_timer()<br>&emsp;&emsp;tcp_clear_xmit_timer()<br>&emsp;&emsp;tcp_reset_xmit_timer()是用来重置TCP状态机定时器的通用函数。tcp_reset_keepalive_timer()是重置连接管理定时器的接口，如keepalive定时器和SYN-ACK定时器。tcp_clear_xmit_timer()用来清楚或删除已安装的TCP定时器。</p>
 <h3 id="Linux中的定时器"><a href="#Linux中的定时器" class="headerlink" title="Linux中的定时器"></a>Linux中的定时器</h3><p>&emsp;&emsp;Linxu实现定时器的数据结构是struct timer_list，源码如下：<br>include/linux/timer.h<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">struct timer_list &#123;</div><div class="line">    /* list指向列表头的指针，这时定时器所在的位置 */</div><div class="line">    struct list_head list;</div><div class="line">    /* 存储定时器启动所需的时钟周期数 */</div><div class="line">    unsigned long expires;</div><div class="line">    /* 包含传递给定时器回调函数的参数 */</div><div class="line">    unsigned long data;</div><div class="line">    /* 定时器超时时，所需要执行的回调函数 */</div><div class="line">    void (*functian) (unsigned long);</div><div class="line">&#125;;</div></pre></td></tr></table></figure></p>
@@ -77,12 +104,22 @@
     <link href="http://yoursite.com/2017/12/31/TCP%E6%8E%A5%E6%94%B6/"/>
     <id>http://yoursite.com/2017/12/31/TCP接收/</id>
     <published>2017-12-31T01:52:31.000Z</published>
-    <updated>2017-12-31T01:52:32.057Z</updated>
+    <updated>2018-01-03T02:55:31.647Z</updated>
+    
+    <content type="html"><![CDATA[<p>&emsp;&emsp;应用程序向内核发出请求，从TCP套接字接收正常或者紧急数据。内核套接字实现必须区分这两种不同类型的请求。当应用程序希望接收一个紧急字节的OOB数据时，它必须选择合适的时机已读取数据；否则可能会导致数据丢失。<br>&emsp;&emsp;TCP将数据看做是字节流，TCP接受缓冲区仅排列按序收到的字节，乱序数据则进入另外一个队列，并且来自该队列的数据不能响应应用程序请求。<br><a id="more"></a></p>
+<h4 id="排队机制"><a href="#排队机制" class="headerlink" title="排队机制"></a>排队机制</h4><p>&emsp;&emsp;接收输入TCP报文时，有三个队列：<br>&emsp;&emsp;（1）待处理队列（sk-&gt;backlog）；<br>&emsp;&emsp;（2）预排队队列（tp-&gt;ucopy.prequeue）；<br>&emsp;&emsp;（3）接受队列（sk-&gt;receive_queue）；<br>&emsp;&emsp;sk-&gt;receive_queue包含了处理过的TCP数据包，也就是说，去除了全部的协议头，正准备将数据复制到用户应用程序。sk-&gt;receive_queue包含了所有按顺序接收的数据段，在其他两个队列中的TCP数据段则需要进一步处理。<br>&emsp;&emsp;TCP报文首先由tcp_v4_rcv()进行处理。该函数要决定是否需要处理报文或者在backlog和prequeue队列中排队。源码如下：<br>net/ipv4/tcp_ipv4.c<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">int tcp_v4_rcv(struct sk_buff *skb)</div><div class="line">&#123;</div><div class="line">    ......</div><div class="line">    bh lock_sock(sk); //获取套接字旋转锁</div><div class="line">    ret = 0;</div><div class="line">    </div><div class="line">    if (!sk-&gt;lock.users) &#123; //检查套接字是否处于使用状态</div><div class="line">        if (!tcp_prequeue(sk, skb))</div><div class="line">            ret = tcp_v4_do_rav(sk, skb);</div><div class="line">    &#125; else </div><div class="line">        /* 如果套接字处于使用状态，就将数据包放入待处理队列 */</div><div class="line">        sk_add_backlog(sk, skb);</div><div class="line">    bh_unlock_sock(sk);</div><div class="line">    ......</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+]]></content>
     
     <summary type="html">
     
+      &lt;p&gt;&amp;emsp;&amp;emsp;应用程序向内核发出请求，从TCP套接字接收正常或者紧急数据。内核套接字实现必须区分这两种不同类型的请求。当应用程序希望接收一个紧急字节的OOB数据时，它必须选择合适的时机已读取数据；否则可能会导致数据丢失。&lt;br&gt;&amp;emsp;&amp;emsp;TCP将数据看做是字节流，TCP接受缓冲区仅排列按序收到的字节，乱序数据则进入另外一个队列，并且来自该队列的数据不能响应应用程序请求。&lt;br&gt;
+    
     </summary>
     
+      <category term="TCP/IP架构、设计及应用" scheme="http://yoursite.com/categories/TCP-IP%E6%9E%B6%E6%9E%84%E3%80%81%E8%AE%BE%E8%AE%A1%E5%8F%8A%E5%BA%94%E7%94%A8/"/>
+    
+    
+      <category term="Linux" scheme="http://yoursite.com/tags/Linux/"/>
     
   </entry>
   
@@ -589,33 +626,6 @@ beta = 4;
     <summary type="html">
     
       &lt;p&gt;&amp;emsp;&amp;emsp;Linux kernel对收到sack的处理相比ack的处理要复杂的多。在receiver收到每个数据包后，都要walk一遍receiver window (rwnd)，将walk信息记录在ack包的sack选项中，然后发送给sender。sender处理sack的函数主要是tcp_sacktag_write_queue()，废话不多说，下面就来看看。&lt;br&gt;
-    
-    </summary>
-    
-      <category term="TCP/IP" scheme="http://yoursite.com/categories/TCP-IP/"/>
-    
-    
-  </entry>
-  
-  <entry>
-    <title>TCP重点系列之sack介绍</title>
-    <link href="http://yoursite.com/2017/03/01/TCP%E9%87%8D%E7%82%B9%E7%B3%BB%E5%88%97%E4%B9%8Bsack%E4%BB%8B%E7%BB%8D/"/>
-    <id>http://yoursite.com/2017/03/01/TCP重点系列之sack介绍/</id>
-    <published>2017-03-01T12:04:16.000Z</published>
-    <updated>2017-08-23T09:08:36.210Z</updated>
-    
-    <content type="html"><![CDATA[<p>&emsp;&emsp;在早期的TCP拥塞控制中都是通过收到duplicate ack（默认3个）来trigger fast retransmition，但是当有多个丢包时，这样每次重传一个包，收到重传包的ack后，再通过 duplicate ack trigger retransmit下一个包，容易造成timeout，于是有人提出了sack来解决这个问题。<br><a id="more"></a></p>
-<h4 id="什么是sack"><a href="#什么是sack" class="headerlink" title="什么是sack"></a>什么是sack</h4><p>&emsp;&emsp;sack的全称是selective acknowledgment，也就是选择性确认，添加sack功能需要在TCP包<br>头加两个选项，一个是开启选项（enabling option），另一个是sack选项（sack option）本身。开启sack选项后，receiver会将自己收到了哪些包，没收到哪些包的信息记录在sack段中告诉给sender，这样sender便可以一次性重传所有的丢包。</p>
-<h4 id="enabling-option"><a href="#enabling-option" class="headerlink" title="enabling option"></a>enabling option</h4><p>enabling option是一个占两字节的选项，在建立连接时通过SYN来告诉对方自己是否支持sack。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">TCP Sack-Permitted Option</div><div class="line">Kind: 4</div><div class="line">+-----------+------------+</div><div class="line">|  Kind = 4 | Length = 2 |</div><div class="line">+-----------+------------+</div></pre></td></tr></table></figure></p>
-<h4 id="sack-option"><a href="#sack-option" class="headerlink" title="sack option"></a>sack option</h4><p>开启sack后，从receiver向sender发送的ack会在sack option字段中携带一些确认信息，<br>而不是单纯的duplicate ack。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">TCP SACK Option</div><div class="line">Kind: 5</div><div class="line">Length: Variable</div><div class="line">                          +-------------+-------------+</div><div class="line">                          | Kind = 5    |   Length    |</div><div class="line">+------------+------------+-------------+-------------+</div><div class="line">|            Left Edge of list Block                  |</div><div class="line">+------------+------------+-------------+-------------+</div><div class="line">|            Right Edge of list Block                 |</div><div class="line">+------------+------------+-------------+-------------+</div><div class="line">|                                                     |</div><div class="line">/                      .  .  .                        /</div><div class="line">|                                                     |</div><div class="line">+------------+------------+-------------+-------------+</div><div class="line">|            Left Edge of list Block                  |</div><div class="line">+------------+------------+-------------+-------------+</div><div class="line">|            Right Edge of list Block                 |</div><div class="line">+------------+------------+-------------+-------------+</div></pre></td></tr></table></figure></p>
-<p>sack选项一般占40字节，其中kind占4字节，length占4字节，剩下32字节，每8字节为一个sack段，一个sack段用来记录一个连续block的开始序号和结束序号，所以最多只能记录4段连续的block。在实际情况中，经常会最多只有三段block，因为sack会经常与时间戳选项结合，用于测量RTT，这需要占用额外的8字节。</p>
-<h4 id="为什么要引入sack"><a href="#为什么要引入sack" class="headerlink" title="为什么要引入sack"></a>为什么要引入sack</h4><p>&emsp;&emsp;在早期的TCP拥塞控制中，通过收到duplicate ack（默认为3个），连续三次ack某一个包来告诉sender某个丢包了，然后进入fast retransmition state，sender重传这个包，当receiver收到这个重传包后，便会发一个ack（ack新的包）给sender，告诉sender下一个要发送的包是哪一个。可以看到，通过duplicate ack每次只能重传一个包，如果有多个丢包，在等待重传过程中，很容易timeout，造成带宽利用率下降（underutilized）。<br>&emsp;&emsp;而如果开启sack，每一个sack段记录的是已经收到的连续的包，sack段与sack段之间断片的，也就是还没收到的（可能已经丢失，也可能是reorder）。通过sack段便可以知道多个可能已经丢失的包，这样便可以一次性的重传，而不是一个一个重传，避免因等待时间长造成的timeout问题。<br>&emsp;&emsp;要注意的是开启sack选项，也是有弊端的，因为丢包意味着网络很可能已经拥塞，这时如果一次重传多个包，很可能会造成网络更加拥塞。</p>
-<h4 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h4><p><a href="https://tools.ietf.org/pdf/rfc2018.pdf" target="_blank" rel="external">RFC 2018 TCP Selective Acknowledgment Options</a></p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;&amp;emsp;&amp;emsp;在早期的TCP拥塞控制中都是通过收到duplicate ack（默认3个）来trigger fast retransmition，但是当有多个丢包时，这样每次重传一个包，收到重传包的ack后，再通过 duplicate ack trigger retransmit下一个包，容易造成timeout，于是有人提出了sack来解决这个问题。&lt;br&gt;
     
     </summary>
     
