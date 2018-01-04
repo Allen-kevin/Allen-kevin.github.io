@@ -78,7 +78,7 @@
 <link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="Hexo, NexT" />
+  <meta name="keywords" content="Linux," />
 
 
 
@@ -96,19 +96,17 @@
 
 
 
-<meta name="description" content="&amp;emsp;&amp;emsp;经典的TCP拥塞控制算法TCP Reno从被提出后很长一段时间一直作为Linux kernel的默认算法，但随着Internet在规模、传输速度、负载、连接数上的增长，TCP Reno迟早会成为性能瓶颈。">
+<meta name="description" content="&amp;emsp;&amp;emsp;TCP实现了两种确认模式：&amp;emsp;&amp;emsp;快速确认&amp;emsp;&amp;emsp;延时确认&amp;emsp;&amp;emsp;在有些情况下，我们需要快速地得到ACK，以便于发送端在接收到ACK后，发出更多的数据，其原因是每个新数据的确认都会导致拥塞窗口加1。另外一些需要得到快速确认的情况是接收到乱序分段时，或者所接收数据的断档被填补时。也有一些情况需要延时确认，在这些情况中，会话是交互">
+<meta name="keywords" content="Linux">
 <meta property="og:type" content="article">
-<meta property="og:title" content="TCP拥塞控制之：FAST TCP">
-<meta property="og:url" content="http://yoursite.com/2017/05/18/TCP拥塞控制之FASTTCP/index.html">
+<meta property="og:title" content="延时确认定时器">
+<meta property="og:url" content="http://yoursite.com/2018/01/03/TCP定时器（四）/index.html">
 <meta property="og:site_name" content="凡是过去 皆为序曲">
-<meta property="og:description" content="&amp;emsp;&amp;emsp;经典的TCP拥塞控制算法TCP Reno从被提出后很长一段时间一直作为Linux kernel的默认算法，但随着Internet在规模、传输速度、负载、连接数上的增长，TCP Reno迟早会成为性能瓶颈。">
-<meta property="og:image" content="http://yoursite.com/pictures/TCP/20170519171625.png">
-<meta property="og:image" content="http://yoursite.com/pictures/TCP/20170520104134.png">
-<meta property="og:updated_time" content="2017-05-22T01:46:18.005Z">
+<meta property="og:description" content="&amp;emsp;&amp;emsp;TCP实现了两种确认模式：&amp;emsp;&amp;emsp;快速确认&amp;emsp;&amp;emsp;延时确认&amp;emsp;&amp;emsp;在有些情况下，我们需要快速地得到ACK，以便于发送端在接收到ACK后，发出更多的数据，其原因是每个新数据的确认都会导致拥塞窗口加1。另外一些需要得到快速确认的情况是接收到乱序分段时，或者所接收数据的断档被填补时。也有一些情况需要延时确认，在这些情况中，会话是交互">
+<meta property="og:updated_time" content="2018-01-04T02:24:11.033Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="TCP拥塞控制之：FAST TCP">
-<meta name="twitter:description" content="&amp;emsp;&amp;emsp;经典的TCP拥塞控制算法TCP Reno从被提出后很长一段时间一直作为Linux kernel的默认算法，但随着Internet在规模、传输速度、负载、连接数上的增长，TCP Reno迟早会成为性能瓶颈。">
-<meta name="twitter:image" content="http://yoursite.com/pictures/TCP/20170519171625.png">
+<meta name="twitter:title" content="延时确认定时器">
+<meta name="twitter:description" content="&amp;emsp;&amp;emsp;TCP实现了两种确认模式：&amp;emsp;&amp;emsp;快速确认&amp;emsp;&amp;emsp;延时确认&amp;emsp;&amp;emsp;在有些情况下，我们需要快速地得到ACK，以便于发送端在接收到ACK后，发出更多的数据，其原因是每个新数据的确认都会导致拥塞窗口加1。另外一些需要得到快速确认的情况是接收到乱序分段时，或者所接收数据的断档被填补时。也有一些情况需要延时确认，在这些情况中，会话是交互">
 
 
 
@@ -136,13 +134,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2017/05/18/TCP拥塞控制之FASTTCP/"/>
+  <link rel="canonical" href="http://yoursite.com/2018/01/03/TCP定时器（四）/"/>
 
 
 
 
 
-  <title>TCP拥塞控制之：FAST TCP | 凡是过去 皆为序曲</title>
+  <title>延时确认定时器 | 凡是过去 皆为序曲</title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -291,7 +289,7 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/05/18/TCP拥塞控制之FASTTCP/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/03/TCP定时器（四）/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="kevin">
@@ -308,7 +306,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">TCP拥塞控制之：FAST TCP</h1>
+          <h1 class="post-title" itemprop="name headline">延时确认定时器</h1>
         
 
         <div class="post-meta">
@@ -320,8 +318,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-18T19:11:52+08:00">
-                2017-05-18
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-03T10:59:58+08:00">
+                2018-01-03
               </time>
             
 
@@ -343,8 +341,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/私人文献阅读/" itemprop="url" rel="index">
-                    <span itemprop="name">私人文献阅读</span>
+                  <a href="/categories/TCP-IP架构、设计及应用/" itemprop="url" rel="index">
+                    <span itemprop="name">TCP/IP架构、设计及应用</span>
                   </a>
                 </span>
 
@@ -362,8 +360,8 @@
                 <i class="fa fa-comment-o"></i>
               </span>
               
-                <a href="/2017/05/18/TCP拥塞控制之FASTTCP/#SOHUCS" itemprop="discussionUrl">
-                  <span id="changyan_count_unit" class="post-comments-count hc-comment-count" data-xid="2017/05/18/TCP拥塞控制之FASTTCP/" itemprop="commentsCount"></span>
+                <a href="/2018/01/03/TCP定时器（四）/#SOHUCS" itemprop="discussionUrl">
+                  <span id="changyan_count_unit" class="post-comments-count hc-comment-count" data-xid="2018/01/03/TCP定时器（四）/" itemprop="commentsCount"></span>
                 </a>
               
             
@@ -388,29 +386,10 @@
       
 
       
-        <p>&emsp;&emsp;经典的TCP拥塞控制算法TCP Reno从被提出后很长一段时间一直作为Linux kernel的默认算法，但随着Internet在规模、传输速度、负载、连接数上的增长，TCP Reno迟早会成为性能瓶颈。<br><a id="more"></a></p>
-<h3 id="问题与背景"><a href="#问题与背景" class="headerlink" title="问题与背景"></a>问题与背景</h3><p>&emsp;&emsp;当前的Linux kernel的默认拥塞控制算法是于2008年提出的CUBIC，本文介绍的FAST TCP算法于2004年被提出，主要针对高速和长延迟网络，虽然有点老，但还是可以了解了解的。原文主要是和TCP Reno作比较，所以提出的问题也是针对TCP Reno的（时代所限制，如果是现在提出的算法多半是要和CUBIC作比较的）。</p>
-<h4 id="TCP-Reno的问题"><a href="#TCP-Reno的问题" class="headerlink" title="TCP Reno的问题"></a>TCP Reno的问题</h4><p>&emsp;&emsp;TCP Reno在large bandwidth-delay products网络上表现差主要体现在以下四个方面（摘自原文）：</p>
-<blockquote>
-<ol>
-<li>At the packet level, linear increase by one packet per Pound-Trip Time(RTT) is too slow, and multiplicative decrease per loss event is too drastic.</li>
-<li>At teh flow level, maintaining large average congestion windows requires an extremely small equilibrium loss probability.</li>
-<li>At the packet level, oscillation is unavoidable because TCP uses a binary congestion sigmal(packet loss).</li>
-<li>At the flow level, the dynamics is unstable leading to severe oscillations that can only be reduced by the accurate estimation of packet loss probability and a stable design of the flow dynamics.</li>
-</ol>
-</blockquote>
-<p>&emsp;&emsp;在前人的工作中有很多算法是基于丢包检测提出的，比如HSTCP和STCP，而FAST TCP是通过测量queueing delay来作为网络拥塞程度的参考。</p>
-<h4 id="flow-level和packet-level的区别"><a href="#flow-level和packet-level的区别" class="headerlink" title="flow level和packet level的区别"></a>flow level和packet level的区别</h4><p>&emsp;&emsp;一个拥塞控制算法可以从两个level(flow level and packet level)去设计。flow level相比于packet level是一个宏观上的概念，其设计目标是达到高带宽利用率、低排队延迟和丢包、公平和稳定。而packet level是通过端到端控制的约束来设计实施那些flow level的目标。</p>
-<h3 id="FAST-TCP的设计"><a href="#FAST-TCP的设计" class="headerlink" title="FAST TCP的设计"></a>FAST TCP的设计</h3><p>&emsp;&emsp;在说FAST TCP的设计之前先来看一个方程；<br>$$\check{w}_i(t) = \kappa_i(t)(1 - \frac{p_i(t)}{u_i(t)})\label{eq.Sample}$$<br>方程（1）可以用来描述各种已知的TCP拥塞控制算法，不同的拥塞控制算法的区别在于它们对gain function$\kappa_i$和marginal utility function$u_i$以及congestion measures $p_i$是丢失率还是排队延迟。<br>&emsp;&emsp;当然啦，FAST TCP与其他的拥塞控制算法的区别也是在那三个函数的选择上。下面对这三个函数的作用简单介绍下（还是摘自原文，翻译真的很麻烦）。</p>
-<blockquote>
-<p><strong>$\kappa_i$:</strong> the choice of the gain function $\kappa_i$ determines the dynamic properties sush as stability and responsiveness, but does not affect the equilibrium properties.<br><strong>$u_i$:</strong> the choice of the marginal utility function $u_i$ mainly determines equilibrium properties such as the equilibrium rate allocation and its fairness.<br><strong>$p_i$:</strong> in the absence of explicit feedback, the choice of congestion measure $p_i$ is limited to loss probability or queueing delay. The dynamics of $p_i(t)$ is determined at links.</p>
-</blockquote>
-<h4 id="implementation-strategy"><a href="#implementation-strategy" class="headerlink" title="implementation strategy"></a>implementation strategy</h4><p>&emsp;&emsp;FAST TCP 通过适当的flow and packet level 设计来解决上文提到的TCP Reno 在large windows环境下所遇到的四个问题。<br>&emsp;&emsp;首先，评估当前状态$\frac{p_i(t)}{u_i(t)}$距equilibrium（值为1）有多远，如果当前状态接近于equilibrium，那么就缓慢调整window，反之，则激进一点调整。而在TCP Reno中，其窗口调整取决于当前窗口大小。基于delay的方法避免了在TCP Reno中window缓慢增长，迅速下降的问题。<br>&emsp;&emsp;其次，选择一个multi-bit 的拥塞测试，消除由于binary feedback造成的packet level oscillation。这里binary feedback表示window要么增，要么降，没有其他选择。<br>&emsp;&emsp;最后，拥塞测量函数$p_i(t)$采用测量queueing delay而不是测量loss probability，通过调整window从而控制queueing delay可以使网络稳定在overflowing point的下方区域，如下图（b）中的F点。这样既消除了高queueing<br>delay，又避免了不必要的数据包丢失。更重要的是，这样还保留了root for buffering “mice” traffic。<br><img src="../../../../pictures/TCP/20170519171625.png" alt=""></p>
-<h3 id="FAST-TCP的架构和算法"><a href="#FAST-TCP的架构和算法" class="headerlink" title="FAST TCP的架构和算法"></a>FAST TCP的架构和算法</h3><p>&emsp;&emsp;在FAST TCP这篇paper中， 将TCP拥塞控制机制分割成了四部分，这四部分功能相互独立，以便能够设计分离和异步升级。如下图所示，FAST TCP的架构。<br><img src="../../../../pictures/TCP/20170520104134.png" alt=""><br>&emsp;&emsp;其中，data control 部分决定发送那些数据包，window contorl部分决定可以发多少数据包，burstiness control决定什么时候发送这些数据包，上述决定都是在estimation部分提供的信息的基础上做出的。这里只说一下estimation和window control。</p>
-<h4 id="Estimation"><a href="#Estimation" class="headerlink" title="Estimation"></a>Estimation</h4><p>&emsp;&emsp;对于每一个被发送的数据包，estimation部分计算两类反馈信息。当收到一个正常的ACK，计算出相应数据包的RTT，更新平均queueing delay和最小RTT。当收到一个乱序ACK（三个dupack或者timeout），estimation会将数据包的丢失信息报告给其他部分。estimation既可以进行multi-bit的queueing delay采样，也可以进行ont-bit的loss-or-no-loss采样。<br>最后得到的RTT一般都会采用加权移动平均处理，FAST TCP也不例外，$T_i(k)$表示第k个RTT的样本值，$\overline{T}_i(k)$，平均RTT的更新公式如下：<br>$$\overline{T}_i(k+1) = (1 - \eta)\overline{T}_i(k) + \etaT_i(k)$$<br>这里，$t_k$表示收到第k个RTT样本值的时间，$\eta$为加权值。记$d_i(k)$为到目前为止的最小RTT，那么平均queueing delay的计算公式如下：<br>$$\hat{q}_i(k) = \overline{T}_i(k) - d_i(k)$$</p>
-<h4 id="Window-control"><a href="#Window-control" class="headerlink" title="Window control"></a>Window control</h4><p>&emsp;&emsp;window control会根据estimation提供的拥塞信息（queueing delay and packet loss）来决定拥塞窗口的调整。FAST TCP不同于传统TCP的关键在于其对拥塞窗口的计算与sender state是独立的。<br>&emsp;&emsp;在正常情况下，根据estimation提供的平均RTT和平均queueing delay，FAST TCP会周期性的更新其拥塞窗口$CWnd$。 更新公式如下：<br>$$w &lt;— min\lbrace2w, (1-\gamma)w + \gamma(\frac{baseRTT}{RTT}w + \alpha(w, qdelay))\rbrace$$<br>这里，$\gamma\in(0, ]$，qdelay是端到端的平均queueing delay。</p>
-<p>&emsp;&emsp;这篇博客只是对原文基本思想的表述，还有许多细节问题没有提到，有兴趣的朋友可以考虑看看原文，原文地址在博客的参考文献中给出。</p>
-<p><strong>参考文献</strong><br><a href="http://infocom2004.ieee-infocom.org/Papers/52_2.PDF" target="_blank" rel="external">FAST TCP: Motivation, Architecture, Algorithms, Performance</a></p>
+        <p>&emsp;&emsp;TCP实现了两种确认模式：<br>&emsp;&emsp;快速确认<br>&emsp;&emsp;延时确认<br>&emsp;&emsp;在有些情况下，我们需要快速地得到ACK，以便于发送端在接收到ACK后，发出更多的数据，其原因是每个新数据的确认都会导致拥塞窗口加1。另外一些需要得到快速确认的情况是接收到乱序分段时，或者所接收数据的断档被填补时。也有一些情况需要延时确认，在这些情况中，会话是交互式的，如telnet、rlogin等，所要键入的每个字符都要回送。在这种情况下，如果为每个分段（只包含一个字符）生成确认，这将在网络中生成大量的报文。<br><a id="more"></a><br>&emsp;&emsp;Linux在struct ack结构中维护所有ACK相关的信息，它是struct_opt结构的一部分。源码如下：<br>include/net/sock.h<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">struct &#123;</div><div class="line">    __u8 pending; //表示任何给定时刻ACK的状态</div><div class="line">    __u8 quick; //</div><div class="line">    __u8 pingpong; //会话是交互式的</div><div class="line">    __u8 blocked; //延迟ACK被套接字锁阻塞</div><div class="line">    __u32 ato; //软时钟的预测滴答数</div><div class="line">    unsigned long timeout; //当前调度超时</div><div class="line">    __u32 lrcvtime; //收到最后一个数据包的时间戳</div><div class="line">    __u16 last_seq_size; //最后一个到来分段的大小</div><div class="line">    __u16 rcv_mss; //MSS用于延迟ACK决策</div><div class="line">&#125;ack;</div></pre></td></tr></table></figure></p>
+<p>&emsp;&emsp;TCP ACK的状态有三个，源码如下：<br>include/net/tcp.h<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">enum tcp_ack_state_t</div><div class="line">&#123;</div><div class="line">    TCP_ACK_SCHED = 1; //表示调度了ACK</div><div class="line">    TCP_ACK_TIMER = 2; //表示已经安装了延时确认定时器</div><div class="line">    TCP_ACK_PUSHED = 4; //表示ACK需要尽早被发送出去</div><div class="line">&#125;;</div></pre></td></tr></table></figure></p>
+<h4 id="ACK的调度时机"><a href="#ACK的调度时机" class="headerlink" title="ACK的调度时机"></a>ACK的调度时机</h4><p>&emsp;&emsp;一旦从对等端得到数据，就需要调度ACK。调用tcp_schedule_ack()来设置TCP_ACK_SCHED标志。从tcp_rcv_established()和tcp_data_queue()中调用tcp_event_data_recv()接收数据时，都要调度ACK。<br>include/net/tcp.h<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">static inline void tcp_schedule_ack(struct tcp_opt *tp)</div><div class="line">&#123;</div><div class="line">    tp-&gt;ack.pending |= TCP_ACK_SCHED;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>&emsp;&emsp;调用tcp_schedule_ack()可以调度一个ACK，但是不能基于该标志来强制发送ACK。ACK是立即发送还是延迟一段时间发送需要满足一定的条件。<br>net/ipv4/tcp_input.c<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line">int tcp_rcv_established(struct sock *sk, struct sk_buff *skb, </div><div class="line">    struct tcphdr *th, unsigned len)</div><div class="line">&#123;</div><div class="line">    struct tcp_opt *tp = &amp;(sk-&gt;pinfo.af_tcp);</div><div class="line">    ......</div><div class="line">        if (eaten) &#123;</div><div class="line">            /* 检查是否处于快速ACK模式 */</div><div class="line">            if (tcp_in_quickack_mode(tp)) &#123;</div><div class="line">                /* 如果是，就立即生成ACK */</div><div class="line">                tcp_send_ack(sk);</div><div class="line">            &#125; else &#123;</div><div class="line">                /* 否则推迟一段时间 */</div><div class="line">                tcp_send_delayed_ack(sk);</div><div class="line">            &#125;</div><div class="line"></div><div class="line">        &#125; else &#123;</div><div class="line">            /* 如果应用程序没有读取数据，而是在接受对中排队，</div><div class="line">             * 就调用__tcp_ack_snd_check()做更严格的检查。</div><div class="line">             */</div><div class="line">            __tcp_ack_snd_check(sk, 0);</div><div class="line">        &#125;</div><div class="line">    ......</div><div class="line">    tcp_ack_snd_check(sk);</div><div class="line">    ......</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
 
       
     </div>
@@ -438,6 +417,12 @@
 
     <footer class="post-footer">
       
+        <div class="post-tags">
+          
+            <a href="/tags/Linux/" rel="tag"># Linux</a>
+          
+        </div>
+      
 
       
         
@@ -447,8 +432,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2017/05/18/TCP拥塞控制之Vegas/" rel="next" title="TCP拥塞算法之：Vegas">
-                <i class="fa fa-chevron-left"></i> TCP拥塞算法之：Vegas
+              <a href="/2018/01/02/TCP定时器（三）/" rel="next" title="零窗口探测定时器">
+                <i class="fa fa-chevron-left"></i> 零窗口探测定时器
               </a>
             
           </div>
@@ -456,10 +441,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2017/05/25/TCP拥塞控制之BBR/" rel="prev" title="TCP拥塞控制之：BBR">
-                TCP拥塞控制之：BBR <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -598,7 +579,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#问题与背景"><span class="nav-number">1.</span> <span class="nav-text">问题与背景</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#TCP-Reno的问题"><span class="nav-number">1.1.</span> <span class="nav-text">TCP Reno的问题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#flow-level和packet-level的区别"><span class="nav-number">1.2.</span> <span class="nav-text">flow level和packet level的区别</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#FAST-TCP的设计"><span class="nav-number">2.</span> <span class="nav-text">FAST TCP的设计</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#implementation-strategy"><span class="nav-number">2.1.</span> <span class="nav-text">implementation strategy</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#FAST-TCP的架构和算法"><span class="nav-number">3.</span> <span class="nav-text">FAST TCP的架构和算法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Estimation"><span class="nav-number">3.1.</span> <span class="nav-text">Estimation</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Window-control"><span class="nav-number">3.2.</span> <span class="nav-text">Window control</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#ACK的调度时机"><span class="nav-number">1.</span> <span class="nav-text">ACK的调度时机</span></a></li></ol></div>
             
 
           </div>
