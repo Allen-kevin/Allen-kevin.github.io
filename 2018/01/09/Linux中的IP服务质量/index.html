@@ -1,0 +1,823 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+  
+  
+  <link rel="stylesheet" media="all" href="/lib/Han/dist/han.min.css?v=3.3">
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Linux," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="凡是过去 皆为序曲" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.1" />
+
+
+
+
+
+
+<meta name="description" content="&amp;emsp;&amp;emsp;Linux中的服务质量（排队规则）的基本功能是决定如何按顺序接受输入的网络报文，以及使用什么带宽速率接收，并且决定何时以及如何将报文安排进队列中并按照分配的带宽速率进行传输。它主要是根据应用程序需求管理带宽。">
+<meta name="keywords" content="Linux">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux中的IP服务质量">
+<meta property="og:url" content="http://yoursite.com/2018/01/09/Linux中的IP服务质量/index.html">
+<meta property="og:site_name" content="凡是过去 皆为序曲">
+<meta property="og:description" content="&amp;emsp;&amp;emsp;Linux中的服务质量（排队规则）的基本功能是决定如何按顺序接受输入的网络报文，以及使用什么带宽速率接收，并且决定何时以及如何将报文安排进队列中并按照分配的带宽速率进行传输。它主要是根据应用程序需求管理带宽。">
+<meta property="og:image" content="http://yoursite.com/pictures/TCP/20180110083808.png">
+<meta property="og:updated_time" content="2018-01-10T08:13:43.214Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Linux中的IP服务质量">
+<meta name="twitter:description" content="&amp;emsp;&amp;emsp;Linux中的服务质量（排队规则）的基本功能是决定如何按顺序接受输入的网络报文，以及使用什么带宽速率接收，并且决定何时以及如何将报文安排进队列中并按照分配的带宽速率进行传输。它主要是根据应用程序需求管理带宽。">
+<meta name="twitter:image" content="http://yoursite.com/pictures/TCP/20180110083808.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/01/09/Linux中的IP服务质量/"/>
+
+
+
+
+
+  <title>Linux中的IP服务质量 | 凡是过去 皆为序曲</title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  ga('create', 'your-analytics-id', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">凡是过去 皆为序曲</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archives"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-commonweal">
+          <a href="/404.html" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-heartbeat"></i> <br />
+            
+            公益404
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/09/Linux中的IP服务质量/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="kevin">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="凡是过去 皆为序曲">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Linux中的IP服务质量</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-09T18:43:43+08:00">
+                2018-01-09
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/TCP-IP架构、设计及应用/" itemprop="url" rel="index">
+                    <span itemprop="name">TCP/IP架构、设计及应用</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+              <span class="post-meta-divider">|</span>
+              <span class="post-meta-item-icon">
+                <i class="fa fa-comment-o"></i>
+              </span>
+              
+                <a href="/2018/01/09/Linux中的IP服务质量/#SOHUCS" itemprop="discussionUrl">
+                  <span id="changyan_count_unit" class="post-comments-count hc-comment-count" data-xid="2018/01/09/Linux中的IP服务质量/" itemprop="commentsCount"></span>
+                </a>
+              
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body han-init-context" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>&emsp;&emsp;Linux中的服务质量（排队规则）的基本功能是决定如何按顺序接受输入的网络报文，以及使用什么带宽速率接收，并且决定何时以及如何将报文安排进队列中并按照分配的带宽速率进行传输。它主要是根据应用程序需求管理带宽。<br><a id="more"></a><br>&emsp;&emsp;下面是Linux支持的排队规则类型：<br>&emsp;&emsp;（1）先进先出（First In First Out, FIFO）<br>&emsp;&emsp;（2）带优先级的先进先出（Priority FIFO, PFIFO）<br>&emsp;&emsp;（3）令牌通流（Token Bucket Flow, TBF）<br>&emsp;&emsp;（4）异步传输模式（Asynchronous Transfer Mode, ATM）<br>&emsp;&emsp;（5）随机早检测（Random Early Detection, RED）<br>&emsp;&emsp;（6）随机公平队列（Stochastic Fair Queueing, SFQ）<br>&emsp;&emsp;（7）可分类排队规则（Class-Bassed Queueing Discipline, CBQ）<br>&emsp;&emsp;（8）通用随机早检测（Generalized GED）</p>
+<h4 id="Linux流量控制的基本条件"><a href="#Linux流量控制的基本条件" class="headerlink" title="Linux流量控制的基本条件"></a>Linux流量控制的基本条件</h4><p>&emps;&emsp;（1）排队规则（Queueing Discipline）<br>&emsp;&emsp;（2）类别（Class）<br>&emsp;&emsp;（3）过滤器/分类器（Filter/Classifier）<br>&emsp;&emsp;（4）策略（Policing）<br>&emsp;&emsp;<strong>排队规则</strong> Linux上的每个网络设备都有一个排队规则，它控制报文在传输前如何进入和出队。<br>&emsp;&emsp;<strong>类别</strong> 只有基于类的排队规则才支持类别。可以在传输网络流量之前根据过滤器（IP地址、TCP/IP端口等）将其分为不同的类别，每种类别会根据其优先级来调度报文的出队。<br>&emsp;&emsp;<strong>过滤器</strong> 过滤器根据特定参数（IP地址、TCP/IP端口等）将报文组织到不同的类别中。<br>&emsp;&emsp;<strong>策略</strong> 在将网络报文从队列中移出以后，可以对报文设置策略：发送报文、丢弃报文或者发送并标记报文。<br>&emsp;&emsp;Linux中的pfifo_fast排队规则的流程图如下图所示。<br><img src="../../../../pictures/TCP/20180110083808.png" alt=""></p>
+<h4 id="Linux中pfifo-fast排队规则的实现"><a href="#Linux中pfifo-fast排队规则的实现" class="headerlink" title="Linux中pfifo_fast排队规则的实现"></a>Linux中pfifo_fast排队规则的实现</h4><p>&emsp;&emsp;pfifo_fast排队规则是Linux系统中所有网络接口的默认排队规则。pfifo_fast排队规则可以被Linux系统中的任何其他排队规则替换。pfifo_fast包含三个不同的FIFO队列，他们根据优先级将报文加入队列。最高优先级的报文进入FIFO 0，接下来依次是FIFO 1和FIFO 2。<br>&emsp;&emsp;pfifo_fast不是由用户配置的，而是默认硬编码的。报文的优先级是内核分配的，并且根据报文的TOS octet映射到适当的波段中。对于报文入队和出队，pfifo_fast排队规则使用pfifo_fast_enqueue()和pfifo_fast_dequeue()函数。</p>
+<h4 id="排队规则数据结构"><a href="#排队规则数据结构" class="headerlink" title="排队规则数据结构"></a>排队规则数据结构</h4><p>&emsp;&emsp;<strong>（1）结构Qdisc</strong> struct Qdisc数据结构表示流量排队规则的一个qdisc，它与网络设备相关联。这个排队规则用于在将报文发送到Linux系统的网络接口之前的流量控制（报文排队）。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div></pre></td><td class="code"><pre><div class="line">include/net/pkt_sched.h</div><div class="line"></div><div class="line">struct Qdisc </div><div class="line">&#123;</div><div class="line">    /* 指向排队规则的入队函数的函数指针。如果没有配置其他队列规则，则默认的函数</div><div class="line">     * 是pfifo_fast_enqueue。入队函数的主要作用是将sk_buff加入到调度器的恰当的</div><div class="line">     * 队列中。</div><div class="line">     */</div><div class="line">    int                 (*enqueue)(sturct sk_buff *skb, struct Qdisc *dev);</div><div class="line">    /* 指向队列规则的出队函数的函数指针。默认函数是pfifo_fast_dequeue()</div><div class="line">     * 。出队函数的主要作用是，从优先级最高的非空队列中移出报文。</div><div class="line">     */</div><div class="line">    struct sk_buff*     (*dequeue)(struct Qdisc *dev);</div><div class="line">    unsigned            flags;</div><div class="line">    ......</div><div class="line">    /* 每个排队规则都有一个用于控制其操作的函数集，Qdisc_ops数据结构包含了所有</div><div class="line">     * 这些控制函数。</div><div class="line">     */</div><div class="line">    struct Qdisc_ops    *ops;</div><div class="line">    /* Linux网络设备维护了qdisc_list，以链接所有用于设备排队的排队规则。这里，</div><div class="line">     * next指针指向设备的下一个排队规则。</div><div class="line">     */</div><div class="line">    struct Qdisc        *next;</div><div class="line">    /* 内核中有多个排队规则实例，每个排队规则实例都通过32位的数字来标识。*/</div><div class="line">    u32                 handle;</div><div class="line">    atomic_t            refcnt;</div><div class="line">    /* q表示队列的头部 */</div><div class="line">    struct sk_buff_head q;</div><div class="line">    /* 指向网络设备 */</div><div class="line">    struct net_device   *dev;</div><div class="line">    /* 表示统计，即入队的字节数与报文数、丢弃的报文数等。*/</div><div class="line">    struct tc_stats     stats;</div><div class="line">    int                 (*reshape_fail)(struct sk_buff *skb, struct Qdisc *q);</div><div class="line">    ......</div><div class="line">    struct Qdisc        *__parents;</div><div class="line">    /* 这是一个位置指针。对于默认的pfifo_fast，它指向一个sk_buff_head结构的数</div><div class="line">     * 组；对于CBQ，它指向cbq_sched_data数据结构，这个数据结构包含了用于不同队</div><div class="line">     * 列的类型。</div><div class="line">     */</div><div class="line">    char                data[0];</div><div class="line"></div><div class="line">&#125;;</div></pre></td></tr></table></figure></p>
+<p>&emsp;&emsp;<strong>（2）结构Qdisc_ops</strong> struct Qdisc_ops数据结构提供了用于各种操作的控制函数集，这些操作在排队规则上执行。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div></pre></td><td class="code"><pre><div class="line">include/net/pkt_sched.h</div><div class="line"></div><div class="line">struct Qdisc_ops</div><div class="line">&#123;</div><div class="line">    /* 指向下一个Qdisc_ops，以链接所有在内核中注册的排队规则操作。*/</div><div class="line">    struct Qdisc_ops        *next;</div><div class="line">    /* 这是一个类别操作数据结构Qdisc_class_ops，它为某个特定的类别提供一个函</div><div class="line">     * 数集。</div><div class="line">     */</div><div class="line">    struct Qdisc_class_ops  *cl_ops;</div><div class="line">    /* 包含排队规则标识（例如，pfifo、cbq等）的字符数组。*/</div><div class="line">    char                    id[IFNAMSIZ];</div><div class="line">    int                     priv_size;</div><div class="line"></div><div class="line">    int                     (*enqueue)(struct sk_buff *, struct Qdisc *);</div><div class="line">    struct sk_buff *        (*dequeue)(struct Qdisc *);</div><div class="line">    /* 如果报文已经发送，但是由于未知的原因而发送失败，则requeue()</div><div class="line">     * 函数将报文放回到它原来在队列中的位置。</div><div class="line">     */</div><div class="line">    int                     (*requeue)(struct sk_buff *, struct Qdisc);</div><div class="line">    /* 从队列中删除并丢弃报文 */</div><div class="line">    int                     (*drop)(struct Qdisc *);</div><div class="line"></div><div class="line">    int                     (*init)(struct Qdisc *, struct rtattr *arg);</div><div class="line">    /* 将排队规则重新设置到初始状态 */</div><div class="line">    void                    (*reset)(struct Qdisc *);</div><div class="line">    /* 销毁在排队规则初始化期间使用的资源 */</div><div class="line">    void                    (*destroy)(struct Qdisc *);</div><div class="line">    /* 改变一个排队规则的参数值 */</div><div class="line">    int                     (*change)(struct Qdisc *, struct rtattr *arg);</div><div class="line">    /* 显示排队规则的统计信息 */</div><div class="line">    int                     (*dump)(struct Qdisc * struct sk_buff);</div><div class="line">&#125;;</div></pre></td></tr></table></figure></p>
+<p>&emsp;&emsp;<strong>（3）结构Qdisc_class_ops</strong> 这是一个类别操作数据结构，它为某个特定的类别提供了一个控制函数集。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div></pre></td><td class="code"><pre><div class="line">include/net/pkt_sched.h</div><div class="line"></div><div class="line">struct Qdisc_class_ops</div><div class="line">&#123;</div><div class="line">    ......</div><div class="line">    /* 作用是将一个新的排队规则附加到一个类别上，并将之前附加的排队规则返回 */</div><div class="line">    int              (*qrqft)(struct Qdisc *, unsigned long c1, struct Qdisc</div><div class="line">                           *, struct Qdisc **);</div><div class="line">    /* 返回一个指向类别的排队规则的指针 */</div><div class="line">    struct Qdisc *   (*leaf)(struct Qdisc *, unsigned long c1);</div><div class="line">    ......</div><div class="line">    /* 返回类别的内部ID */</div><div class="line">    unsigned long    (*get)(struct Qdisc *, u32 classid);</div><div class="line">    /* 当get返回的类别不再被引用时调用该函数 */</div><div class="line">    void             (*put)(struct Qdisc *, unsigned long);</div><div class="line">    /* 改变类别的属性，也用于创建新的类别 */</div><div class="line">    int              (*change)(struct Qdisc *, u32, u32, struct rtattr **, </div><div class="line">                           unsigned long *);</div><div class="line">    /* 删除一个类别 */</div><div class="line">    int              (*delete)(struct Qdisc *, unsigned long);</div><div class="line">    /* 遍历一个排队规则上所有的类别，用于获取所有类别的诊断数据 */</div><div class="line">    void             (*walk)(struct Qdisc *, struct qdisc_walker *org);</div><div class="line">    ......</div><div class="line">    /* 返回指向类别的过滤器列表的指针，用于管理过滤器列表 */</div><div class="line">    struct tcf_proto ** (*tcf_chain)(struct Qdisc *, unsigned long);</div><div class="line">    /* 绑定一个过滤器实例到类别 */</div><div class="line">    unsigned long    (*bind_tcf)(struct Qdisc *, unsigned long, u32 classid);</div><div class="line">    /* 从类别中删除一个过滤器实例 */</div><div class="line">    void             (*unbind_tcf)(struct Qdisc *, unsigned long);</div><div class="line">    ......</div><div class="line">    /* 返回类别的统计信息 */</div><div class="line">    int              (*dump)(struct Qdisc *, unsigned long, struct sk_buff </div><div class="line">                          *skb, struct tcmsg*);</div><div class="line">&#125;;</div></pre></td></tr></table></figure></p>
+<p>&emsp;&emsp;<strong>（4）结构cbq_class</strong> 该数据结构表示cbq排队规则的流量类型，用于根据为类型分配的带宽调度报文。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">net/sched/sch_cbq.c</div><div class="line"></div><div class="line">struct cbq_class</div><div class="line">&#123;</div><div class="line">    /* 指向类别中cbq_class中下一个类别 */</div><div class="line">    struct cbq_class     *next;</div><div class="line">    /* cbq调度算法维护了活动的流量类别类型，用于根据优先级调度类别*/</div><div class="line">    struct cbq_class     *next_alive;</div><div class="line">    ......</div><div class="line">    /* 在cbq排队规则中每个类别都通过一个编号（id）来表示。这个域包含了一个cbq类</div><div class="line">     *别的唯一编号。</div><div class="line">     */</div><div class="line">    u32                  classid;</div><div class="line">    /* 这个域包含了类别优先级，它用于调度cbq类别 */</div><div class="line">    unsigned char        priority;</div><div class="line">    /* 这个域包含了overtime之后使用的类别优先级。一个cbq类别有三种类型：</div><div class="line">     * overtime、underlimit和atlimit。</div><div class="line">     */</div><div class="line">    unsigned char        priority2;</div><div class="line">    /* 这个域用于计算空闲时间，计算是在cbq调度函数中指定的 */</div><div class="line">    unsigned char        ewma_log;</div><div class="line">&#125;;</div></pre></td></tr></table></figure></p>
+<p><strong>参考文献</strong>：<br><a href="https://aavmqxaxn.updog.co/YWF2bXF4YXhuMDQ3MDE0NzczMw.pdf" target="_blank" rel="external">TCP/IP架构、设计及应用</a></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Linux/" rel="tag"># Linux</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/01/03/TCP定时器（四）/" rel="next" title="延时确认定时器">
+                <i class="fa fa-chevron-left"></i> 延时确认定时器
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMDQ5OS83MDUz"></div>
+    
+  </div>
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/uploads/avatar.jpg"
+               alt="kevin" />
+          <p class="site-author-name" itemprop="name">kevin</p>
+           
+              <p class="site-description motion-element" itemprop="description"></p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">28</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#Linux流量控制的基本条件"><span class="nav-number">1.</span> <span class="nav-text">Linux流量控制的基本条件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Linux中pfifo-fast排队规则的实现"><span class="nav-number">2.</span> <span class="nav-text">Linux中pfifo_fast排队规则的实现</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#排队规则数据结构"><span class="nav-number">3.</span> <span class="nav-text">排队规则数据结构</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">kevin</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <div id="lv-container" data-id="city" data-uid="MTAyMC8zMDQ5OS83MDUz">
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+
+        if (typeof LivereTower === 'function') { return; }
+
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+
+        e.parentNode.insertBefore(j, e);
+     })(document, 'script');
+    </script>
+    <noscript>为正常使用来必力评论功能请激活JavaScript</noscript>
+    </div>
+  
+
+
+
+
+  
+    <script type="text/javascript">
+    (function(){
+      var appid = 'cyt0MsHAj';
+      var conf = '66bcfe1dd2d805358cdeacd4effb7088';
+      var width = window.innerWidth || document.documentElement.clientWidth;
+      if (width < 960) {
+      window.document.write('<script id="changyan_mobile_js" charset="utf-8" type="text/javascript" src="https://changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf + '"><\/script>'); } else { var loadJs=function(d,a){var c=document.getElementsByTagName("head")[0]||document.head||document.documentElement;var b=document.createElement("script");b.setAttribute("type","text/javascript");b.setAttribute("charset","UTF-8");b.setAttribute("src",d);if(typeof a==="function"){if(window.attachEvent){b.onreadystatechange=function(){var e=b.readyState;if(e==="loaded"||e==="complete"){b.onreadystatechange=null;a()}}}else{b.onload=a}}c.appendChild(b)};loadJs("https://changyan.sohu.com/upload/changyan.js",function(){
+        window.changyan.api.config({appid:appid,conf:conf})});
+      }
+    })();
+    </script>
+    <script type="text/javascript" src="https://assets.changyan.sohu.com/upload/plugins/plugins.count.js"></script>
+  
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>
