@@ -104,7 +104,7 @@
 <meta property="og:site_name" content="凡是过去 皆为序曲">
 <meta property="og:description" content="&amp;emsp;&amp;emsp;Linux中的服务质量（排队规则）的基本功能是决定如何按顺序接受输入的网络报文，以及使用什么带宽速率接收，并且决定何时以及如何将报文安排进队列中并按照分配的带宽速率进行传输。它主要是根据应用程序需求管理带宽。">
 <meta property="og:image" content="http://yoursite.com/pictures/TCP/20180110083808.png">
-<meta property="og:updated_time" content="2018-01-10T08:13:43.214Z">
+<meta property="og:updated_time" content="2018-03-04T02:25:18.093Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Linux中的IP服务质量">
 <meta name="twitter:description" content="&amp;emsp;&amp;emsp;Linux中的服务质量（排队规则）的基本功能是决定如何按顺序接受输入的网络报文，以及使用什么带宽速率接收，并且决定何时以及如何将报文安排进队列中并按照分配的带宽速率进行传输。它主要是根据应用程序需求管理带宽。">
@@ -389,7 +389,7 @@
 
       
         <p>&emsp;&emsp;Linux中的服务质量（排队规则）的基本功能是决定如何按顺序接受输入的网络报文，以及使用什么带宽速率接收，并且决定何时以及如何将报文安排进队列中并按照分配的带宽速率进行传输。它主要是根据应用程序需求管理带宽。<br><a id="more"></a><br>&emsp;&emsp;下面是Linux支持的排队规则类型：<br>&emsp;&emsp;（1）先进先出（First In First Out, FIFO）<br>&emsp;&emsp;（2）带优先级的先进先出（Priority FIFO, PFIFO）<br>&emsp;&emsp;（3）令牌通流（Token Bucket Flow, TBF）<br>&emsp;&emsp;（4）异步传输模式（Asynchronous Transfer Mode, ATM）<br>&emsp;&emsp;（5）随机早检测（Random Early Detection, RED）<br>&emsp;&emsp;（6）随机公平队列（Stochastic Fair Queueing, SFQ）<br>&emsp;&emsp;（7）可分类排队规则（Class-Bassed Queueing Discipline, CBQ）<br>&emsp;&emsp;（8）通用随机早检测（Generalized GED）</p>
-<h4 id="Linux流量控制的基本条件"><a href="#Linux流量控制的基本条件" class="headerlink" title="Linux流量控制的基本条件"></a>Linux流量控制的基本条件</h4><p>&emps;&emsp;（1）排队规则（Queueing Discipline）<br>&emsp;&emsp;（2）类别（Class）<br>&emsp;&emsp;（3）过滤器/分类器（Filter/Classifier）<br>&emsp;&emsp;（4）策略（Policing）<br>&emsp;&emsp;<strong>排队规则</strong> Linux上的每个网络设备都有一个排队规则，它控制报文在传输前如何进入和出队。<br>&emsp;&emsp;<strong>类别</strong> 只有基于类的排队规则才支持类别。可以在传输网络流量之前根据过滤器（IP地址、TCP/IP端口等）将其分为不同的类别，每种类别会根据其优先级来调度报文的出队。<br>&emsp;&emsp;<strong>过滤器</strong> 过滤器根据特定参数（IP地址、TCP/IP端口等）将报文组织到不同的类别中。<br>&emsp;&emsp;<strong>策略</strong> 在将网络报文从队列中移出以后，可以对报文设置策略：发送报文、丢弃报文或者发送并标记报文。<br>&emsp;&emsp;Linux中的pfifo_fast排队规则的流程图如下图所示。<br><img src="../../../../pictures/TCP/20180110083808.png" alt=""></p>
+<h4 id="Linux流量控制的基本组件"><a href="#Linux流量控制的基本组件" class="headerlink" title="Linux流量控制的基本组件"></a>Linux流量控制的基本组件</h4><p>&emps;&emsp;（1）排队规则（Queueing Discipline）<br>&emsp;&emsp;（2）类别（Class）<br>&emsp;&emsp;（3）过滤器/分类器（Filter/Classifier）<br>&emsp;&emsp;（4）策略（Policing）<br>&emsp;&emsp;<strong>排队规则</strong> Linux上的每个网络设备都有一个排队规则，它控制报文在传输前如何入队和出队。<br>&emsp;&emsp;<strong>类别</strong> 只有基于类的排队规则才支持类别。可以在传输网络流量之前根据过滤器（IP地址、TCP/IP端口等）将其分为不同的类别，每种类别会根据其优先级来调度报文的出队。<br>&emsp;&emsp;<strong>过滤器</strong> 过滤器根据特定参数（IP地址、TCP/IP端口等）将报文组织到不同的类别中。<br>&emsp;&emsp;<strong>策略</strong> 在将网络报文从队列中移出以后，可以对报文设置策略：发送报文、丢弃报文或者发送并标记报文。<br>&emsp;&emsp;Linux中的pfifo_fast排队规则的流程图如下图所示。<br><img src="../../../../pictures/TCP/20180110083808.png" alt=""></p>
 <h4 id="Linux中pfifo-fast排队规则的实现"><a href="#Linux中pfifo-fast排队规则的实现" class="headerlink" title="Linux中pfifo_fast排队规则的实现"></a>Linux中pfifo_fast排队规则的实现</h4><p>&emsp;&emsp;pfifo_fast排队规则是Linux系统中所有网络接口的默认排队规则。pfifo_fast排队规则可以被Linux系统中的任何其他排队规则替换。pfifo_fast包含三个不同的FIFO队列，他们根据优先级将报文加入队列。最高优先级的报文进入FIFO 0，接下来依次是FIFO 1和FIFO 2。<br>&emsp;&emsp;pfifo_fast不是由用户配置的，而是默认硬编码的。报文的优先级是内核分配的，并且根据报文的TOS octet映射到适当的波段中。对于报文入队和出队，pfifo_fast排队规则使用pfifo_fast_enqueue()和pfifo_fast_dequeue()函数。</p>
 <h4 id="排队规则数据结构"><a href="#排队规则数据结构" class="headerlink" title="排队规则数据结构"></a>排队规则数据结构</h4><p>&emsp;&emsp;<strong>（1）结构Qdisc</strong> struct Qdisc数据结构表示流量排队规则的一个qdisc，它与网络设备相关联。这个排队规则用于在将报文发送到Linux系统的网络接口之前的流量控制（报文排队）。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div></pre></td><td class="code"><pre><div class="line">include/net/pkt_sched.h</div><div class="line"></div><div class="line">struct Qdisc </div><div class="line">&#123;</div><div class="line">    /* 指向排队规则的入队函数的函数指针。如果没有配置其他队列规则，则默认的函数</div><div class="line">     * 是pfifo_fast_enqueue。入队函数的主要作用是将sk_buff加入到调度器的恰当的</div><div class="line">     * 队列中。</div><div class="line">     */</div><div class="line">    int                 (*enqueue)(sturct sk_buff *skb, struct Qdisc *dev);</div><div class="line">    /* 指向队列规则的出队函数的函数指针。默认函数是pfifo_fast_dequeue()</div><div class="line">     * 。出队函数的主要作用是，从优先级最高的非空队列中移出报文。</div><div class="line">     */</div><div class="line">    struct sk_buff*     (*dequeue)(struct Qdisc *dev);</div><div class="line">    unsigned            flags;</div><div class="line">    ......</div><div class="line">    /* 每个排队规则都有一个用于控制其操作的函数集，Qdisc_ops数据结构包含了所有</div><div class="line">     * 这些控制函数。</div><div class="line">     */</div><div class="line">    struct Qdisc_ops    *ops;</div><div class="line">    /* Linux网络设备维护了qdisc_list，以链接所有用于设备排队的排队规则。这里，</div><div class="line">     * next指针指向设备的下一个排队规则。</div><div class="line">     */</div><div class="line">    struct Qdisc        *next;</div><div class="line">    /* 内核中有多个排队规则实例，每个排队规则实例都通过32位的数字来标识。*/</div><div class="line">    u32                 handle;</div><div class="line">    atomic_t            refcnt;</div><div class="line">    /* q表示队列的头部 */</div><div class="line">    struct sk_buff_head q;</div><div class="line">    /* 指向网络设备 */</div><div class="line">    struct net_device   *dev;</div><div class="line">    /* 表示统计，即入队的字节数与报文数、丢弃的报文数等。*/</div><div class="line">    struct tc_stats     stats;</div><div class="line">    int                 (*reshape_fail)(struct sk_buff *skb, struct Qdisc *q);</div><div class="line">    ......</div><div class="line">    struct Qdisc        *__parents;</div><div class="line">    /* 这是一个位置指针。对于默认的pfifo_fast，它指向一个sk_buff_head结构的数</div><div class="line">     * 组；对于CBQ，它指向cbq_sched_data数据结构，这个数据结构包含了用于不同队</div><div class="line">     * 列的类型。</div><div class="line">     */</div><div class="line">    char                data[0];</div><div class="line"></div><div class="line">&#125;;</div></pre></td></tr></table></figure></p>
 <p>&emsp;&emsp;<strong>（2）结构Qdisc_ops</strong> struct Qdisc_ops数据结构提供了用于各种操作的控制函数集，这些操作在排队规则上执行。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div></pre></td><td class="code"><pre><div class="line">include/net/pkt_sched.h</div><div class="line"></div><div class="line">struct Qdisc_ops</div><div class="line">&#123;</div><div class="line">    /* 指向下一个Qdisc_ops，以链接所有在内核中注册的排队规则操作。*/</div><div class="line">    struct Qdisc_ops        *next;</div><div class="line">    /* 这是一个类别操作数据结构Qdisc_class_ops，它为某个特定的类别提供一个函</div><div class="line">     * 数集。</div><div class="line">     */</div><div class="line">    struct Qdisc_class_ops  *cl_ops;</div><div class="line">    /* 包含排队规则标识（例如，pfifo、cbq等）的字符数组。*/</div><div class="line">    char                    id[IFNAMSIZ];</div><div class="line">    int                     priv_size;</div><div class="line"></div><div class="line">    int                     (*enqueue)(struct sk_buff *, struct Qdisc *);</div><div class="line">    struct sk_buff *        (*dequeue)(struct Qdisc *);</div><div class="line">    /* 如果报文已经发送，但是由于未知的原因而发送失败，则requeue()</div><div class="line">     * 函数将报文放回到它原来在队列中的位置。</div><div class="line">     */</div><div class="line">    int                     (*requeue)(struct sk_buff *, struct Qdisc);</div><div class="line">    /* 从队列中删除并丢弃报文 */</div><div class="line">    int                     (*drop)(struct Qdisc *);</div><div class="line"></div><div class="line">    int                     (*init)(struct Qdisc *, struct rtattr *arg);</div><div class="line">    /* 将排队规则重新设置到初始状态 */</div><div class="line">    void                    (*reset)(struct Qdisc *);</div><div class="line">    /* 销毁在排队规则初始化期间使用的资源 */</div><div class="line">    void                    (*destroy)(struct Qdisc *);</div><div class="line">    /* 改变一个排队规则的参数值 */</div><div class="line">    int                     (*change)(struct Qdisc *, struct rtattr *arg);</div><div class="line">    /* 显示排队规则的统计信息 */</div><div class="line">    int                     (*dump)(struct Qdisc * struct sk_buff);</div><div class="line">&#125;;</div></pre></td></tr></table></figure></p>
@@ -447,6 +447,10 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/01/11/tc用户程序设计及其内核实现/" rel="prev" title="tc用户程序设计及其内核实现">
+                tc用户程序设计及其内核实现 <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -521,7 +525,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">28</span>
+                <span class="site-state-item-count">30</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -532,7 +536,7 @@
             
             <div class="site-state-item site-state-categories">
               <a href="/categories/index.html">
-                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-count">8</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>
@@ -543,7 +547,7 @@
             
             <div class="site-state-item site-state-tags">
               <a href="/tags/index.html">
-                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-count">5</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
@@ -585,7 +589,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#Linux流量控制的基本条件"><span class="nav-number">1.</span> <span class="nav-text">Linux流量控制的基本条件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Linux中pfifo-fast排队规则的实现"><span class="nav-number">2.</span> <span class="nav-text">Linux中pfifo_fast排队规则的实现</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#排队规则数据结构"><span class="nav-number">3.</span> <span class="nav-text">排队规则数据结构</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#Linux流量控制的基本组件"><span class="nav-number">1.</span> <span class="nav-text">Linux流量控制的基本组件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Linux中pfifo-fast排队规则的实现"><span class="nav-number">2.</span> <span class="nav-text">Linux中pfifo_fast排队规则的实现</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#排队规则数据结构"><span class="nav-number">3.</span> <span class="nav-text">排队规则数据结构</span></a></li></ol></div>
             
 
           </div>

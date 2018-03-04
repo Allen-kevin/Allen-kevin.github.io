@@ -103,7 +103,7 @@
 <meta property="og:url" content="http://yoursite.com/2018/01/03/TCP定时器（四）/index.html">
 <meta property="og:site_name" content="凡是过去 皆为序曲">
 <meta property="og:description" content="&amp;emsp;&amp;emsp;TCP实现了两种确认模式：&amp;emsp;&amp;emsp;快速确认&amp;emsp;&amp;emsp;延时确认&amp;emsp;&amp;emsp;在有些情况下，我们需要快速地得到ACK，以便于发送端在接收到ACK后，发出更多的数据，其原因是每个新数据的确认都会导致拥塞窗口加1。另外一些需要得到快速确认的情况是接收到乱序分段时，或者所接收数据的断档被填补时。也有一些情况需要延时确认，在这些情况中，会话是交互">
-<meta property="og:updated_time" content="2018-01-04T02:24:11.033Z">
+<meta property="og:updated_time" content="2018-03-03T01:50:26.855Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="延时确认定时器">
 <meta name="twitter:description" content="&amp;emsp;&amp;emsp;TCP实现了两种确认模式：&amp;emsp;&amp;emsp;快速确认&amp;emsp;&amp;emsp;延时确认&amp;emsp;&amp;emsp;在有些情况下，我们需要快速地得到ACK，以便于发送端在接收到ACK后，发出更多的数据，其原因是每个新数据的确认都会导致拥塞窗口加1。另外一些需要得到快速确认的情况是接收到乱序分段时，或者所接收数据的断档被填补时。也有一些情况需要延时确认，在这些情况中，会话是交互">
@@ -390,6 +390,7 @@
 <p>&emsp;&emsp;TCP ACK的状态有三个，源码如下：<br>include/net/tcp.h<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">enum tcp_ack_state_t</div><div class="line">&#123;</div><div class="line">    TCP_ACK_SCHED = 1; //表示调度了ACK</div><div class="line">    TCP_ACK_TIMER = 2; //表示已经安装了延时确认定时器</div><div class="line">    TCP_ACK_PUSHED = 4; //表示ACK需要尽早被发送出去</div><div class="line">&#125;;</div></pre></td></tr></table></figure></p>
 <h4 id="ACK的调度时机"><a href="#ACK的调度时机" class="headerlink" title="ACK的调度时机"></a>ACK的调度时机</h4><p>&emsp;&emsp;一旦从对等端得到数据，就需要调度ACK。调用tcp_schedule_ack()来设置TCP_ACK_SCHED标志。从tcp_rcv_established()和tcp_data_queue()中调用tcp_event_data_recv()接收数据时，都要调度ACK。<br>include/net/tcp.h<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">static inline void tcp_schedule_ack(struct tcp_opt *tp)</div><div class="line">&#123;</div><div class="line">    tp-&gt;ack.pending |= TCP_ACK_SCHED;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
 <p>&emsp;&emsp;调用tcp_schedule_ack()可以调度一个ACK，但是不能基于该标志来强制发送ACK。ACK是立即发送还是延迟一段时间发送需要满足一定的条件。<br>net/ipv4/tcp_input.c<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line">int tcp_rcv_established(struct sock *sk, struct sk_buff *skb, </div><div class="line">    struct tcphdr *th, unsigned len)</div><div class="line">&#123;</div><div class="line">    struct tcp_opt *tp = &amp;(sk-&gt;pinfo.af_tcp);</div><div class="line">    ......</div><div class="line">        if (eaten) &#123;</div><div class="line">            /* 检查是否处于快速ACK模式 */</div><div class="line">            if (tcp_in_quickack_mode(tp)) &#123;</div><div class="line">                /* 如果是，就立即生成ACK */</div><div class="line">                tcp_send_ack(sk);</div><div class="line">            &#125; else &#123;</div><div class="line">                /* 否则推迟一段时间 */</div><div class="line">                tcp_send_delayed_ack(sk);</div><div class="line">            &#125;</div><div class="line"></div><div class="line">        &#125; else &#123;</div><div class="line">            /* 如果应用程序没有读取数据，而是在接受对中排队，</div><div class="line">             * 就调用__tcp_ack_snd_check()做更严格的检查。</div><div class="line">             */</div><div class="line">            __tcp_ack_snd_check(sk, 0);</div><div class="line">        &#125;</div><div class="line">    ......</div><div class="line">    tcp_ack_snd_check(sk);</div><div class="line">    ......</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p><strong>参考文献</strong>：<br><a href="https://aavmqxaxn.updog.co/YWF2bXF4YXhuMDQ3MDE0NzczMw.pdf" target="_blank" rel="external">TCP/IP架构、设计及应用</a></p>
 
       
     </div>
@@ -519,7 +520,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">28</span>
+                <span class="site-state-item-count">30</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -530,7 +531,7 @@
             
             <div class="site-state-item site-state-categories">
               <a href="/categories/index.html">
-                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-count">8</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>
@@ -541,7 +542,7 @@
             
             <div class="site-state-item site-state-tags">
               <a href="/tags/index.html">
-                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-count">5</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
