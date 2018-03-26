@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2018-03-26T08:46:09.820Z</updated>
+  <updated>2018-03-26T08:50:49.584Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -20,7 +20,7 @@
     <link href="http://yoursite.com/2018/03/25/%E6%8E%92%E5%BA%8F%E9%97%AE%E9%A2%98/"/>
     <id>http://yoursite.com/2018/03/25/排序问题/</id>
     <published>2018-03-25T15:24:55.000Z</published>
-    <updated>2018-03-26T08:46:09.820Z</updated>
+    <updated>2018-03-26T08:50:49.584Z</updated>
     
     <content type="html"><![CDATA[<p>&emsp;&emsp;目前正在看《算法导论》，之前看了一部分，没坚持看完，而今迈步重头越，顺便写个博客记录一下，避免下次出现类似情况。这篇博客主要是记录《算法导论》第一部分的排序问题，排序问题是算法中的基本问题，也是一个重要问题。<br><a id="more"></a><br>&emsp;&emsp;在正式介绍排序排序算法之前，先声明一下什么是原址排序：如果输入数组中仅有常数个元素需要在排序过程中存储在数组之外，则称排序是原址的。</p>
 <h4 id="插入排序"><a href="#插入排序" class="headerlink" title="插入排序"></a>插入排序</h4><p>&emsp;&emsp;插入排序的主要思想是假设array[0] to array[j-1]是已排好序的，array[j]是当前待插入的数，array[j+1] to array[n]是无序的。那么先使用变量key保存array[j]的值，使用i记录array[j]前一个值的下标，然后将array[j-1] to array[0]依次与key比较，直到i &lt; 0 or array[i] &lt; key，此时便找到了key要插入的位置。源码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">InsertionSort(int* array, int length)</div><div class="line">&#123;</div><div class="line">    int key, i;//key表示待插入的数</div><div class="line"></div><div class="line">    for (int j = 1; j &lt; length; j++) &#123;</div><div class="line">        key = array[j];</div><div class="line">        i = j - 1;</div><div class="line">        while (i &gt;= 0 &amp;&amp; array[i] &gt; key) &#123;//循环结束条件</div><div class="line">            array[i+1] = array[i];//将大于key的数依次向后移</div><div class="line">            i = i - 1;</div><div class="line">        &#125;</div><div class="line">        array[i+1] = key;//i+1为key要插入的位置</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
