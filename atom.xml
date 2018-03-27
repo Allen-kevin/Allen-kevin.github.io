@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2018-03-26T08:58:08.033Z</updated>
+  <updated>2018-03-27T08:20:56.418Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -16,9 +16,37 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>排序问题（二）</title>
+    <link href="http://yoursite.com/2018/03/26/%E6%8E%92%E5%BA%8F%E9%97%AE%E9%A2%98%EF%BC%88%E4%BA%8C%EF%BC%89/"/>
+    <id>http://yoursite.com/2018/03/26/排序问题（二）/</id>
+    <published>2018-03-26T11:16:10.000Z</published>
+    <updated>2018-03-27T08:20:56.418Z</updated>
+    
+    <content type="html"><![CDATA[<p>&emsp;&emsp;前面介绍了插入排序、归并排序和堆排序，下面接着介绍排序算法中的快速排序、计数排序和桶排序。最后还会给出各个排序算法的时间复杂度。<br><a id="more"></a></p>
+<h4 id="快速排序"><a href="#快速排序" class="headerlink" title="快速排序"></a>快速排序</h4><p>&emsp;&emsp;快速排序是一种最坏情况时间复杂度为$\Theta（n^2）$的排序算法，但是快速排序通常是实际排序应用中最好的选择，因为它的平均性能非常好：它的期望时间复杂度是$\Theta（nlgn）$，而且$\Theta（nlgn）$中隐含的常数因子非常小。另外一个特点是，快速排序是原址排序的，甚至在虚存环境中也能很好的工作。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line">void QuickSort(int* array, int begin, int end)</div><div class="line">&#123;</div><div class="line">    if (begin &lt; end) &#123;</div><div class="line">        //每次调用Partition()函数，都会有一个数被排序到正确的位置</div><div class="line">        int temp = Partition(array, begin, end);</div><div class="line">        //采用分治策略递归调用QuickSort()，快速排序的重点是Partition()函数</div><div class="line">        QuickSort(array, begin, temp-1);</div><div class="line">        QuickSort(array, temp+1, end);</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">void Partition(int* array, int begin, int end)</div><div class="line">&#123;</div><div class="line">    //保存数组的最后一位</div><div class="line">    int key = array[end];</div><div class="line">    int i = begin - 1;</div><div class="line"></div><div class="line">    //将小于key的数放到key的左边，大于key的数放到key的右边</div><div class="line">    for (int j = begin; j &lt;= end-1; j++) &#123;</div><div class="line">        if (array[j] &lt;= key) &#123;</div><div class="line">            i = i+1;</div><div class="line">            swap(array[i], array[j]);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    //将key放到其在数组中应在的位置</div><div class="line">    swap(array[i+1], array[end]);</div><div class="line"></div><div class="line">    return i+1;//返回key的下标</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h4 id="计数排序"><a href="#计数排序" class="headerlink" title="计数排序"></a>计数排序</h4><p>&emsp;&emsp;计数排序是一种线性时间复杂度的排序算法，假设$n$个输入元素中的每一个都是在$0$到$k$区间内的一个整数。当$k=O（n）$时，排序的运行时间为$\Theta（n）$。<br>&emsp;&emsp;计数排序的基本思想是：对每一个输入元素x，确定小于x的元素个数，那么便可以确定x在输出数组中的位置了。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">void CountingSort(int* array, int* Output, int length, int k)</div><div class="line">&#123;</div><div class="line">    //用于临时存放待排序数组元素的统计信息</div><div class="line">    int temp[k+1];</div><div class="line">    for (int i = 0; i &lt;= k; i++)</div><div class="line">        temp[i] = 0;//初始化临时数组</div><div class="line"></div><div class="line">    for (int j = 0; j &lt; length; j++)</div><div class="line">        //统计array数组中每个元素出现的次数</div><div class="line">        temp[array[j]] = temp[array[j]] + 1;</div><div class="line"></div><div class="line">    for (int i = 1; i &lt;= k; i++)</div><div class="line">        //通过累加计算确定对每一个i=0,1,...,k，有多少输入元素是小于或等于i的。</div><div class="line">        temp[i] = temp[i] +temp[i-1];</div><div class="line"></div><div class="line">    for (int j = 0; j &lt; length; j++) &#123;</div><div class="line">        //把array数组中的每个元素放到它在输出数组Output的正确位置上。</div><div class="line">        Output[temp[array[j]]-1] = array[j];</div><div class="line">        temp[array[j]] = temp[array[j]] - 1;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>&emsp;&emsp;计数排序的一个重要性质就是它是稳定的，具有相同值的元素在输出数组中的相对次序与它们在输入数组中的次序相同。</p>
+<h4 id="桶排序"><a href="#桶排序" class="headerlink" title="桶排序"></a>桶排序</h4><p>&emsp;&emsp;桶排序的时间复杂度为$O（n）$，工作原理是将数组分到有限数量的桶子里，每个桶再个别排序，虽然桶排序有好的时间复杂度，但却是以牺牲空间为代价。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div></pre></td><td class="code"><pre><div class="line">//定义链表节点</div><div class="line">struct Node &#123;</div><div class="line">    int data;</div><div class="line">    Node* next;</div><div class="line">    Node(int _data) &#123;</div><div class="line">        data = _data;</div><div class="line">        next = NULL;</div><div class="line">    &#125;</div><div class="line">&#125;;</div><div class="line"></div><div class="line">void BucketSort(int* array, int arraySize, int bucketSize)</div><div class="line">&#123;</div><div class="line">    Node **bucketTable = (Node**)malloc(bucketSize*sizeof(Node*));</div><div class="line">    for (int i = 0; i &lt; bucketSize; i++) &#123;//初始化桶</div><div class="line">        bucketTable[i] = (Node*)malloc(sizeof(Node));//分配一个节点空间</div><div class="line">        bucketTable[i]-&gt;data = 0;//0表示桶中还没有数据</div><div class="line">        bucketTable[i]-&gt;next = NULL;//给next指针初始值赋值NULL</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    for (int j = 0; j &lt; arraySize; j++) &#123;</div><div class="line">        Node* node = (Node*)malloc(sizeof(Node));//申请一个节点大小空间</div><div class="line">        node-&gt;data = array[j];//将待排序数组的元素依次赋给新节点</div><div class="line">        node-&gt;next = NULL;//新节点的next赋空</div><div class="line"></div><div class="line">        int index = array[j]/10;//假设数据满足0 &lt;= array[j] &lt;= 99</div><div class="line">        node *p = bucketTable[index];//p指向桶中数据链表的头</div><div class="line"></div><div class="line">        if (p-&gt;data == 0) &#123;//桶为空时</div><div class="line">            bucketTable[index]-&gt;next = node;//将第一个节点挂载链表头指针后面</div><div class="line">            (bucketTable[index]-&gt;data)++;//头指针的data域记录桶中元素的个数</div><div class="line">        &#125; esle &#123;//桶不为空时，将相应节点插入到链表中</div><div class="line">            while (p-&gt;next != NULL &amp;&amp; p-&gt;next-&gt;data &lt; node-&gt;data)</div><div class="line">                p = p-&gt;next;</div><div class="line">            //添加新节点</div><div class="line">            node-&gt;next = p-&gt;next;</div><div class="line">            (bucketTable[index]-&gt;data)++;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>&emsp;&emsp;下面盗用算法导论中的一个图，以便更好地理解桶排序。<br><img src="../../../../pictures/algorithm/0000.jpg" alt=""></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;&amp;emsp;&amp;emsp;前面介绍了插入排序、归并排序和堆排序，下面接着介绍排序算法中的快速排序、计数排序和桶排序。最后还会给出各个排序算法的时间复杂度。&lt;br&gt;
+    
+    </summary>
+    
+      <category term="数据结构和算法" scheme="http://yoursite.com/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%92%8C%E7%AE%97%E6%B3%95/"/>
+    
+    
+      <category term="排序" scheme="http://yoursite.com/tags/%E6%8E%92%E5%BA%8F/"/>
+    
+  </entry>
+  
+  <entry>
     <title>排序问题（一）</title>
-    <link href="http://yoursite.com/2018/03/25/%E6%8E%92%E5%BA%8F%E9%97%AE%E9%A2%98/"/>
-    <id>http://yoursite.com/2018/03/25/排序问题/</id>
+    <link href="http://yoursite.com/2018/03/25/%E6%8E%92%E5%BA%8F%E9%97%AE%E9%A2%98%EF%BC%88%E4%B8%80%EF%BC%89/"/>
+    <id>http://yoursite.com/2018/03/25/排序问题（一）/</id>
     <published>2018-03-25T15:24:55.000Z</published>
     <updated>2018-03-26T08:58:08.033Z</updated>
     
@@ -565,49 +593,6 @@
     <summary type="html">
     
       &lt;p&gt;&amp;emsp;&amp;emsp;BBR是Google在2016年提出的一种拥塞控制算法，在Linux kernel@4.9及以后的版本中已添加该算法。在Google通过paper将BBR公布前，BBR算法应该在Google自家World Area Network中早已投入使用。Google后来提出基于SDN的B4网络（paper叫做B4，很有名的一篇paper），其拥塞控制算法也是使用的BBR。&lt;br&gt;
-    
-    </summary>
-    
-      <category term="私人文献阅读" scheme="http://yoursite.com/categories/%E7%A7%81%E4%BA%BA%E6%96%87%E7%8C%AE%E9%98%85%E8%AF%BB/"/>
-    
-    
-  </entry>
-  
-  <entry>
-    <title>TCP拥塞控制之：FAST TCP</title>
-    <link href="http://yoursite.com/2017/05/18/TCP%E6%8B%A5%E5%A1%9E%E6%8E%A7%E5%88%B6%E4%B9%8BFASTTCP/"/>
-    <id>http://yoursite.com/2017/05/18/TCP拥塞控制之FASTTCP/</id>
-    <published>2017-05-18T11:11:52.000Z</published>
-    <updated>2017-05-22T01:46:18.005Z</updated>
-    
-    <content type="html"><![CDATA[<p>&emsp;&emsp;经典的TCP拥塞控制算法TCP Reno从被提出后很长一段时间一直作为Linux kernel的默认算法，但随着Internet在规模、传输速度、负载、连接数上的增长，TCP Reno迟早会成为性能瓶颈。<br><a id="more"></a></p>
-<h3 id="问题与背景"><a href="#问题与背景" class="headerlink" title="问题与背景"></a>问题与背景</h3><p>&emsp;&emsp;当前的Linux kernel的默认拥塞控制算法是于2008年提出的CUBIC，本文介绍的FAST TCP算法于2004年被提出，主要针对高速和长延迟网络，虽然有点老，但还是可以了解了解的。原文主要是和TCP Reno作比较，所以提出的问题也是针对TCP Reno的（时代所限制，如果是现在提出的算法多半是要和CUBIC作比较的）。</p>
-<h4 id="TCP-Reno的问题"><a href="#TCP-Reno的问题" class="headerlink" title="TCP Reno的问题"></a>TCP Reno的问题</h4><p>&emsp;&emsp;TCP Reno在large bandwidth-delay products网络上表现差主要体现在以下四个方面（摘自原文）：</p>
-<blockquote>
-<ol>
-<li>At the packet level, linear increase by one packet per Pound-Trip Time(RTT) is too slow, and multiplicative decrease per loss event is too drastic.</li>
-<li>At teh flow level, maintaining large average congestion windows requires an extremely small equilibrium loss probability.</li>
-<li>At the packet level, oscillation is unavoidable because TCP uses a binary congestion sigmal(packet loss).</li>
-<li>At the flow level, the dynamics is unstable leading to severe oscillations that can only be reduced by the accurate estimation of packet loss probability and a stable design of the flow dynamics.</li>
-</ol>
-</blockquote>
-<p>&emsp;&emsp;在前人的工作中有很多算法是基于丢包检测提出的，比如HSTCP和STCP，而FAST TCP是通过测量queueing delay来作为网络拥塞程度的参考。</p>
-<h4 id="flow-level和packet-level的区别"><a href="#flow-level和packet-level的区别" class="headerlink" title="flow level和packet level的区别"></a>flow level和packet level的区别</h4><p>&emsp;&emsp;一个拥塞控制算法可以从两个level(flow level and packet level)去设计。flow level相比于packet level是一个宏观上的概念，其设计目标是达到高带宽利用率、低排队延迟和丢包、公平和稳定。而packet level是通过端到端控制的约束来设计实施那些flow level的目标。</p>
-<h3 id="FAST-TCP的设计"><a href="#FAST-TCP的设计" class="headerlink" title="FAST TCP的设计"></a>FAST TCP的设计</h3><p>&emsp;&emsp;在说FAST TCP的设计之前先来看一个方程；<br>$$\check{w}_i(t) = \kappa_i(t)(1 - \frac{p_i(t)}{u_i(t)})\label{eq.Sample}$$<br>方程（1）可以用来描述各种已知的TCP拥塞控制算法，不同的拥塞控制算法的区别在于它们对gain function$\kappa_i$和marginal utility function$u_i$以及congestion measures $p_i$是丢失率还是排队延迟。<br>&emsp;&emsp;当然啦，FAST TCP与其他的拥塞控制算法的区别也是在那三个函数的选择上。下面对这三个函数的作用简单介绍下（还是摘自原文，翻译真的很麻烦）。</p>
-<blockquote>
-<p><strong>$\kappa_i$:</strong> the choice of the gain function $\kappa_i$ determines the dynamic properties sush as stability and responsiveness, but does not affect the equilibrium properties.<br><strong>$u_i$:</strong> the choice of the marginal utility function $u_i$ mainly determines equilibrium properties such as the equilibrium rate allocation and its fairness.<br><strong>$p_i$:</strong> in the absence of explicit feedback, the choice of congestion measure $p_i$ is limited to loss probability or queueing delay. The dynamics of $p_i(t)$ is determined at links.</p>
-</blockquote>
-<h4 id="implementation-strategy"><a href="#implementation-strategy" class="headerlink" title="implementation strategy"></a>implementation strategy</h4><p>&emsp;&emsp;FAST TCP 通过适当的flow and packet level 设计来解决上文提到的TCP Reno 在large windows环境下所遇到的四个问题。<br>&emsp;&emsp;首先，评估当前状态$\frac{p_i(t)}{u_i(t)}$距equilibrium（值为1）有多远，如果当前状态接近于equilibrium，那么就缓慢调整window，反之，则激进一点调整。而在TCP Reno中，其窗口调整取决于当前窗口大小。基于delay的方法避免了在TCP Reno中window缓慢增长，迅速下降的问题。<br>&emsp;&emsp;其次，选择一个multi-bit 的拥塞测试，消除由于binary feedback造成的packet level oscillation。这里binary feedback表示window要么增，要么降，没有其他选择。<br>&emsp;&emsp;最后，拥塞测量函数$p_i(t)$采用测量queueing delay而不是测量loss probability，通过调整window从而控制queueing delay可以使网络稳定在overflowing point的下方区域，如下图（b）中的F点。这样既消除了高queueing<br>delay，又避免了不必要的数据包丢失。更重要的是，这样还保留了root for buffering “mice” traffic。<br><img src="../../../../pictures/TCP/20170519171625.png" alt=""></p>
-<h3 id="FAST-TCP的架构和算法"><a href="#FAST-TCP的架构和算法" class="headerlink" title="FAST TCP的架构和算法"></a>FAST TCP的架构和算法</h3><p>&emsp;&emsp;在FAST TCP这篇paper中， 将TCP拥塞控制机制分割成了四部分，这四部分功能相互独立，以便能够设计分离和异步升级。如下图所示，FAST TCP的架构。<br><img src="../../../../pictures/TCP/20170520104134.png" alt=""><br>&emsp;&emsp;其中，data control 部分决定发送那些数据包，window contorl部分决定可以发多少数据包，burstiness control决定什么时候发送这些数据包，上述决定都是在estimation部分提供的信息的基础上做出的。这里只说一下estimation和window control。</p>
-<h4 id="Estimation"><a href="#Estimation" class="headerlink" title="Estimation"></a>Estimation</h4><p>&emsp;&emsp;对于每一个被发送的数据包，estimation部分计算两类反馈信息。当收到一个正常的ACK，计算出相应数据包的RTT，更新平均queueing delay和最小RTT。当收到一个乱序ACK（三个dupack或者timeout），estimation会将数据包的丢失信息报告给其他部分。estimation既可以进行multi-bit的queueing delay采样，也可以进行ont-bit的loss-or-no-loss采样。<br>最后得到的RTT一般都会采用加权移动平均处理，FAST TCP也不例外，$T_i(k)$表示第k个RTT的样本值，$\overline{T}_i(k)$，平均RTT的更新公式如下：<br>$$\overline{T}_i(k+1) = (1 - \eta)\overline{T}_i(k) + \etaT_i(k)$$<br>这里，$t_k$表示收到第k个RTT样本值的时间，$\eta$为加权值。记$d_i(k)$为到目前为止的最小RTT，那么平均queueing delay的计算公式如下：<br>$$\hat{q}_i(k) = \overline{T}_i(k) - d_i(k)$$</p>
-<h4 id="Window-control"><a href="#Window-control" class="headerlink" title="Window control"></a>Window control</h4><p>&emsp;&emsp;window control会根据estimation提供的拥塞信息（queueing delay and packet loss）来决定拥塞窗口的调整。FAST TCP不同于传统TCP的关键在于其对拥塞窗口的计算与sender state是独立的。<br>&emsp;&emsp;在正常情况下，根据estimation提供的平均RTT和平均queueing delay，FAST TCP会周期性的更新其拥塞窗口$CWnd$。 更新公式如下：<br>$$w &lt;— min\lbrace2w, (1-\gamma)w + \gamma(\frac{baseRTT}{RTT}w + \alpha(w, qdelay))\rbrace$$<br>这里，$\gamma\in(0, ]$，qdelay是端到端的平均queueing delay。</p>
-<p>&emsp;&emsp;这篇博客只是对原文基本思想的表述，还有许多细节问题没有提到，有兴趣的朋友可以考虑看看原文，原文地址在博客的参考文献中给出。</p>
-<p><strong>参考文献</strong><br><a href="http://infocom2004.ieee-infocom.org/Papers/52_2.PDF" target="_blank" rel="external">FAST TCP: Motivation, Architecture, Algorithms, Performance</a></p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;&amp;emsp;&amp;emsp;经典的TCP拥塞控制算法TCP Reno从被提出后很长一段时间一直作为Linux kernel的默认算法，但随着Internet在规模、传输速度、负载、连接数上的增长，TCP Reno迟早会成为性能瓶颈。&lt;br&gt;
     
     </summary>
     
