@@ -422,7 +422,7 @@
     <link href="http://yoursite.com/2017/11/18/%E7%94%A8%E6%88%B7%E6%80%81%E5%8D%8F%E8%AE%AE%E6%A0%88%E4%B9%8BMTCP/"/>
     <id>http://yoursite.com/2017/11/18/用户态协议栈之MTCP/</id>
     <published>2017-11-18T03:12:17.000Z</published>
-    <updated>2018-03-30T01:49:12.870Z</updated>
+    <updated>2018-03-30T01:53:10.933Z</updated>
     
     <content type="html"><![CDATA[<a id="more"></a>
 <p>mtcp特点：<br>（1）将多个昂贵的系统调用转换成一个单共享内存引用;<br>（2）允许高效的流级事件聚合;<br>（3）执行批处理数据包I/O以提高I/O效率。</p>
@@ -437,7 +437,7 @@
 <h4 id="User-level-TCP-stack"><a href="#User-level-TCP-stack" class="headerlink" title="User-level TCP stack"></a>User-level TCP stack</h4><p>&emsp;&emsp;将Linux TCP作为一个库实现放到用户层的好处是消除了系统调用，将系统调用转换成了用户层的函数调用。<br><img src="../../../../pictures//TCP/20171121211849.png" alt=""><br>&emsp;&emsp;如图2所示，application使用mtcp库函数通过共享缓存与mtcp线程通信。共享缓存的唯一访问入口就是库函数，这样可以保证内部TCP数据的共享安全性。当库函数需要修改共享数据时，只需要简单的将请求放到job queue。来自于不同流的多个请求在一个循环内被堆积在jobqueue中，当mtcp获得CPU后，便对这些请求进行批处理。来自于mtcp线程的flow events会被放入event queue，处理方式同job queue。</p>
 <h5 id="数据包处理过程"><a href="#数据包处理过程" class="headerlink" title="数据包处理过程"></a>数据包处理过程</h5><p>&emsp;&emsp;mTCP线程从NIC的RX队列中读取一批数据包，并将它们传递给遵循标准TCP规范的TCP包处理逻辑。对于每一个数据包，mtcp首先会在流哈希表搜索相应流的tcp控制块(tcb)。如图3所示，在服务端收到一个SYN/ACK数据包的ACK后，新连接的tcb将会被放到accept queue（2），并为监听套接字生成一个read event（3）。如果有新数据包到达，mtcp会copy数据包的负载到套接字的read buffer并生成一个read event放到internal event queue。同时mtcp会生成一个ACK数据包放到TX manager的ACK列表中。<br><img src="../../../../pictures/TCP/20171123220125.png" alt=""><br>&emsp;&emsp;当批处理完收到的数据包后，mtcp会将queued中的event刷新到应用层的event queue（4）中，并通过信号唤醒应用层。当应用层被唤醒后，使用epoll批处理多个事件（5），并写入来自多个流的响应而没有上下文切换。每个套接字的write()调用写数据到send buffer（6），并将tcb放到write queue（7）。后面，mtcp会收集需要发送数据的tcb，并放到send list（8）。最后通过packet I/O系统调用将list中的数据包发送出去，并将它们传输到NIC的TX queue。</p>
 <h3 id="mtcp的原理是什么？"><a href="#mtcp的原理是什么？" class="headerlink" title="mtcp的原理是什么？"></a>mtcp的原理是什么？</h3><p>mtcp为每个应用线程建一个tcp线程，并将这个线程绑定到一个物理cpu核上。<br>将系统调用转换为内部进程间通信来消除高昂的系统调用开销</p>
-<p><strong>参考文献</strong><br><a href="https://www.usenix.org/system/files/conference/nsdi14/nsdi14-paper-jeong.pdf" target="_blank" rel="external">mtcp</a></p>
+<p><strong>参考文献</strong><br><a href="https://www.usenix.org/system/files/conference/nsdi14/nsdi14-paper-jeong.pdf" target="_blank" rel="external">mTCP: a Highly Scalable User-level TCP Stack<br>for Multicore Systems</a></p>
 ]]></content>
     
     <summary type="html">
