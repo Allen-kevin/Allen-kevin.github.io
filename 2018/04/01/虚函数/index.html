@@ -96,12 +96,16 @@
 
 
 
-<meta property="og:type" content="website">
-<meta property="og:title" content="凡是过去 皆为序曲">
-<meta property="og:url" content="http://yoursite.com/archives/2017/02/index.html">
+<meta name="description" content="&amp;emsp;&amp;emsp;有两种机制可以用于实现多态公有继承：&amp;emsp;&amp;emsp;在派生类中重新定义基类的方法；&amp;emsp;&amp;emsp;使用虚函数；">
+<meta property="og:type" content="article">
+<meta property="og:title" content="虚函数与纯虚函数">
+<meta property="og:url" content="http://yoursite.com/2018/04/01/虚函数/index.html">
 <meta property="og:site_name" content="凡是过去 皆为序曲">
+<meta property="og:description" content="&amp;emsp;&amp;emsp;有两种机制可以用于实现多态公有继承：&amp;emsp;&amp;emsp;在派生类中重新定义基类的方法；&amp;emsp;&amp;emsp;使用虚函数；">
+<meta property="og:updated_time" content="2018-04-01T12:13:50.978Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="凡是过去 皆为序曲">
+<meta name="twitter:title" content="虚函数与纯虚函数">
+<meta name="twitter:description" content="&amp;emsp;&amp;emsp;有两种机制可以用于实现多态公有继承：&amp;emsp;&amp;emsp;在派生类中重新定义基类的方法；&amp;emsp;&amp;emsp;使用虚函数；">
 
 
 
@@ -129,13 +133,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/archives/2017/02/"/>
+  <link rel="canonical" href="http://yoursite.com/2018/04/01/虚函数/"/>
 
 
 
 
 
-  <title>归档 | 凡是过去 皆为序曲</title>
+  <title>虚函数与纯虚函数 | 凡是过去 皆为序曲</title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -170,7 +174,7 @@
     
   
 
-  <div class="container sidebar-position-left  page-archive  ">
+  <div class="container sidebar-position-left page-post-detail ">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -274,65 +278,177 @@
           <div id="content" class="content">
             
 
-  <section id="posts" class="posts-collapse">
-    <span class="archive-move-on"></span>
+  <div id="posts" class="posts-expand">
+    
 
-    <span class="archive-page-counter">
-      
-      
-       
-      
-      OK! 目前共计 34 篇日志。 继续努力。
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/04/01/虚函数/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="kevin">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="凡是过去 皆为序曲">
     </span>
 
     
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">虚函数与纯虚函数</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-01T19:32:28+08:00">
+                2018-04-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/C-C/" itemprop="url" rel="index">
+                    <span itemprop="name">C/C++</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+              <span class="post-meta-divider">|</span>
+              <span class="post-meta-item-icon">
+                <i class="fa fa-comment-o"></i>
+              </span>
+              
+                <a href="/2018/04/01/虚函数/#SOHUCS" itemprop="discussionUrl">
+                  <span id="changyan_count_unit" class="post-comments-count hc-comment-count" data-xid="2018/04/01/虚函数/" itemprop="commentsCount"></span>
+                </a>
+              
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body han-init-context" itemprop="articleBody">
 
       
       
+
+      
+        <p>&emsp;&emsp;有两种机制可以用于实现多态公有继承：<br>&emsp;&emsp;在派生类中重新定义基类的方法；<br>&emsp;&emsp;使用虚函数；<br><a id="more"></a></p>
+<h4 id="虚函数"><a href="#虚函数" class="headerlink" title="虚函数"></a>虚函数</h4><p>&emsp;&emsp;如果要在派生类中重新定义基类的方法，通常应将基类方法声明为虚的。这样，程序将根据对象类型而不是引用或指针的类型来选择调用那个方法。为基类声明一个虚析构函数也是一种惯例。虚函数使用关键字virtual声明。下面举个简单的例子，假如类Brass是BrassPlus的基类。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line">class Brass &#123;</div><div class="line">private:</div><div class="line">public:</div><div class="line">    Brass();</div><div class="line">    double Balance();//忽略</div><div class="line">    virtual void Withdraw(double);//基类虚函数</div><div class="line">    virtual void ViewAcct();//基类虚函数</div><div class="line">    virtual ~Brass();</div><div class="line">&#125;;</div><div class="line"></div><div class="line">class BrassPlus: public Brass &#123;</div><div class="line">private:</div><div class="line">public:</div><div class="line">    BrassPlus();</div><div class="line">    virtual void Withdraw(double);//派生类虚函数</div><div class="line">    virtual ViewAcct();//派生类虚函数</div><div class="line">&#125;;</div><div class="line"></div><div class="line">int main()</div><div class="line">&#123;</div><div class="line">    Brass dom;//基类对象</div><div class="line">    BrassPlus dot;//派生类对象</div><div class="line"></div><div class="line">    Brass &amp; b1_ref = dom;//b1_ref的引用类型为Brass，指向的对象类型也为Brass</div><div class="line">    Brass &amp; b2_ref = dot//b2_ref的引用类型为Brass，指向的对象类型为BrassPlus</div><div class="line">    b1_ref.ViewAcct();//Brass::ViewAcct()</div><div class="line">    b2_ref.ViewAcct();//BrassPlus::ViewAcct()</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p><strong>如果没有使用virtual</strong>声明为虚函数，那么程序将根据引用类型或指针类型选择方法，因为引用变量的类型为Brass，那么调用b1_ref.ViewAcct()和<strong>b2_ref.ViewAcct()</strong>都会选择Brass::ViewAcct()。<br><strong>如果使用了virtual</strong>声明为虚函数，那么程序将根据引用类或指针指向的对象的类型选择方法，即调用b1_ref会选择Brass::ViewAcct()，而调用b2_ref会选择<strong>BrassPlus::ViewAcct()</strong>。<br>&emsp;&emsp;函数在基类中被声明为虚的后，它在派生类中将自动成为虚函数。但是在派生类中使用关键字virtual来指明那些函数在基类中被声明成了虚函数也是一种常见的做法。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
       
 
       
         
-        <div class="collection-title">
-          <h2 class="archive-year motion-element" id="archive-year-2017">2017</h2>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/03/26/排序问题（二）/" rel="next" title="排序问题（二）">
+                <i class="fa fa-chevron-left"></i> 排序问题（二）
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
         </div>
       
-      
 
       
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2017/02/14/TCP重点系列之快速重传/" itemprop="url">
-              
-                <span itemprop="name">TCP重点系列之快速重传tcp_fastretrans_alert</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2017-02-14T11:11:15+08:00"
-              content="2017-02-14" >
-          02-14
-        </time>
-      </div>
-
-    </header>
+      
+    </footer>
   </article>
 
 
 
-    
-
-  </section>
-
-  
-
+    <div class="post-spread">
+      
+    </div>
+  </div>
 
 
           </div>
@@ -340,6 +456,12 @@
 
 
           
+  <div class="comments" id="comments">
+    
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMDQ5OS83MDUz"></div>
+    
+  </div>
+
 
 
         </div>
@@ -360,8 +482,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview sidebar-panel sidebar-panel-active">
+      <section class="site-overview sidebar-panel">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
                src="/uploads/avatar.jpg"
@@ -430,6 +561,22 @@
 
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#虚函数"><span class="nav-number">1.</span> <span class="nav-text">虚函数</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
@@ -543,11 +690,9 @@
   
 
   
-  
-    <script type="text/javascript" id="motion.page.archive">
-      $('.archive-year').velocity('transition.slideLeftIn');
-    </script>
-  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
 
 
   
@@ -583,6 +728,23 @@
 
 
 
+  
+    <div id="lv-container" data-id="city" data-uid="MTAyMC8zMDQ5OS83MDUz">
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+
+        if (typeof LivereTower === 'function') { return; }
+
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+
+        e.parentNode.insertBefore(j, e);
+     })(document, 'script');
+    </script>
+    <noscript>为正常使用来必力评论功能请激活JavaScript</noscript>
+    </div>
   
 
 
