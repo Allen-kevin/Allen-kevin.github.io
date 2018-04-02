@@ -329,7 +329,7 @@
     <link href="http://yoursite.com/2017/12/29/%E6%9E%84%E5%BB%BA%E5%92%8C%E8%A7%A3%E6%9E%90%E5%8D%8F%E8%AE%AE%E5%B1%82%E7%9A%84%E5%8D%8F%E8%AE%AE%E5%A4%B4/"/>
     <id>http://yoursite.com/2017/12/29/构建和解析协议层的协议头/</id>
     <published>2017-12-29T07:06:24.000Z</published>
-    <updated>2018-03-04T02:27:04.308Z</updated>
+    <updated>2018-04-02T07:11:47.916Z</updated>
     
     <content type="html"><![CDATA[<p>&emsp;&emsp;在上一篇博客说了sk_buff和协议头，这里说下如何构建向下遍历协议层时的协议头和解析向上遍历协议层时的协议头。<br><a id="more"></a></p>
 <h3 id="构建向下遍历协议层时的协议头"><a href="#构建向下遍历协议层时的协议头" class="headerlink" title="构建向下遍历协议层时的协议头"></a>构建向下遍历协议层时的协议头</h3><h4 id="TCP头的添加"><a href="#TCP头的添加" class="headerlink" title="TCP头的添加"></a>TCP头的添加</h4><p><img src="../../../../pictres/TCP/20171229154204.png" alt=""><br>&emsp;&emsp;在TCP载荷（skb-&gt;data）前面添加TCP协议头，TCP调用tcp_transmit_skb()来为TCP数据构建一个TCP头。首先计算TCP头的长度，要考虑当前TCP连接所使用的TCP选项。一旦完成该操作，就需要调用skb_push()来为TCP头分配空间，该函数将data指针向head指针方向移动TCP头所请求的长度。如上图所示，当skb_push()返回时，skb-&gt;h.th将指向skb-&gt;data。下面是分配TCP头的源代码。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">net/ipv4/tcp_output.c</div><div class="line"></div><div class="line">        if (sysctl_tcp_window_scaling) &#123;</div><div class="line">            tcp_header_size += TCPOLEN_WSCALE_ALLGNED;</div><div class="line">            sysctl_flags |= SYSCTL_FLAG_WSCALE;</div><div class="line">        &#125;</div><div class="line">    ......</div><div class="line">    /* 调用skb_push()来为TCP头分配空间 */</div><div class="line">    th = (struct tcphdr *) skb_push(skb, tcp_header_size);</div><div class="line">    /* 将skb-&gt;h.th指向skb-&gt;data */</div><div class="line">    skb-&gt;h.th = th;</div><div class="line">    ......</div><div class="line">    th-&gt;source = sk-&gt;sport; //指向源端口</div><div class="line">    th-&gt;dest   = sk-&gt;dport; //指向目的端口</div><div class="line">    th-&gt;seg    = htonl(tcb-&gt;seq);</div></pre></td></tr></table></figure></p>
@@ -349,7 +349,7 @@
     
     </summary>
     
-      <category term="TCP/IP架构、设计及应用" scheme="http://yoursite.com/categories/TCP-IP%E6%9E%B6%E6%9E%84%E3%80%81%E8%AE%BE%E8%AE%A1%E5%8F%8A%E5%BA%94%E7%94%A8/"/>
+      <category term="TCP/IP" scheme="http://yoursite.com/categories/TCP-IP/"/>
     
     
       <category term="Linux" scheme="http://yoursite.com/tags/Linux/"/>
