@@ -96,16 +96,16 @@
 
 
 
-<meta name="description" content="&amp;emsp;&amp;emsp;有两种机制可以用于实现多态公有继承：&amp;emsp;&amp;emsp;在派生类中重新定义基类的方法；&amp;emsp;&amp;emsp;使用虚函数；">
+<meta name="description" content="&amp;emsp;&amp;emsp;有两种机制可以用于实现多态公有继承：&amp;emsp;&amp;emsp;（1）在派生类中重新定义基类的方法；&amp;emsp;&amp;emsp;（2）使用虚函数；">
 <meta property="og:type" content="article">
 <meta property="og:title" content="虚函数与纯虚函数">
 <meta property="og:url" content="http://yoursite.com/2018/04/01/虚函数/index.html">
 <meta property="og:site_name" content="凡是过去 皆为序曲">
-<meta property="og:description" content="&amp;emsp;&amp;emsp;有两种机制可以用于实现多态公有继承：&amp;emsp;&amp;emsp;在派生类中重新定义基类的方法；&amp;emsp;&amp;emsp;使用虚函数；">
-<meta property="og:updated_time" content="2018-04-01T12:13:50.978Z">
+<meta property="og:description" content="&amp;emsp;&amp;emsp;有两种机制可以用于实现多态公有继承：&amp;emsp;&amp;emsp;（1）在派生类中重新定义基类的方法；&amp;emsp;&amp;emsp;（2）使用虚函数；">
+<meta property="og:updated_time" content="2018-04-02T04:49:22.672Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="虚函数与纯虚函数">
-<meta name="twitter:description" content="&amp;emsp;&amp;emsp;有两种机制可以用于实现多态公有继承：&amp;emsp;&amp;emsp;在派生类中重新定义基类的方法；&amp;emsp;&amp;emsp;使用虚函数；">
+<meta name="twitter:description" content="&amp;emsp;&amp;emsp;有两种机制可以用于实现多态公有继承：&amp;emsp;&amp;emsp;（1）在派生类中重新定义基类的方法；&amp;emsp;&amp;emsp;（2）使用虚函数；">
 
 
 
@@ -385,9 +385,13 @@
       
 
       
-        <p>&emsp;&emsp;有两种机制可以用于实现多态公有继承：<br>&emsp;&emsp;在派生类中重新定义基类的方法；<br>&emsp;&emsp;使用虚函数；<br><a id="more"></a></p>
+        <p>&emsp;&emsp;有两种机制可以用于实现多态公有继承：<br>&emsp;&emsp;（1）在派生类中重新定义基类的方法；<br>&emsp;&emsp;（2）使用虚函数；<br><a id="more"></a></p>
 <h4 id="虚函数"><a href="#虚函数" class="headerlink" title="虚函数"></a>虚函数</h4><p>&emsp;&emsp;如果要在派生类中重新定义基类的方法，通常应将基类方法声明为虚的。这样，程序将根据对象类型而不是引用或指针的类型来选择调用那个方法。为基类声明一个虚析构函数也是一种惯例。虚函数使用关键字virtual声明。下面举个简单的例子，假如类Brass是BrassPlus的基类。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line">class Brass &#123;</div><div class="line">private:</div><div class="line">public:</div><div class="line">    Brass();</div><div class="line">    double Balance();//忽略</div><div class="line">    virtual void Withdraw(double);//基类虚函数</div><div class="line">    virtual void ViewAcct();//基类虚函数</div><div class="line">    virtual ~Brass();</div><div class="line">&#125;;</div><div class="line"></div><div class="line">class BrassPlus: public Brass &#123;</div><div class="line">private:</div><div class="line">public:</div><div class="line">    BrassPlus();</div><div class="line">    virtual void Withdraw(double);//派生类虚函数</div><div class="line">    virtual ViewAcct();//派生类虚函数</div><div class="line">&#125;;</div><div class="line"></div><div class="line">int main()</div><div class="line">&#123;</div><div class="line">    Brass dom;//基类对象</div><div class="line">    BrassPlus dot;//派生类对象</div><div class="line"></div><div class="line">    Brass &amp; b1_ref = dom;//b1_ref的引用类型为Brass，指向的对象类型也为Brass</div><div class="line">    Brass &amp; b2_ref = dot//b2_ref的引用类型为Brass，指向的对象类型为BrassPlus</div><div class="line">    b1_ref.ViewAcct();//Brass::ViewAcct()</div><div class="line">    b2_ref.ViewAcct();//BrassPlus::ViewAcct()</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p><strong>如果没有使用virtual</strong>声明为虚函数，那么程序将根据引用类型或指针类型选择方法，因为引用变量的类型为Brass，那么调用b1_ref.ViewAcct()和<strong>b2_ref.ViewAcct()</strong>都会选择Brass::ViewAcct()。<br><strong>如果使用了virtual</strong>声明为虚函数，那么程序将根据引用类或指针指向的对象的类型选择方法，即调用b1_ref会选择Brass::ViewAcct()，而调用b2_ref会选择<strong>BrassPlus::ViewAcct()</strong>。<br>&emsp;&emsp;函数在基类中被声明为虚的后，它在派生类中将自动成为虚函数。但是在派生类中使用关键字virtual来指明那些函数在基类中被声明成了虚函数也是一种常见的做法。</p>
+<p>&emsp;&emsp;<strong>如果没有使用virtual</strong>声明为虚函数，那么程序将根据引用类型或指针类型选择方法，因为引用变量的类型为Brass，那么调用b1_ref.ViewAcct()和b2_ref.ViewAcct()都会选择Brass::ViewAcct()。<br>&emsp;&emsp;<strong>如果使用了virtual</strong>声明为虚函数，那么程序将根据引用类或指针指向的对象的类型选择方法，即调用b1_ref会选择Brass::ViewAcct()，而调用b2_ref会选择BrassPlus::ViewAcct()。<br>&emsp;&emsp;函数在基类中被声明为虚的后，它在派生类中将自动成为虚函数。但是在派生类中使用关键字virtual来指明那些函数在基类中被声明成了虚函数也是一种常见的做法。还需要注意的是关键字virtual只用于类声明的原型中，而不会用于方法定义中。</p>
+<h5 id="虚函数和非虚函数在编译时的差别"><a href="#虚函数和非虚函数在编译时的差别" class="headerlink" title="虚函数和非虚函数在编译时的差别"></a>虚函数和非虚函数在编译时的差别</h5><p>&emsp;&emsp;通过一个简单的例子来说明他们之间的差别。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">BrassPlus ophelia;</div><div class="line">Brass *bp;</div><div class="line">bp = &amp;ophelia;</div><div class="line">bp-&gt;ViewAcct();</div></pre></td></tr></table></figure></p>
+<p>&emsp;&emsp;如果在BrassPlus中没有将ViewAcct()声明为虚函数，那么将根据指针类型来调用bp-&gt;ViewAcct()。而指针类型在编译时已知，那么编译器对非虚函数将使用静态编译。<br>&emsp;&emsp;如果在BrassPlus中将ViewAcct声明为虚函数，那么将根据指针指向的对象类型来调用bp-&gt;ViewAcct()。但通常只有在运行程序时才能确定对象的类型，那么编译器对虚函数将使用动态编译。<br><strong>动态编译</strong>：要在运行时判断对象的类型，就必须采取一些方法来跟踪基类指针或引用指向的对象类型，这会增加额外的处理开销。<br><strong>静态编译</strong>：在编译阶段就可以知道指针或引用的类型，而不需要额外的开销来跟踪基类指针或引用指向的对象，这样效率更高。C++的指导原则是不要为不使用的特性付出代价（内存或则处理时间），仅当程序设计确实需要虚函数时，才使用。</p>
+<h5 id="虚函数的工作原理"><a href="#虚函数的工作原理" class="headerlink" title="虚函数的工作原理"></a>虚函数的工作原理</h5><p>&emsp;&emsp;编译器处理虚函数的方法是：给每个对象添加一个隐藏成员。隐藏成员找那个保存了一个指向函数地址数组的指针。这种数组称为虚函数表(virtual function table, vtbl)。虚函数表中存储了为类对象进行声明的虚函数的地址。<br>&emsp;&emsp;派生类对象会包含一个指向独立地址表的指针。如果派生类提供了虚函数的新定义，该虚函数表将保存新函数的地址，如果派生类没有重新定义虚函数，该vtbl将保存函数原始版本的地址。如果派生类定义了新的虚函数，则该虚函数的地址将被添加到vtal表中。</p>
+<h5 id="有关虚函数的注意事项"><a href="#有关虚函数的注意事项" class="headerlink" title="有关虚函数的注意事项"></a>有关虚函数的注意事项</h5><p>&emsp;&emsp;（1）构造函数不能是虚函数，因为派生类不能继承基类的构造函数，所以将类构造函数声明为虚的没什么意义。<br>&emsp;&emsp;（2）基类的析构函数应该是虚函数，除非不用做基类。即使不用做基类，给类定义一个虚析构函数并非错误，只会带来效率方面的问题。<br>&emsp;&emsp;（3）友元不能是虚函数，因为友元不是类成员，而只有成员才能是虚函数。<br>&emsp;&emsp;（4）如果基类声明被重载了，则应在派生类中重新定义所有的基类版本。</p>
 
       
     </div>
@@ -571,7 +575,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#虚函数"><span class="nav-number">1.</span> <span class="nav-text">虚函数</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#虚函数"><span class="nav-number">1.</span> <span class="nav-text">虚函数</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#虚函数和非虚函数在编译时的差别"><span class="nav-number">1.1.</span> <span class="nav-text">虚函数和非虚函数在编译时的差别</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#虚函数的工作原理"><span class="nav-number">1.2.</span> <span class="nav-text">虚函数的工作原理</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#有关虚函数的注意事项"><span class="nav-number">1.3.</span> <span class="nav-text">有关虚函数的注意事项</span></a></li></ol></li></ol></div>
             
 
           </div>
