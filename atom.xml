@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2018-04-02T07:01:59.639Z</updated>
+  <updated>2018-04-06T14:03:22.288Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -14,6 +14,38 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>内核级线程、用户级线程和轻量级进程的区别</title>
+    <link href="http://yoursite.com/2018/04/06/%E5%86%85%E6%A0%B8%E7%BA%A7%E7%BA%BF%E7%A8%8B%E3%80%81%E7%94%A8%E6%88%B7%E7%BA%A7%E7%BA%BF%E7%A8%8B%E5%92%8C%E8%BD%BB%E9%87%8F%E7%BA%A7%E8%BF%9B%E7%A8%8B%E7%9A%84%E5%8C%BA%E5%88%AB/"/>
+    <id>http://yoursite.com/2018/04/06/内核级线程、用户级线程和轻量级进程的区别/</id>
+    <published>2018-04-06T07:47:14.000Z</published>
+    <updated>2018-04-06T14:03:22.288Z</updated>
+    
+    <content type="html"><![CDATA[<p>&emsp;&emsp;最近看《TCP/IP架构、设计及应用》中对于线程的介绍，看得我一脸懵，其实之前看过一遍，但没有特别注意线程的介绍。于是专门花了点时间在网上认真查了一下资料，算是大致明白了内核级线程、用户及线程和轻量级进程之间的区别。<br><a id="more"></a><br>&emsp;&emsp;线程是程序执行流的最小单元，是进程中的实际运作单位，是被系统独立调度和分派的基本单位。而进程是作为资源分配的基本单位。<br>&emsp;&emsp;从线程的运行空间来说，分为用户级线程（user-level thread, ULT）和内核级线程（kernel-level, KLT）。分类标准主要是线程的调度者是在核内还核外。还有一种线程叫做<strong>轻量级进程</strong>（lightweight process, LWP）。阿西吧，线程不就是轻量级进程吗，难道我以前看的是盗版书？在介绍这三种线程的区别之前先说说单线程和多线程。</p>
+<h4 id="单线程和多线程"><a href="#单线程和多线程" class="headerlink" title="单线程和多线程"></a>单线程和多线程</h4><p>&emsp;&emsp;每个进程中只有一个线程在执行称为单线程，多线程是指操作系统在单个进程内多个并发执行路径的能力。下图给出的是单线程和多线程模型。<br><img src="../../../../pictures/Computer System/20180406192814.png" alt=""><br>&emsp;&emsp;进程中的所有线程共享该进程的状态和资源，它们驻留在同一块地址空间中，当一个线程改变了内存中的一个数据项时，其他线程在访问这一数据项时能够看到变化后的结果。多线程就好比多个人在一张桌子吃饭，有一盘猪蹄，某人动筷子吃了一个，那其他人就要少吃一个。单线程如同一个人在一张桌子上吃饭，桌子上所有东西都是你的。多线程相比单线程的优点是可并发、效率高；而缺点是资源竞争带来的不稳定，比如死锁问题，因此对有多个线程要访问的数据需要一些同步技术。</p>
+<h4 id="用户级线程"><a href="#用户级线程" class="headerlink" title="用户级线程"></a>用户级线程</h4><p>&emsp;&emsp;用户级线程是指有关线程的管理工作都是由应用程序完成，内核意识不到用户级线程的存在，也不会对这些用户级线程进行调度。记住如果某个进程创建了多个用户级线程，那么所有这些用户级线程仅有一个对应的内核线程，看到这里是不是有点懵逼。要知道在用户级线程策略中，内核是以进程为单位进行调度的，不管进程内有多少线程，内核一次只把一个进程分配给一个处理器，因此一个进程中只有一个线程可以执行，所以只有一个对应的内核线程。</p>
+<h5 id="用户级线程的优点"><a href="#用户级线程的优点" class="headerlink" title="用户级线程的优点"></a>用户级线程的优点</h5><p>&emsp;&emsp;（1）用户级线程切换不需要内核态特权，因此，进程不需要为了线程管理而切换到内核态，节省了两次状态转换（从用户态到内核态，从内核态返回到用户态）的开销。<br>&emsp;&emsp;（2）用户级线程可以在任何操作系统上运行，不需要对底层内核进行修改以支持用户级线程。</p>
+<h5 id="用户级线程的缺点"><a href="#用户级线程的缺点" class="headerlink" title="用户级线程的缺点"></a>用户级线程的缺点</h5><p>&emsp;&emsp;（1）当用户级线程执行一个系统调用时，不进这个线程会被阻塞，进程中的所有线程都会被阻塞。<br>&emsp;&emsp;（2）在一个纯粹的用户级线程中，一个多线程应用程序不能利用多处理技术。这一点在前面已经说过。而在现实中多处理系统变得越来越普遍，所以提供纯用户级线程的操作系统几乎没有了。</p>
+<h4 id="内核级线程"><a href="#内核级线程" class="headerlink" title="内核级线程"></a>内核级线程</h4><p>&emsp;&emsp;内核级线程（kernel-level threads）是指由内核管理、只运行在内核态、不受用户态上下文拖累的线程。其依赖于操作系统核心，由内核的内部需求进行创建和撤销。内核线程的线程表位于内核中，包括了线程控制块，一旦线程阻塞，内核会从当前或者其他进程中重现选择一个线程保证程序的执行。用户应用程序通过API和系统调用（system call）来访问内核级线程。</p>
+<h5 id="内核级线程的优点"><a href="#内核级线程的优点" class="headerlink" title="内核级线程的优点"></a>内核级线程的优点</h5><p>&emsp;&emsp;（1）如果进程中的一个线程被阻塞，内核可以调度同一个进程的另一个线程。<br>&emsp;&emsp;（2）内核可以同时把同一个进程中的多个线程调度到多个处理器。是不是又有一点阿西吧了，在说用户级线程时说一个进程只会被分配一个处理器。而在这里又说可以同时给一个进程中的多个线程调度到多个处理器。先给一个模型图然后再解释原因。<br><img src="../../../../pictures/Computer System/20180406210450.png" alt=""><br>&emsp;&emsp;首先要明确一点，用户级线程是运行在用户态，内核无法感知到用户空间发生了什么，所以只会给进程分配一个处理器。而内核级线程是运行在内核态，内核是知道自己空间里发生了啥的。</p>
+<h5 id="内核级线程的缺点"><a href="#内核级线程的缺点" class="headerlink" title="内核级线程的缺点"></a>内核级线程的缺点</h5><p>&emsp;&emsp;（1）把控制从一个线程传送到同一个进程的另一个线程时，需要到内核的状态切换，这样会造成系统开销。</p>
+<h4 id="轻量级进程"><a href="#轻量级进程" class="headerlink" title="轻量级进程"></a>轻量级进程</h4><p>&emsp;&emsp;术语轻量级进程有几个不同的说法：1）等同于线程；2）等同于内核级线程；3）一种把用户级线程映射到内核级线程的实体。<br>&emsp;&emsp;在这里取第三层意思。轻量级进程的创建完全在用户空间完成，进程的调度和同步也在应用程序中进行。每一个轻量级进程都与一个特定的内核线程建立映射关系，即每个轻量级进程由一个内核支持。当某个轻量级进程阻塞时，不会导致整个进程的阻塞。轻量级进程结合了用户级线程和内核级线程的优点，同时减少了他们的缺点。但是轻量级进程还是有局限性，因为每个轻量级进程都需要一个内核级线程支持，而内核级线程会消耗内核资源，因此一个系统不能支持大量的轻量级进程。</p>
+<p><strong>参考文献</strong><br> 1、操作系统精髓与设计原理<br> 2、TCP/IP架构、设计及应用</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;&amp;emsp;&amp;emsp;最近看《TCP/IP架构、设计及应用》中对于线程的介绍，看得我一脸懵，其实之前看过一遍，但没有特别注意线程的介绍。于是专门花了点时间在网上认真查了一下资料，算是大致明白了内核级线程、用户及线程和轻量级进程之间的区别。&lt;br&gt;
+    
+    </summary>
+    
+      <category term="操作系统" scheme="http://yoursite.com/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/"/>
+    
+    
+      <category term="进程和线程" scheme="http://yoursite.com/tags/%E8%BF%9B%E7%A8%8B%E5%92%8C%E7%BA%BF%E7%A8%8B/"/>
+    
+  </entry>
   
   <entry>
     <title>虚函数与纯虚函数</title>
@@ -575,33 +607,6 @@
     
     
       <category term="DCN" scheme="http://yoursite.com/tags/DCN/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>iperf和iperf3的问题</title>
-    <link href="http://yoursite.com/2017/08/28/iperf%E5%92%8Ciperf3%E7%9A%84%E9%97%AE%E9%A2%98/"/>
-    <id>http://yoursite.com/2017/08/28/iperf和iperf3的问题/</id>
-    <published>2017-08-28T00:13:08.000Z</published>
-    <updated>2017-08-31T00:44:37.712Z</updated>
-    
-    <content type="html"><![CDATA[<p>&emsp;&emsp;最近因为实验需要重现在data center networks中的TCP Incast问题，就是many client to one server发包，导致每条流分得的带宽很小，即sender window很小，当出现burst现象时，可能致使某条流整个的window都丢掉，引发timeout问题。<br><a id="more"></a></p>
-<h4 id="iperf的问题"><a href="#iperf的问题" class="headerlink" title="iperf的问题"></a>iperf的问题</h4><p>由于服务器数量不够，只能通过测试工具iperf多开一些流，发现iperf开的流数量小于20条时还很正常，但到达30条及以上就会出现一些异常问题，如下图示：<br><img src="../../../../pictures/iperf/webwxgetmsgimg.png" alt=""><br>经分析，这个问题是iperf工具本身的设计bug，所以想到使用iperf3来试一试。</p>
-<h4 id="iperf3的问题"><a href="#iperf3的问题" class="headerlink" title="iperf3的问题"></a>iperf3的问题</h4><p>iperf3从下载到安装倒是非常顺利，这里先给出源码下载及安装过程:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">$wget http://downloads.es.net/pub/iperf/iperf-3.1.3.tar.gz</div><div class="line">$tar zxvf iperf-3.1.3.tar.gz</div><div class="line">$cd iperf-3.1.3</div><div class="line">$./configure --prefix=/usr/local/bin/</div><div class="line">$make</div><div class="line">$make install</div></pre></td></tr></table></figure></p>
-<p>但是当我通过iperf3 –version查看是否安装成功时，却出现了问题：<br><strong>问题一</strong><br>由于当时忘记了截图，只好手动复原一下问题<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">iperf3: error while loading shared libraries: libiperf.so.0: cannot open shared object file: No such file or directory</div></pre></td></tr></table></figure></p>
-<p>提示当载入共享库Libiperf.so.0时，不能打开共享目标文件，估计是共享库不存在，于是我根据提示进行了调试，解决办法如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">$echo $LD_LIBRARY_PATH </div><div class="line"></div><div class="line">//如果上面的命令得到的是空，那就进行下面的操作</div><div class="line">$LD_LIBRATY_PATH=/usr/local/lib</div><div class="line">//进行下面这条操作的前提是你的/usr/local/bin/中有libiperf.so.0这个file</div><div class="line">$LD_LIBRARY_PATH=$LD_LIBRATY_PATH:/usr/local/bin/libiperf.so.0</div></pre></td></tr></table></figure></p>
-<p>然后再试一试，效果如下：<br><img src="../../../../pictures/iperf/20170828084439.png" alt=""></p>
-<p><strong>问题二</strong><br>经过上面的一番折腾，在一个client一个server的情况下，测试了同时开40条流和同时开80条流都很好。我满心欢喜的以为可以大干一场了，于是改为3个client，同时向一个server发包，but，but，Iperf3居然不支持many client to one server的情况，截图如下：<br><img src="../../../../pictures/iperf/20170828085457.png" alt=""><br>iperf都支持many client to one server，why，why，为什么升级版iperf3却不支持，那我的TCP Incast还重现个锤子，哎，只好自己写一个了。</p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;&amp;emsp;&amp;emsp;最近因为实验需要重现在data center networks中的TCP Incast问题，就是many client to one server发包，导致每条流分得的带宽很小，即sender window很小，当出现burst现象时，可能致使某条流整个的window都丢掉，引发timeout问题。&lt;br&gt;
-    
-    </summary>
-    
-      <category term="UNIX/LINUX" scheme="http://yoursite.com/categories/UNIX-LINUX/"/>
-    
     
   </entry>
   
