@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2018-04-06T14:56:15.736Z</updated>
+  <updated>2018-04-09T02:26:58.655Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -14,6 +14,47 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>网络协议初始化套接字注册和</title>
+    <link href="http://yoursite.com/2018/04/08/%E5%A5%97%E6%8E%A5%E5%AD%97%E6%B3%A8%E5%86%8C/"/>
+    <id>http://yoursite.com/2018/04/08/套接字注册/</id>
+    <published>2018-04-08T06:31:03.000Z</published>
+    <updated>2018-04-09T02:26:58.655Z</updated>
+    
+    <content type="html"><![CDATA[<p>&emsp;&emsp;应用程序在使用套接字（socket）的时候，其实这个套接字已经进行了注册和初始化，那到底是怎么一个过程呢。可能从事应用开发的人员并不关心这些，只需要会用就行。而像我这种搞网络的，还是得要了解的。<br><a id="more"></a><br>&emsp;&emsp;在这里先对几个相关的头文件做个简单介绍， 然后在细说各相关函数。<br>&emsp;&emsp;在/inlcude/linux/net.h文件的开头一段话。简单来说就是和网络层相关的东西基本都会在这个头文件里声明。</p>
+<blockquote>
+<p>An implementation of the SOCKET network access protocol. This is the master<br>header file for the Linux NET layer, or, in plain English: the networking<br>handing part of the kernel.</p>
+</blockquote>
+<p>&emsp;&emsp;摘自/net/socket.c文件的开头，基本上和套接字的实现相关的函数都在这个.c文件里。</p>
+<blockquote>
+<p>An implementation of the SOCKET network access protocol.</p>
+</blockquote>
+<p>&emsp;&emsp;摘自/net/ipv4/af_inet.c文件的开头，翻译成英文的意思是说这个头文件是LINUX操作系统的TCP/IP协议套件的实现。 INET是使用BSD套接字接口作为与用户级通信的手段实现的。</p>
+<blockquote>
+<p>An implementation of the TCP/IP protocol suite for the LINUX operating<br>system. INET is implemented using the BSD Socket interface as the means of<br>communication with the user level.</p>
+</blockquote>
+<h4 id="网络协议的初始化"><a href="#网络协议的初始化" class="headerlink" title="网络协议的初始化"></a>网络协议的初始化</h4><p>&emps;&emsp;先介绍一个结构体，后面会用到。<br>@kernel version 4.10.13 /include/linux/net.h<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">struct net_proto_family &#123;</div><div class="line">    int family;//用于指明使用的协议族</div><div class="line">    //create域是一个函数指针，指向特定协议的套接字创建函数。</div><div class="line">    int (*creat)(struct net *net, struct socket *sock, int protocol, int kern);</div><div class="line"></div><div class="line">    struct module *owner;</div><div class="line">&#125;;</div></pre></td></tr></table></figure></p>
+<p>@kernel version 4.10.13 /net/ipv4/af_inet.c<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">static const struct net_proto_family inet_family_ops = &#123;</div><div class="line">    /* UNIX网络编程卷1第79页有对AF_XXX和PF_XXX做过介绍，AF_前缀表示地址族，PF_</div><div class="line">     * 前缀表示协议族。</div><div class="line">     */</div><div class="line">    family = PF_INET,//表示使用协议为Ipv4</div><div class="line">    create = inet_create,//inet_create是套接字创建函数</div><div class="line">    owner = THIS_MODULE,</div><div class="line">&#125;;</div></pre></td></tr></table></figure></p>
+<p>&emsp;&emsp;网络协议初始化函数<br>@kernel version 4.10.13 /net/ipv4/af_inet.c<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div></pre></td><td class="code"><pre><div class="line">static int __init inet_init(void)</div><div class="line">&#123;</div><div class="line">    struct inet_protosw *q;</div><div class="line">    struct list_head *r;</div><div class="line">    int rc = -EINVAL;</div><div class="line"></div><div class="line">    sock_skb_cb_check_size(sizeof(struct inet_skb_parm));</div><div class="line"></div><div class="line">    rc = proto_register(&amp;tcp_prot, 1);//注册tcp协议</div><div class="line">    if (rc)</div><div class="line">        goto out;</div><div class="line"></div><div class="line"></div><div class="line">    rc = proto_register(&amp;udp_prot, 1);//注册udp协议</div><div class="line">    if (rc)</div><div class="line">        goto out_unregister_tcp_proto;</div><div class="line"></div><div class="line">    rc = proto_register(&amp;raw_prot, 1);//注册raw协议</div><div class="line">    if (rc)</div><div class="line">        gotot out_unregister_udp_proto;</div><div class="line"></div><div class="line">    rc = proto_register(&amp;ping_prot, 1);//注册ping协议</div><div class="line">    if (rc)</div><div class="line">        goto out_unregister_raw_proto;</div><div class="line"></div><div class="line">    /* </div><div class="line">     * Tell SOCKET that we are alive...</div><div class="line">     */</div><div class="line"></div><div class="line">    //调用注册套接字函数</div><div class="line">    (void)sock_register(&amp;inet_family_ops);</div><div class="line"></div><div class="line">    /*</div><div class="line">     * Add all the base protocols.</div><div class="line">     */</div><div class="line"></div><div class="line">    /* 下面4个if为添加icmp、udp、tcp、igmp协议 */</div><div class="line">    if (inet_add_protocol(&amp;icmp_protocol, IPPROTO_ICMP) &lt; 0)</div><div class="line">        pr_crit(&quot;%d: Cannot add ICMP protocol\n&quot;, __func__);</div><div class="line">    if (inet_add_protocol(&amp;udp_protocol, IPPROTO_UDP) &lt; 0)</div><div class="line">        pr_crit(&quot;%d: Cannot add UDP protocol\n&quot;, __func__);</div><div class="line">    if (inet_add_protocol(&amp;tcp_protocol, IPPROTO_TCP) &lt; 0)</div><div class="line">        pr_crit(&quot;%d: Cannot add TCP protocol\n&quot;, __func__);</div><div class="line">#ifdef CONIFG_IP_MULTICAST</div><div class="line">    if (inet_add_protocol(&amp;igmp_protocol, IPPROTO_IGMP) &lt; 0)</div><div class="line">        pr_crit(&quot;%d: Cannot add IGMP protocol\n&quot;, __func__);</div><div class="line">#endif</div><div class="line"></div><div class="line">    ......</div><div class="line">    //inetsw表包含inet_create构建新套接字所需的所有内容。</div><div class="line">    for (r = &amp;inetsw[0]; r &lt; &amp;inetsw[SOCK_MAX]; ++r)</div><div class="line">        INIT_LIST_HEAD(r);</div><div class="line"></div><div class="line">    //将inetsw_array中的元素按套接字类型注册到inetsw链表中</div><div class="line">    for (q = inetsw_array; q &lt; &amp;inetsw_array[INETSW_ARRAY_LEN]; ++q)</div><div class="line">        inet_register_protosw(q);</div><div class="line">    ......</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h4 id="套接字注册函数的声明"><a href="#套接字注册函数的声明" class="headerlink" title="套接字注册函数的声明"></a>套接字注册函数的声明</h4><p>&emsp;&emsp;注册套接字和注销套接字函数的声明。<br>@kernel version 4.10.13 /include/linux/net.h<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">int sock_register(const struct net_proto_family *fam);</div><div class="line">void sock_unregister(int family);</div></pre></td></tr></table></figure></p>
+<h4 id="套接字注册函数的定义"><a href="#套接字注册函数的定义" class="headerlink" title="套接字注册函数的定义"></a>套接字注册函数的定义</h4><p>&emsp;&emsp;sock_register()的实现起始很简单，就是将要注册的协议套接字添加到结构体数组net_families[]里，net_families[]是net_proto_family类型的结构体数组。有一个小细节就是注意旋转锁和rcu同步机制，不过这两个知识点不是这次介绍的重点。<br>@kernel version 4.10.13 /net/socket.c<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">static const struct net_proto_family __rcu *net_families[NPROTO] __read_family;</div></pre></td></tr></table></figure></p>
+<p>@kernel version 4.10.13 /net/socket.c<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div></pre></td><td class="code"><pre><div class="line">int sock_register(const struct net_proto_family *ops)</div><div class="line">&#123;</div><div class="line">    int err;</div><div class="line"></div><div class="line">    /* #define NPROTO   AF_MAX</div><div class="line">     * #define AF_MAX   43</div><div class="line">     * 也就是ops-&gt;family的协议值是不能超出43的</div><div class="line">     */</div><div class="line">    if (ops-&gt;family &gt;= NPROTO) &#123; </div><div class="line">        pr_crit(&quot;protocol %d &gt;= NAROTO(%d)\n&quot;, ops-&gt;family, NPROTO);</div><div class="line">        return -ENOBUFS;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    //加旋转锁</div><div class="line">    spln_lock(&amp;net_family_lock);</div><div class="line"></div><div class="line">    /* net_families[]是一个协议族数组，每一个被注册的协议都对应一个struct </div><div class="line">     * net_proto_family结构体，该结构体都被存储到这个数组里。</div><div class="line">     * rcu（read-copy update）是Linux中比较重要的一种同步机制，这里就不做</div><div class="line">     * 过多介绍了。</div><div class="line">     */</div><div class="line">    if (rcu_dereference_protected(net_families[ops-&gt;family],</div><div class="line">                lockedp_is_held(&amp;net_family_lock)))</div><div class="line">        err = -EEXIST;</div><div class="line">    else &#123;</div><div class="line">        rcu_assign_pointer(net_families[ops-&gt;family], ops);</div><div class="line">        err = 0;</div><div class="line">    &#125;</div><div class="line">    //释放锁</div><div class="line">    spin_unlock(&amp;net_family_lock);</div><div class="line"></div><div class="line">    pr_info(&quot;NET: Registered protocol family %d\n&quot;, ops-&gt;family);</div><div class="line">    return err;</div><div class="line">&#125;</div><div class="line">EXPORT_SYMBOL(sock_register);</div></pre></td></tr></table></figure></p>
+<p><strong>参考文献</strong><br>（1）TCP/IP架构、应用及设计<br>（2）TCP/IP详解卷2<br>（3）UNIX网络编程卷2</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;&amp;emsp;&amp;emsp;应用程序在使用套接字（socket）的时候，其实这个套接字已经进行了注册和初始化，那到底是怎么一个过程呢。可能从事应用开发的人员并不关心这些，只需要会用就行。而像我这种搞网络的，还是得要了解的。&lt;br&gt;
+    
+    </summary>
+    
+      <category term="UNIX网络编程" scheme="http://yoursite.com/categories/UNIX%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/"/>
+    
+    
+      <category term="套接字" scheme="http://yoursite.com/tags/%E5%A5%97%E6%8E%A5%E5%AD%97/"/>
+    
+  </entry>
   
   <entry>
     <title>内核级线程、用户级线程和轻量级进程</title>
@@ -142,7 +183,7 @@
     <link href="http://yoursite.com/2018/03/03/I-O%E9%80%9A%E4%BF%A1%E6%8A%80%E6%9C%AF/"/>
     <id>http://yoursite.com/2018/03/03/I-O通信技术/</id>
     <published>2018-03-03T01:17:59.000Z</published>
-    <updated>2018-04-02T07:07:40.725Z</updated>
+    <updated>2018-04-08T06:40:49.281Z</updated>
     
     <content type="html"><![CDATA[<p>&emsp;&emsp;对I/O操作有三种可能的技术：可编程I/O、中断驱动I/O、直接内存存取（DMA）。<br><a id="more"></a></p>
 <h4 id="可编程I-O"><a href="#可编程I-O" class="headerlink" title="可编程I/O"></a>可编程I/O</h4><p>&emsp;&emsp;当处理器正在执行程序并遇到一个与I/O相关的指令时，它通过给相应的I/O模块发命令来执行这个指令。<br>&emsp;&emsp;可编程I/O的问题是处理器通常必须等待很长的时间，以确定I/O模块是否做好了接收或发送更多数据的准备。处理器在等待期间必须不断的询问I/O木块的状态，其结果是严重地降低了整个系统的性能。</p>
@@ -566,48 +607,6 @@
     
       <category term="计算机系统" scheme="http://yoursite.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F/"/>
     
-    
-  </entry>
-  
-  <entry>
-    <title>Token Flow Control in Data Center Networks解读</title>
-    <link href="http://yoursite.com/2017/08/31/TFC/"/>
-    <id>http://yoursite.com/2017/08/31/TFC/</id>
-    <published>2017-08-31T00:45:22.000Z</published>
-    <updated>2017-08-31T13:21:37.656Z</updated>
-    
-    <content type="html"><![CDATA[<p>&emsp;&emsp;Token Flow Control (TFC)是为在数据中心网络中获得高带宽利用率，极低延迟，快速收敛，基本不丢包而提出的一种传输控制机制。<br><a id="more"></a></p>
-<h3 id="问题是什么"><a href="#问题是什么" class="headerlink" title="问题是什么"></a>问题是什么</h3><h4 id="应用需求"><a href="#应用需求" class="headerlink" title="应用需求"></a>应用需求</h4><p>&emsp;&emsp;现代数据中心网络对服务性能要求一直在增加。比如支持online数据处理的流计算对平均和尾延迟比一些像MapReduce这类的offline处理模式更加敏感；在memcachedsystems中，零包丢失是一个重要的性能刻画尺度，因为丢包后的重传会严重影响网络传输性能。</p>
-<h4 id="数据流自身特性"><a href="#数据流自身特性" class="headerlink" title="数据流自身特性"></a>数据流自身特性</h4><p>&emsp;&emsp;某些流的自身特性也导致了网络的低性能，比如short traffic bursts易导致网络拥塞和包丢失，致使flow completion time延长；highly concurrent flow也会带来网络拥塞，当并发高到一定程度，甚至会出现每条流的cwnd小到只有一个数据包这种情况； on-off pattern of flow transmission<br>&emsp;&emsp;不管是新的应用需求还是数据流自身特性对数据中心网路的性能要求都在日益增加。总的来说，就是要做到，fast convergence, zero packet loss, low latency。</p>
-<h3 id="为什么这个问题很重要和已有工作"><a href="#为什么这个问题很重要和已有工作" class="headerlink" title="为什么这个问题很重要和已有工作"></a>为什么这个问题很重要和已有工作</h3><h4 id="Fast-Convergence"><a href="#Fast-Convergence" class="headerlink" title="Fast Convergence"></a>Fast Convergence</h4><p>&emsp;&emsp;在数据中心网络中，大约90%的流都是短流，短流一般只有几个数据包，所以为了减少flow completion time，传输协议使流快速的收敛到一个合适的共享带宽就很重要。现有的<strong>TCP及其TCP变体</strong>都是先经过慢启动，然后到达threshold，进入拥塞避免，对这种短流响应太慢，可能这些流还没收敛到公平共享带宽就已经结束了。<br>&emsp;&emsp;还有一个问题是有些流（silent flow）是间歇性的传输数据，在他们不传输数据的这个时间段内，但它们占据着带宽，致使带宽利用不充分。传输协议<strong>$D^{3}$</strong>虽然可以快速的收敛到一个合适的速率，但无法解决这种silent flow问题。</p>
-<h4 id="Zero-Packet-Loss"><a href="#Zero-Packet-Loss" class="headerlink" title="Zero Packet Loss"></a>Zero Packet Loss</h4><p>&emsp;&emsp;在大规模数据中心网络中，TCP遭受的问题有TCP Incast, TCP outcast, long query completion time, out-of-order等。Long query completion time and out-of-order就不介绍了，这里解释一下什么是TCP Incast and TCP outcast:<br>&emsp;&emsp;<strong>TCP Incast:</strong> TCP Incast是指多个机器的大量TCP连接集中连接到一个机器，导致压力集中到某一个交换机，交换机的buffer很快用光，然后出现大规模的丢包事件，如图1所示。有兴趣的可以看看专门研究TCP Incast问题的paper。在blog后面会列出相关的paper。<br><img src="../../../../pictures/DCN/20170831103945.png" alt=""><br>&emsp;&emsp;<strong>TCP outcast:</strong> TCP outcast</p>
-<h4 id="Low-Latency"><a href="#Low-Latency" class="headerlink" title="Low Latency"></a>Low Latency</h4><p>&emsp;&emsp;高延迟直接对一些云服务提供商的利润造成负面影响，许多云服务商采用分布式实时计算系统，例如Storm，网络时延是计算框架中整个时延的大头。还有一些web services，例如facebook，都要求极低延迟。而在数据中心网络中，round trip delay一般很小，通常在hundred microseonds级别，而queueing delay很大，要比round trip delay高出几个数量级，可以达到hundred milliseconds级别。</p>
-<h3 id="TFC的设计"><a href="#TFC的设计" class="headerlink" title="TFC的设计"></a>TFC的设计</h3><p>&emsp;&emsp;在TFC的设计模型中，有两个量很重要，分别是<strong>Token</strong>和<strong>the Number of Effective Flows</strong>：</p>
-<blockquote>
-<p>Token T[n]. T[n] represents how many data can be transmited by a link in time slot n(n = 0, 1, …). T[n] can be computed as $c*t$, where c is the link bandwidth and t is the duration of a time slot.<br>Number of effective flows E[n]. E[n] stands for the number of full windows of data packets injected by all the passing flows in time slot n.</p>
-</blockquote>
-<p>之所以要计算有效流数，是因为有些流是间歇性的传输数据，所以间歇期时间要被剔除。还有一点要说明的是，这里的有效流，根据原文的解释，应该是在时间段$t$内，满发送窗口的个数。下面给出了$E[n]$的计算公式；<br>$$E[n] = \sum_{f} \frac{t}{rtt_f} \quad (1)$$<br>表达式（1）中的$t$是指持续时间长度，$rtt_f$表示流f的$rtt$，这样算是因为，一个$rtt$可以发送一个满窗口的数据包。<br>$$W[n+1] = \frac{T[n]}{E[n]} \quad (2)$$<br>知道了满窗口的个数和总共发送了多少数据包，当然就知道了拥塞窗口的大小。<br>下图是一个计算例子：<br><img src="../../../../pictures/DCN/20170831125800.png" alt=""></p>
-<h4 id="Measuring-the-Number-of-Effective-Flows"><a href="#Measuring-the-Number-of-Effective-Flows" class="headerlink" title="Measuring the Number of Effective Flows"></a>Measuring the Number of Effective Flows</h4><p>&emsp;&emsp;精确的知道有效流数有以下几个方法。方法一每条流可以在每个回合发送一个额外特殊的数据包，switches只需要测量在时间段$n$内收到的特殊数据包数就可以知道有效流的个数，但这种方法引入的开销太大。方法二在时间段$n$内的有效流数$E[n]$可以通过等式$\frac{A[n]}{W[n-1]}$得到，但是这个$W[n-1]$是上一个时间段得到的，除非bottleneck switch在上一个时间段记录的拥塞窗口值一直到当前都保持不变。<br>&emsp;&emsp;TFC在这里通过在每个回合标记一个数据包来告诉switch有效流数，而不是发送一个额外的数据包。这样，switch只需要数被标记过的数据包就可以知道有效流数了。</p>
-<h4 id="Duration-of-a-Time-Slot"><a href="#Duration-of-a-Time-Slot" class="headerlink" title="Duration of a Time Slot"></a>Duration of a Time Slot</h4><p>&emsp;&emsp;理论上这个时间长度可以是任意值但是，在实际环境中，考虑到收敛速度，计算有效流的精确性，还是需要确定一个合适的值。一方面呢，这个值不能太大，如果太大，switchs就不能即时的通过得到的有效流数更新拥塞窗口，以至于无法做到快速收敛。也不能太小，如果太小，这样计数的有效流数就会太小，就会得到一很大的拥塞窗口值，导致不准确。一般选择某条流的$rtt$作为基准，根据经验，在数据中心网络中,流与流之间的$rtt$相差不超过3倍。</p>
-<h4 id="Achieving-Rare-Packets-Loss"><a href="#Achieving-Rare-Packets-Loss" class="headerlink" title="Achieving Rare Packets Loss"></a>Achieving Rare Packets Loss</h4><p>&emsp;&emsp;当并发流的数量足够大，即时每条流只发一个数据包，也会出现拥塞，然而这种情形在数据中心网络中还比较普遍。一个比较常见的方法就是改变MSS的大小，这样一来，每个数据包中，包头占的比重就会增加，带宽利用率因此会下降。另外一个方法就是延迟发送时间，每$\frac{MSS}{W}$个$RTT$发送一个数据包。这样的话就需要精确的测量$RTT$，以及一个高分辨率的计时器来计数$\frac{RTT}{W}$,然而采用高分辨率定时器会引入大量的中断，产生额外的负载，如频繁地打乱处理器高速缓存并增加耗电。<br>&emsp;&emsp;每一个switch都有了一个counter来记录还可以发送多少数据包，这个计数器会随着时间而增加。当一个ACK到达时switch时，如果它携带的拥塞窗口小于一个包大小，但是switch的counter记录的可发送的值大于一个数据包，那么，switch会将ACK头部的拥塞窗口值修改为一个数据包大小，然后，counter减1；如果counter小于1，那么这个ACK会被放入到一个delay queue中，等到counter大于1了，再做处理。还有如果ACK通报给sender的拥塞窗口值本身就大于一个数据包，那么ACK会直接被转发，counter减1。</p>
-<h3 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h3><p>&emsp;&emsp;实施TFC算法呢需要修改数据包头和拥塞控制机制，包头呢，主要是动用了TCP头的保留位中的两位，分别叫做RM(Round MArk)和RMA(Round MArk Acknowledgment)，用来打标记方便switch计算有效流数；对拥塞控制机制的修改已经在前面说过了。<br>&emsp;&emsp;关于RM和RMA的使用，需要提出一点疑问，原文中是这样描述的：</p>
-<blockquote>
-<p>During the establishment phase, the sender and receiver negotiate<br>whether to use TFC or not. Then at the data transmission<br>phase, the sender sets the RM bit in the TFC header<br>of the first data packet to 1. After receiving a RMA marked<br>packet, the sender sets the RM bit in the TFC header of the<br>next sending data packet to 1.</p>
-</blockquote>
-<p>想法是挺好的，但是，万一这个带有标记的数据包丢了怎么办，paper没有给出说明。如果丢了，paper中对有效流的计数将无法实现。<br>&emsp;&emsp;要实现TFC的功能，switch需要做三件事，computing tokens, measuring the number of effective flows and updating congestion windows。这些功能都在上面介绍过了，这里就不多说了。实现结构图如下图示：<br><img src="../../../../pictures/DCN/20170831192042.png" alt=""></p>
-<p><strong>参考文献：</strong><br><a href="https://nns.cs.tsinghua.edu.cn/paper/eurosys16_jz.pdf" target="_blank" rel="external">TFC: Token Flow Control in Data Center Networks</a><br><a href="http://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=6203387" target="_blank" rel="external">ICTCP: Incast Congestion Control for TCP in Data-Center Networks</a><br><a href="https://www.usenix.org/system/files/conference/nsdi12/nsdi12-final126.pdf" target="_blank" rel="external">The TCP Outcast Problem: Exposing Unfairness in Data Center Networks</a></p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;&amp;emsp;&amp;emsp;Token Flow Control (TFC)是为在数据中心网络中获得高带宽利用率，极低延迟，快速收敛，基本不丢包而提出的一种传输控制机制。&lt;br&gt;
-    
-    </summary>
-    
-      <category term="私人文献阅读" scheme="http://yoursite.com/categories/%E7%A7%81%E4%BA%BA%E6%96%87%E7%8C%AE%E9%98%85%E8%AF%BB/"/>
-    
-    
-      <category term="DCN" scheme="http://yoursite.com/tags/DCN/"/>
     
   </entry>
   
