@@ -78,7 +78,7 @@
 <link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="Hexo, NexT" />
+  <meta name="keywords" content="协议栈," />
 
 
 
@@ -96,12 +96,19 @@
 
 
 
-<meta property="og:type" content="website">
-<meta property="og:title" content="凡是过去 皆为序曲">
-<meta property="og:url" content="http://yoursite.com/categories/TCP-IP/index.html">
+<meta name="description" content="&amp;emsp;&amp;emsp;一直说自己是搞网络的，但突然发现自己在这一块有好多空白区，以前一直将关注点放在TCP上。但对于一名合格的网络编程人员来说，这似乎太局限了，所以想从整体上去认识一下网络协议栈的工作过程。想了一下，打算先从网络协议栈的初始化过程开始，打开源码一看，阿西吧，代码量有点大啊。">
+<meta name="keywords" content="协议栈">
+<meta property="og:type" content="article">
+<meta property="og:title" content="网络协议栈的初始化（一）">
+<meta property="og:url" content="http://yoursite.com/2018/04/09/网络协议栈的初始化（一）/index.html">
 <meta property="og:site_name" content="凡是过去 皆为序曲">
+<meta property="og:description" content="&amp;emsp;&amp;emsp;一直说自己是搞网络的，但突然发现自己在这一块有好多空白区，以前一直将关注点放在TCP上。但对于一名合格的网络编程人员来说，这似乎太局限了，所以想从整体上去认识一下网络协议栈的工作过程。想了一下，打算先从网络协议栈的初始化过程开始，打开源码一看，阿西吧，代码量有点大啊。">
+<meta property="og:image" content="http://yoursite.com/pictures/UNIX/20180409180128.png">
+<meta property="og:updated_time" content="2018-04-10T10:17:22.047Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="凡是过去 皆为序曲">
+<meta name="twitter:title" content="网络协议栈的初始化（一）">
+<meta name="twitter:description" content="&amp;emsp;&amp;emsp;一直说自己是搞网络的，但突然发现自己在这一块有好多空白区，以前一直将关注点放在TCP上。但对于一名合格的网络编程人员来说，这似乎太局限了，所以想从整体上去认识一下网络协议栈的工作过程。想了一下，打算先从网络协议栈的初始化过程开始，打开源码一看，阿西吧，代码量有点大啊。">
+<meta name="twitter:image" content="http://yoursite.com/pictures/UNIX/20180409180128.png">
 
 
 
@@ -129,13 +136,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/categories/TCP-IP/"/>
+  <link rel="canonical" href="http://yoursite.com/2018/04/09/网络协议栈的初始化（一）/"/>
 
 
 
 
 
-  <title>分类: TCP/IP | 凡是过去 皆为序曲</title>
+  <title>网络协议栈的初始化（一） | 凡是过去 皆为序曲</title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -170,7 +177,7 @@
     
   
 
-  <div class="container sidebar-position-left  ">
+  <div class="container sidebar-position-left page-post-detail ">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -274,301 +281,185 @@
           <div id="content" class="content">
             
 
-  <section id="posts" class="posts-collapse">
-    <div class="collection-title">
-      <h1>TCP/IP<small>分类</small>
-      </h1>
-    </div>
-
+  <div id="posts" class="posts-expand">
     
-      
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2018/01/11/tc用户程序设计及其内核实现/" itemprop="url">
-              
-                <span itemprop="name">tc用户程序设计及其内核实现</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2018-01-11T09:02:00+08:00"
-              content="2018-01-11" >
-          01-11
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-    
-      
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2018/01/09/Linux中的IP服务质量/" itemprop="url">
-              
-                <span itemprop="name">Linux中的IP服务质量</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2018-01-09T18:43:43+08:00"
-              content="2018-01-09" >
-          01-09
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-    
-      
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2018/01/03/TCP定时器（四）/" itemprop="url">
-              
-                <span itemprop="name">延时确认定时器</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2018-01-03T10:59:58+08:00"
-              content="2018-01-03" >
-          01-03
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-    
-      
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2018/01/02/TCP定时器（三）/" itemprop="url">
-              
-                <span itemprop="name">零窗口探测定时器</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2018-01-02T18:23:59+08:00"
-              content="2018-01-02" >
-          01-02
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-    
-      
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2018/01/02/TCP定时器（二）/" itemprop="url">
-              
-                <span itemprop="name">TCP重传定时器</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2018-01-02T15:21:20+08:00"
-              content="2018-01-02" >
-          01-02
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-    
-      
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2018/01/02/TCP定时器（一）/" itemprop="url">
-              
-                <span itemprop="name">Linux中的定时器</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2018-01-02T01:55:01+08:00"
-              content="2018-01-02" >
-          01-02
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-    
-      
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2017/12/31/TCP接收/" itemprop="url">
-              
-                <span itemprop="name">TCP接收</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2017-12-31T09:52:31+08:00"
-              content="2017-12-31" >
-          12-31
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-    
-      
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2017/12/29/构建和解析协议层的协议头/" itemprop="url">
-              
-                <span itemprop="name">构建和解析协议层的协议头</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2017-12-29T15:06:24+08:00"
-              content="2017-12-29" >
-          12-29
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-    
-      
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2017/12/26/sk-buff和协议头/" itemprop="url">
-              
-                <span itemprop="name">sk_buff和协议头</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2017-12-26T08:23:44+08:00"
-              content="2017-12-26" >
-          12-26
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-    
-      
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2017/07/19/TCP重点系列之ACK处理/" itemprop="url">
-              
-                <span itemprop="name">TCP重点系列之ACK处理</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2017-07-19T21:15:25+08:00"
-              content="2017-07-19" >
-          07-19
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-    
-  </section>
 
   
-  <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/categories/TCP-IP/page/2/">2</a><a class="extend next" rel="next" href="/categories/TCP-IP/page/2/"><i class="fa fa-angle-right"></i></a>
-  </nav>
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/04/09/网络协议栈的初始化（一）/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="kevin">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="凡是过去 皆为序曲">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">网络协议栈的初始化（一）</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-09T10:48:54+08:00">
+                2018-04-09
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/UNIX网络编程/" itemprop="url" rel="index">
+                    <span itemprop="name">UNIX网络编程</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+              <span class="post-meta-divider">|</span>
+              <span class="post-meta-item-icon">
+                <i class="fa fa-comment-o"></i>
+              </span>
+              
+                <a href="/2018/04/09/网络协议栈的初始化（一）/#SOHUCS" itemprop="discussionUrl">
+                  <span id="changyan_count_unit" class="post-comments-count hc-comment-count" data-xid="2018/04/09/网络协议栈的初始化（一）/" itemprop="commentsCount"></span>
+                </a>
+              
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body han-init-context" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>&emsp;&emsp;一直说自己是搞网络的，但突然发现自己在这一块有好多空白区，以前一直将关注点放在TCP上。但对于一名合格的网络编程人员来说，这似乎太局限了，所以想从整体上去认识一下网络协议栈的工作过程。想了一下，打算先从网络协议栈的初始化过程开始，打开源码一看，阿西吧，代码量有点大啊。<br><a id="more"></a><br>&emsp;&emsp;网络协议栈的初始化要从/init/main.c文件里的start_kernel()函数开始说起，在这个函数里初始化了很多东西，基本上OS最核心的基础设施都在这里面进行了初始化，在函数的最后调用了函数rest_init()。在rest_init()又调用了kernel_init()函数。kernel_init()主要进行系统层级的初始化工作，这个函数主要是将一些系统周边及软件中间层挂进OS及初始化，它的大部分工作都由do_basic_setup()完成。下面的图1是调用流程图。<br><img src="../../../../pictures/UNIX/20180409180128.png" alt=""><br>&emsp;&emsp;经过上面一系列的初始化，还有网络设备没有涉及到，但CPU子系统已启动并运行，并且内存和进程管理都正常工作。由于我们的关注点是网络协议栈的初始化，而不是整个内核的初始化，所以上面都只是简要的介绍了下。下面就要开始表演真正的技术了。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/协议栈/" rel="tag"># 协议栈</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/04/08/套接字注册/" rel="next" title="网络协议初始化和套接字注册">
+                <i class="fa fa-chevron-left"></i> 网络协议初始化和套接字注册
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/04/09/网络协议栈的初始化（二）/" rel="prev" title="网络协议栈的初始化（二）">
+                网络协议栈的初始化（二） <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
 
 
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
 
 
           </div>
@@ -576,6 +467,12 @@
 
 
           
+  <div class="comments" id="comments">
+    
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMDQ5OS83MDUz"></div>
+    
+  </div>
+
 
 
         </div>
@@ -779,6 +676,10 @@
   
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
+
 
   
 
@@ -813,6 +714,23 @@
 
 
 
+  
+    <div id="lv-container" data-id="city" data-uid="MTAyMC8zMDQ5OS83MDUz">
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+
+        if (typeof LivereTower === 'function') { return; }
+
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+
+        e.parentNode.insertBefore(j, e);
+     })(document, 'script');
+    </script>
+    <noscript>为正常使用来必力评论功能请激活JavaScript</noscript>
+    </div>
   
 
 
