@@ -99,13 +99,13 @@
 <meta name="description" content="&amp;emsp;&amp;emsp;应用程序在使用套接字（socket）的时候，其实这个套接字已经进行了注册和初始化，那到底是怎么一个过程呢。可能从事应用开发的人员并不关心这些，只需要会用就行。而像我这种搞网络的，还是得要了解的。">
 <meta name="keywords" content="协议栈">
 <meta property="og:type" content="article">
-<meta property="og:title" content="网络协议初始化和套接字注册">
-<meta property="og:url" content="http://yoursite.com/2018/04/08/套接字注册/index.html">
+<meta property="og:title" content="网络协议的初始化（四）">
+<meta property="og:url" content="http://yoursite.com/2018/04/08/网络协议栈的初始化（四）/index.html">
 <meta property="og:site_name" content="凡是过去 皆为序曲">
 <meta property="og:description" content="&amp;emsp;&amp;emsp;应用程序在使用套接字（socket）的时候，其实这个套接字已经进行了注册和初始化，那到底是怎么一个过程呢。可能从事应用开发的人员并不关心这些，只需要会用就行。而像我这种搞网络的，还是得要了解的。">
-<meta property="og:updated_time" content="2018-04-09T02:54:48.087Z">
+<meta property="og:updated_time" content="2018-04-11T07:21:20.263Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="网络协议初始化和套接字注册">
+<meta name="twitter:title" content="网络协议的初始化（四）">
 <meta name="twitter:description" content="&amp;emsp;&amp;emsp;应用程序在使用套接字（socket）的时候，其实这个套接字已经进行了注册和初始化，那到底是怎么一个过程呢。可能从事应用开发的人员并不关心这些，只需要会用就行。而像我这种搞网络的，还是得要了解的。">
 
 
@@ -134,13 +134,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2018/04/08/套接字注册/"/>
+  <link rel="canonical" href="http://yoursite.com/2018/04/08/网络协议栈的初始化（四）/"/>
 
 
 
 
 
-  <title>网络协议初始化和套接字注册 | 凡是过去 皆为序曲</title>
+  <title>网络协议的初始化（四） | 凡是过去 皆为序曲</title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -289,7 +289,7 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/04/08/套接字注册/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/04/08/网络协议栈的初始化（四）/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="kevin">
@@ -306,7 +306,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">网络协议初始化和套接字注册</h1>
+          <h1 class="post-title" itemprop="name headline">网络协议的初始化（四）</h1>
         
 
         <div class="post-meta">
@@ -360,8 +360,8 @@
                 <i class="fa fa-comment-o"></i>
               </span>
               
-                <a href="/2018/04/08/套接字注册/#SOHUCS" itemprop="discussionUrl">
-                  <span id="changyan_count_unit" class="post-comments-count hc-comment-count" data-xid="2018/04/08/套接字注册/" itemprop="commentsCount"></span>
+                <a href="/2018/04/08/网络协议栈的初始化（四）/#SOHUCS" itemprop="discussionUrl">
+                  <span id="changyan_count_unit" class="post-comments-count hc-comment-count" data-xid="2018/04/08/网络协议栈的初始化（四）/" itemprop="commentsCount"></span>
                 </a>
               
             
@@ -398,7 +398,7 @@
 <blockquote>
 <p>An implementation of the TCP/IP protocol suite for the LINUX operating<br>system. INET is implemented using the BSD Socket interface as the means of<br>communication with the user level.</p>
 </blockquote>
-<h4 id="网络协议的初始化"><a href="#网络协议的初始化" class="headerlink" title="网络协议的初始化"></a>网络协议的初始化</h4><p>&emsp;&emsp;先介绍一个结构体，后面会用到。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">@kernel version 4.10.13 /include/linux/net.h</div><div class="line">struct net_proto_family &#123;</div><div class="line">    int family;//用于指明使用的协议族</div><div class="line">    //create域是一个函数指针，指向特定协议的套接字创建函数。</div><div class="line">    int (*creat)(struct net *net, struct socket *sock, int protocol, int kern);</div><div class="line"></div><div class="line">    struct module *owner;</div><div class="line">&#125;;</div></pre></td></tr></table></figure></p>
+<h4 id="网络协议的初始化"><a href="#网络协议的初始化" class="headerlink" title="网络协议的初始化"></a>网络协议的初始化</h4><p>&emsp;&emsp;先介绍几个结构体，后面会用到。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">@kernel version 4.10.13 /include/linux/net.h</div><div class="line">struct net_proto_family &#123;</div><div class="line">    int family;//用于指明使用的协议族</div><div class="line">    //create域是一个函数指针，指向特定协议的套接字创建函数。</div><div class="line">    int (*creat)(struct net *net, struct socket *sock, int protocol, int kern);</div><div class="line"></div><div class="line">    struct module *owner;</div><div class="line">&#125;;</div></pre></td></tr></table></figure></p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">@kernel version 4.10.13 /net/ipv4/af_inet.c</div><div class="line">static const struct net_proto_family inet_family_ops = &#123;</div><div class="line">    /* UNIX网络编程卷1第79页有对AF_XXX和PF_XXX做过介绍，AF_前缀表示地址族，PF_</div><div class="line">     * 前缀表示协议族。</div><div class="line">     */</div><div class="line">    family = PF_INET,//表示使用协议为Ipv4</div><div class="line">    create = inet_create,//inet_create是套接字创建函数</div><div class="line">    owner = THIS_MODULE,</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
 <p>&emsp;&emsp;网络协议初始化函数<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div></pre></td><td class="code"><pre><div class="line">@kernel version 4.10.13 /net/ipv4/af_inet.c</div><div class="line">static int __init inet_init(void)</div><div class="line">&#123;</div><div class="line">    struct inet_protosw *q;</div><div class="line">    struct list_head *r;</div><div class="line">    int rc = -EINVAL;</div><div class="line"></div><div class="line">    sock_skb_cb_check_size(sizeof(struct inet_skb_parm));</div><div class="line"></div><div class="line">    rc = proto_register(&amp;tcp_prot, 1);//注册tcp协议</div><div class="line">    if (rc)</div><div class="line">        goto out;</div><div class="line"></div><div class="line"></div><div class="line">    rc = proto_register(&amp;udp_prot, 1);//注册udp协议</div><div class="line">    if (rc)</div><div class="line">        goto out_unregister_tcp_proto;</div><div class="line"></div><div class="line">    rc = proto_register(&amp;raw_prot, 1);//注册raw协议</div><div class="line">    if (rc)</div><div class="line">        gotot out_unregister_udp_proto;</div><div class="line"></div><div class="line">    rc = proto_register(&amp;ping_prot, 1);//注册ping协议</div><div class="line">    if (rc)</div><div class="line">        goto out_unregister_raw_proto;</div><div class="line"></div><div class="line">    /* </div><div class="line">     * Tell SOCKET that we are alive...</div><div class="line">     */</div><div class="line"></div><div class="line">    //调用注册套接字函数</div><div class="line">    (void)sock_register(&amp;inet_family_ops);</div><div class="line"></div><div class="line">    /*</div><div class="line">     * Add all the base protocols.</div><div class="line">     */</div><div class="line"></div><div class="line">    /* 下面4个if为添加icmp、udp、tcp、igmp协议 */</div><div class="line">    if (inet_add_protocol(&amp;icmp_protocol, IPPROTO_ICMP) &lt; 0)</div><div class="line">        pr_crit(&quot;%d: Cannot add ICMP protocol\n&quot;, __func__);</div><div class="line">    if (inet_add_protocol(&amp;udp_protocol, IPPROTO_UDP) &lt; 0)</div><div class="line">        pr_crit(&quot;%d: Cannot add UDP protocol\n&quot;, __func__);</div><div class="line">    if (inet_add_protocol(&amp;tcp_protocol, IPPROTO_TCP) &lt; 0)</div><div class="line">        pr_crit(&quot;%d: Cannot add TCP protocol\n&quot;, __func__);</div><div class="line">#ifdef CONIFG_IP_MULTICAST</div><div class="line">    if (inet_add_protocol(&amp;igmp_protocol, IPPROTO_IGMP) &lt; 0)</div><div class="line">        pr_crit(&quot;%d: Cannot add IGMP protocol\n&quot;, __func__);</div><div class="line">#endif</div><div class="line"></div><div class="line">    ......</div><div class="line">    //inetsw表包含inet_create构建新套接字所需的所有内容</div><div class="line">    for (r = &amp;inetsw[0]; r &lt; &amp;inetsw[SOCK_MAX]; ++r)</div><div class="line">        INIT_LIST_HEAD(r);</div><div class="line"></div><div class="line">    //将inetsw_array中的元素按套接字类型注册到inetsw链表中</div><div class="line">    for (q = inetsw_array; q &lt; &amp;inetsw_array[INETSW_ARRAY_LEN]; ++q)</div><div class="line">        inet_register_protosw(q);</div><div class="line">    ......</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
 <h4 id="套接字注册函数的声明"><a href="#套接字注册函数的声明" class="headerlink" title="套接字注册函数的声明"></a>套接字注册函数的声明</h4><p>&emsp;&emsp;注册套接字和注销套接字函数的声明。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">@kernel version 4.10.13 /include/linux/net.h</div><div class="line">int sock_register(const struct net_proto_family *fam);</div><div class="line">void sock_unregister(int family);</div></pre></td></tr></table></figure></p>
@@ -534,7 +534,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">38</span>
+                <span class="site-state-item-count">39</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
