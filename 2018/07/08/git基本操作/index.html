@@ -104,7 +104,8 @@
 <meta property="og:site_name" content="凡是过去 皆为序曲">
 <meta property="og:description" content="创建本地git版本库建立本地git仓库有两种方法，一种方法是init一个新仓库，另外一种方法从远程仓库clone。git init方法123mkdir learngitcd learngitgit init 经过git init后就得到了一个新仓库git clone方法使用git clone的前提是得有一个远程git库，可以是github或者其他服务器上的git仓库。下面是一个例子：1git cl">
 <meta property="og:image" content="http://yoursite.com/pictures/UNIX/20180708154229.png">
-<meta property="og:updated_time" content="2018-07-09T00:07:43.814Z">
+<meta property="og:image" content="http://yoursite.com/pictures/git/20180709082346.png">
+<meta property="og:updated_time" content="2018-07-09T00:27:13.318Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="git基本操作">
 <meta name="twitter:description" content="创建本地git版本库建立本地git仓库有两种方法，一种方法是init一个新仓库，另外一种方法从远程仓库clone。git init方法123mkdir learngitcd learngitgit init 经过git init后就得到了一个新仓库git clone方法使用git clone的前提是得有一个远程git库，可以是github或者其他服务器上的git仓库。下面是一个例子：1git cl">
@@ -404,7 +405,7 @@
 <h5 id="工作区和暂存区"><a href="#工作区和暂存区" class="headerlink" title="工作区和暂存区"></a>工作区和暂存区</h5><p>在本地的仓库叫做工作区，也就是kernel-backup文件夹，在kernel-backup里面有一个影藏目录.git，这个.git就是版本库。<br><img src="../../../../pictures/UNIX/20180708154229.png" alt=""></p>
 <h5 id="撤销git操作"><a href="#撤销git操作" class="headerlink" title="撤销git操作"></a>撤销git操作</h5><p>如果修改了文件READ，但是还没有使用git add READ将文件添加到暂存区，这时如果想撤销对文件READ的修改，可以使用git checkout – READ命令。假如已经使用了git add将READ添加到了暂存区，这时要撤销修改的话，可以先使用git reset HEAD READ，将READ从暂存区重新放回工作区，然后再使用git checkout – READ来进行撤销修改。</p>
 <h4 id="多人协作"><a href="#多人协作" class="headerlink" title="多人协作"></a>多人协作</h4><h5 id="创建和切换分支"><a href="#创建和切换分支" class="headerlink" title="创建和切换分支"></a>创建和切换分支</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">[kevin@localhost kernel-backup]$ git branch dev</div><div class="line">[kevin@localhost kernel-backup]$ git checkout dev</div><div class="line">Switched to branch &apos;dev&apos;</div><div class="line">[kevin@localhost kernel-backup]$ git branch  //查看所有分支</div><div class="line">* dev  //*表示当前所在分支</div><div class="line">  master</div></pre></td></tr></table></figure>
-<p>也可以将上面两天命令合并，git checkout -b dev命令表示创建并切换到分支dev</p>
+<p>也可以将上面两天命令合并，git checkout -b dev命令表示创建并切换到分支dev，下面是一个示例图<br><img src="../../../../pictures/git/20180709082346.png" alt=""></p>
 
       
     </div>
@@ -456,10 +457,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2018/07/08/git基本操作/" rel="prev" title="">
-                 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -534,7 +531,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">41</span>
+                <span class="site-state-item-count">40</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
